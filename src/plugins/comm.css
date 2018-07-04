@@ -1,0 +1,76 @@
+html, body {
+  padding: 0;
+  margin: 0;
+  font-size: 16px;
+}
+
+canvas {
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.flex-r {
+  display: flex;
+  display: -webkit-flex; /* Safari */
+  flex-direction: row;
+  align-items: center;
+}
+
+.flex-col {
+  display: flex;
+  display: -webkit-flex; /* Safari */
+  flex-direction: column;
+}
+
+.flex-1 {
+  flex: 1 1 auto;
+}
+
+.flex-c {
+  justify-content: center;
+}
+
+.flex-b {
+  justify-content: space-between;
+}
+
+.flex-a {
+  justify-content: space-around;
+}
+
+.flex-s {
+  justify-content: flex-start;
+}
+
+.flex-e {
+  justify-content: flex-end;
+}
+
+.center {
+  display: flex;
+  display: -webkit-flex; /* Safari */
+  justify-content: center;
+  align-items: center;
+}
+
+@font-face {
+  font-family: FZLTHJW;
+  src: url('./../../static/FZLTHJW.ttf');
+}
+
+.echarts {
+  width: calc(100vw - 1.2rem) !important;
+  padding: 0.8rem 0.6rem;
+}
+
+@-webkit-keyframes spin{
+  100%{
+      -webkit-transform: rotate(360deg);
+  }
+}
+@keyframes spin{
+  100%{
+      -webkit-transform: rotate(360deg);
+  }
+}
