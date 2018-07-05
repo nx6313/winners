@@ -1,5 +1,5 @@
 <template>
-  <div id="page-home" class="page-home" @scroll="scrollPage">
+  <div id="page-home-performance" class="page-home-performance" @scroll="scrollPage">
     <div class="page-header-wrap">
       <span class="user-head" :style="{ 'background-image': `url(${userHead})` }"></span>
       <div class="user-name-wrap">
@@ -86,7 +86,7 @@
 
 <script>
 export default {
-  name: 'Home',
+  name: 'HomePerformance',
   data () {
     return {
       headerIsLoading: true,
@@ -128,33 +128,33 @@ export default {
       dateEvery: [],
       summarizings: [
         {
-          progress: 0,
+          progress: 10,
           title: '整车',
-          num: 0,
+          num: 15,
           des: '销售（台）'
         },
         {
-          progress: 0,
+          progress: 23,
           title: '汽车用品',
-          num: 0,
+          num: 37,
           des: '销售额（万元）'
         },
         {
-          progress: 0,
+          progress: 46,
           title: '金融',
-          num: 0,
+          num: 8,
           des: '信贷量（单）'
         },
         {
-          progress: 0,
+          progress: 80,
           title: '保险',
-          num: 0,
+          num: 10,
           des: '投保量（单）'
         },
         {
-          progress: 0,
+          progress: 100,
           title: '二手车',
-          num: 0,
+          num: 7,
           des: '销售（台）'
         }
       ],
@@ -514,13 +514,16 @@ export default {
       }
     }
   },
+  beforeCreate () {
+    this.$comfun.http_post(this, 'contrast/8')
+  },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
     this.resetDateEvery(this.dateTabs[0].id)
   },
   methods: {
     scrollPage () {
-      var pageScrollTop = document.querySelector('#page-home').scrollTop
+      var pageScrollTop = document.querySelector('#page-home-performance').scrollTop
       if (pageScrollTop > this.sellTabWrapScrollTop) {
         this.isFixed = true
       } else {
@@ -553,11 +556,11 @@ export default {
           this.getDateSection('2017/01/01', curDateType, 'yyyy')
           break
       }
+      this.curHeaderSearchDate = this.dateEvery[this.dateEvery.length - 1]
+      this.searchHeaderData()
       this.dateEveryRailTrans = -document.body.clientWidth
       this.$nextTick().then(() => {
         setTimeout(() => {
-          this.curHeaderSearchDate = this.dateEvery[this.dateEvery.length - 1]
-          this.searchHeaderData()
           var dateEveryRail = this.$refs['date-every-rail']
           if (dateEveryRail) {
             this.dateEveryRailTrans = ((document.body.clientWidth - 1.6 * 16 - 1.2 * 16) / 5) * 3 - dateEveryRail.clientWidth
@@ -883,44 +886,7 @@ export default {
       this.headerTabToggle = 0
     },
     searchHeaderData () {
-      var type = 1
-      var startDate = ''
-      var endDate = ''
-      if (this.curHeaderDateTabType === 'day') {
-        type = 1
-        startDate = this.curHeaderSearchDate.val
-        endDate = this.curHeaderSearchDate.val
-      } else if (this.curHeaderDateTabType === 'week') {
-        type = 2
-        startDate = this.curHeaderSearchDate.val[0]
-        endDate = this.curHeaderSearchDate.val[1]
-      } else if (this.curHeaderDateTabType === 'month') {
-        type = 3
-        startDate = this.curHeaderSearchDate.val[0]
-        endDate = this.curHeaderSearchDate.val[1]
-      } else if (this.curHeaderDateTabType === 'year') {
-        type = 4
-        startDate = this.curHeaderSearchDate.val[0]
-        endDate = this.curHeaderSearchDate.val[1]
-      }
-      this.$comfun.http_post(this, `contrast/${this.$moment.userInfo.id}`, {
-        type: type,
-        startDate: startDate,
-        endDate: endDate
-      }).then((response) => {
-        if (response.body.success === '1') {
-          this.summarizings[0].progress = Math.floor(response.body.contrast.personNewcarNum / response.body.contrast.maxNewcarNum * 100)
-          this.summarizings[0].num = response.body.contrast.personNewcarNum
-          this.summarizings[1].progress = Math.floor(response.body.contrast.personAccessorySum / response.body.contrast.maxAccessorySum * 100)
-          this.summarizings[1].num = response.body.contrast.personAccessorySum
-          this.summarizings[2].progress = Math.floor(response.body.contrast.personFinanceNum / response.body.contrast.maxFinanceNum * 100)
-          this.summarizings[2].num = response.body.contrast.personFinanceNum
-          this.summarizings[3].progress = Math.floor(response.body.contrast.personInsuranceNum / response.body.contrast.maxInsuranceNum * 100)
-          this.summarizings[3].num = response.body.contrast.personInsuranceNum
-          this.summarizings[4].progress = Math.floor(response.body.contrast.personOldcarNum / response.body.contrast.maxOldcarNum * 100)
-          this.summarizings[4].num = response.body.contrast.personOldcarNum
-        }
-      })
+      // this.curHeaderSearchDate
     }
   }
 }

@@ -13,7 +13,8 @@ export default {
       // 是否开启调试模式
       debug: true,
       // localForage
-      localforage: localforage
+      localforage: localforage,
+      userInfo: {}
     }
 
     Object.defineProperty(Vue.prototype, '$moment', { value: Moment })

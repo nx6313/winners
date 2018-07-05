@@ -14,27 +14,86 @@ export default {
   data () {
     return {
       curMenuIndex: 0,
-      menus: [
-        {
-          txt: '我的业绩',
-          path: '/home',
-          icon_normal: 'icon-lhb',
-          icon_select: 'icon-lhb1'
-        },
-        {
-          txt: '龙虎榜',
-          path: '/sale-list',
-          icon_normal: 'icon-gryj1',
-          icon_select: 'icon-gryj'
-        },
-        {
-          txt: '我的',
-          path: '/me',
-          icon_normal: 'icon-wdyj',
-          icon_select: 'icon-wdyj1'
-        }
-      ]
+      menus: []
     }
+  },
+  beforeCreate () {
+    this.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
+      if (loginInfo) {
+        loginInfo.user.grade = 1
+        this.$moment.userInfo = loginInfo.user
+        if (Number(loginInfo.user.grade) === 1) { // 个人
+          this.menus = [
+            {
+              txt: '我的业绩',
+              path: '/home',
+              icon_normal: 'icon-lhb',
+              icon_select: 'icon-lhb1'
+            },
+            {
+              txt: '龙虎榜',
+              path: '/sale-list',
+              icon_normal: 'icon-gryj1',
+              icon_select: 'icon-gryj'
+            },
+            {
+              txt: '我的',
+              path: '/me',
+              icon_normal: 'icon-wdyj',
+              icon_select: 'icon-wdyj1'
+            }
+          ]
+        } else if (Number(loginInfo.user.grade) === 2) { // 公司
+          this.menus = [
+            {
+              txt: '智能决策',
+              path: '/home-manager',
+              icon_normal: 'icon-znjc1',
+              icon_select: 'icon-znjc'
+            },
+            {
+              txt: '销售业绩',
+              path: '/sale-performance',
+              icon_normal: 'icon-gryj1',
+              icon_select: 'icon-gryj'
+            },
+            {
+              txt: '龙虎榜',
+              path: '/sale-list',
+              icon_normal: 'icon-lhb',
+              icon_select: 'icon-lhb1'
+            }
+          ]
+        } else if (Number(loginInfo.user.grade) === 3) { // 集团
+          this.menus = [
+            {
+              txt: '智能决策',
+              path: '/home',
+              icon_normal: 'icon-gryj1',
+              icon_select: 'icon-gryj'
+            },
+            {
+              txt: '公司业绩',
+              path: '/sale-list',
+              icon_normal: 'icon-gryj1',
+              icon_select: 'icon-gryj'
+            },
+            {
+              txt: '龙虎榜',
+              path: '/me',
+              icon_normal: 'icon-lhb',
+              icon_select: 'icon-lhb1'
+            },
+            {
+              txt: '通讯录',
+              path: '/me',
+              icon_normal: 'icon-txl',
+              icon_select: 'icon-txl1'
+            }
+          ]
+        }
+      }
+    })
   },
   mounted () {
     // 恢复刷新引起的指示器错位

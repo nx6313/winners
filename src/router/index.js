@@ -17,6 +17,8 @@ import '@/plugins/animate.css'
 import '@/assets/fonts/iconfont.css'
 import Login from '@/components/Login'
 import Home from '@/components/Home'
+import HomeManager from '@/components/HomeManager'
+import SalePerformance from '@/components/SalePerformance'
 import SaleList from '@/components/SaleList'
 import Me from '@/components/Me'
 
@@ -45,6 +47,16 @@ var router = new Router({
       path: '/home',
       name: 'Home',
       component: Home
+    },
+    {
+      path: '/home-manager',
+      name: 'HomeManager',
+      component: HomeManager
+    },
+    {
+      path: '/sale-performance',
+      name: 'SalePerformance',
+      component: SalePerformance
     },
     {
       path: '/sale-list',
