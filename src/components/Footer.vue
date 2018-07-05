@@ -24,12 +24,12 @@ export default {
         {
           txt: '龙虎榜',
           path: '/sale-list',
-          icon_normal: 'icon-wdyj',
-          icon_select: 'icon-wdyj1'
+          icon_normal: 'icon-gryj1',
+          icon_select: 'icon-gryj'
         },
         {
           txt: '我的',
-          path: '/sale-list',
+          path: '/me',
           icon_normal: 'icon-wdyj',
           icon_select: 'icon-wdyj1'
         }
@@ -58,8 +58,8 @@ export default {
 .app-footer {
   position: fixed;
   width: 100%;
-  height: 3.6rem;
-  line-height: 3.6rem;
+  height: 3.2rem;
+  line-height: 3.2rem;
   bottom: 0;
   background-color: #ffffff;
   z-index: 999999;
@@ -70,12 +70,12 @@ export default {
     height: 3rem;
     line-height: 3rem;
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: #8C8C8C;
     i {
       position: relative;
       display: inline-block;
-      top: -0.4rem;
+      top: -0.44rem;
       width: 1.5rem;
       height: 1.5rem;
       font-size: 1.5rem;
@@ -84,7 +84,7 @@ export default {
     span {
       position: relative;
       display: block;
-      top: -2.3rem;
+      top: -2.4rem;
       pointer-events: none;
     }
   }

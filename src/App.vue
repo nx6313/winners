@@ -27,7 +27,7 @@ export default {
 }
 
 .router-view-wrap {
-  height: calc(100vh - 3.6rem);
+  height: calc(100vh - 3.2rem);
   overflow-x: hidden;
   overflow-y: auto;
 }

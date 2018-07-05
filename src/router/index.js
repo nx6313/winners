@@ -18,6 +18,7 @@ import '@/assets/fonts/iconfont.css'
 import Login from '@/components/Login'
 import Home from '@/components/Home'
 import SaleList from '@/components/SaleList'
+import Me from '@/components/Me'
 
 Vue.use(Router)
 Vue.use(VueResource)
@@ -49,6 +50,11 @@ var router = new Router({
       path: '/sale-list',
       name: 'SaleList',
       component: SaleList
+    },
+    {
+      path: '/me',
+      name: 'Me',
+      component: Me
     }
   ]
 })

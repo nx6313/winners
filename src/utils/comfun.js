@@ -185,13 +185,27 @@ export default {
         }
         return fmt
       },
-      // 获取当前日期几天前或几天后的日期
-      getTargetDate (diff) {
+      // 获取指定日期几天前或几天后的日期，为指定日期按照当前日期计算
+      getTargetDate (diff, date) {
         var today = new Date()
+        if (date !== undefined) {
+          today = date
+        }
         var targetdayMilliseconds = today.getTime() + 1000 * 60 * 60 * 24 * Number(diff)
         var targetday = new Date()
         targetday.setTime(targetdayMilliseconds)
         return targetday
+      },
+      // 获取某月最后一天日期
+      getLastDay (year, month) {
+        var newYear = year
+        var newMonth = month++
+        if (newMonth > 12) {
+          newMonth -= 12
+          newYear++
+        }
+        var newDate = new Date(newYear, newMonth, 1)
+        return new Date(newDate.getTime() - 1000 * 60 * 60 * 24)
       },
       // 将相差的毫秒数转为时间
       formatDiffMilliseconds (diffMilliseconds) {
