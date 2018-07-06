@@ -74,6 +74,10 @@ export default {
             this.$router.replace('/home-manager')
           } else if (Number(response.body.user.grade) === 3) { // 集团
             this.$router.replace('/home')
+          } else {
+            this.$dialog_msg({
+              msg: '无效的登陆权限'
+            })
           }
         } else {
           this.$dialog_msg({
