@@ -20,8 +20,7 @@ export default {
   beforeCreate () {
     this.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
       if (loginInfo) {
-        loginInfo.user.grade = 1
-        this.$moment.userInfo = loginInfo.user
+        this.$moment.userInfo = loginInfo
         if (Number(loginInfo.user.grade) === 1) { // 个人
           this.menus = [
             {
@@ -68,7 +67,7 @@ export default {
           this.menus = [
             {
               txt: '智能决策',
-              path: '/home',
+              path: '/home-boss',
               icon_normal: 'icon-gryj1',
               icon_select: 'icon-gryj'
             },
@@ -98,11 +97,28 @@ export default {
   mounted () {
     // 恢复刷新引起的指示器错位
     var curRouterPath = this.$router.currentRoute.path
-    if (curRouterPath.indexOf('/home') === 0) {
-      this.curMenuIndex = 0
-    } else if (curRouterPath.indexOf('/sale-list') === 0) {
-      this.curMenuIndex = 1
-    }
+    this.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
+      if (loginInfo) {
+        if (Number(loginInfo.user.grade) === 1) { // 个人
+          if (curRouterPath.indexOf('/home') === 0) {
+            this.curMenuIndex = 0
+          } else if (curRouterPath.indexOf('/sale-list') === 0) {
+            this.curMenuIndex = 1
+          } else if (curRouterPath.indexOf('/me') === 0) {
+            this.curMenuIndex = 2
+          }
+        } else if (Number(loginInfo.user.grade) === 2) { // 公司
+          if (curRouterPath.indexOf('/home-manager') === 0) {
+            this.curMenuIndex = 0
+          } else if (curRouterPath.indexOf('/sale-performance') === 0) {
+            this.curMenuIndex = 1
+          } else if (curRouterPath.indexOf('/sale-list') === 0) {
+            this.curMenuIndex = 2
+          }
+        } else if (Number(loginInfo.user.grade) === 3) { // 集团
+        }
+      }
+    })
   },
   methods: {
     toPage (path, menuIndex) {

@@ -72,35 +72,46 @@ export default {
   name: 'SaleList',
   data () {
     return {
+      curTabType: 'newcar',
+      curDateTabType: 'week',
       defaultUserHead: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1060129963,1724829206&fm=27&gp=0.jpg',
       tabs: [
         {
+          id: 'newcar',
           txt: '整车销售'
         },
         {
+          id: 'accessory',
           txt: '汽车用品'
         },
         {
+          id: 'finance',
           txt: '金融'
         },
         {
+          id: 'insurance',
           txt: '保险'
         },
         {
+          id: 'oldcar',
           txt: '二手车'
         },
         {
+          id: 'newcar',
           txt: '综合毛利'
         }
       ],
       tabs2: [
         {
+          id: 'week',
           txt: '周排行'
         },
         {
+          id: 'month',
           txt: '月排行'
         },
         {
+          id: 'year',
           txt: '年排行'
         }
       ],
@@ -181,6 +192,27 @@ export default {
     this.$set(this.userSaleInfo, 'duty', '销售顾问')
     this.$set(this.userSaleInfo, 'up', 2)
     document.querySelector('#app-footer').style.display = 'flex'
+    this.getOrderList()
+  },
+  methods: {
+    getOrderList () {
+      this.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
+        if (loginInfo) {
+          var startDate = '2018-07-01'
+          var endDate = '2018-07-06'
+          var startOldDate = '2018-06-24'
+          var endOldDate = '2018-06-30'
+          this.$comfun.http_post(this, this.curTabType + `/order/${loginInfo.user.id}`, {
+            startDate: startDate,
+            endDate: endDate,
+            startOldDate: startOldDate,
+            endOldDate: endOldDate,
+            start: 0,
+            limit: 10
+          })
+        }
+      })
+    }
   }
 }
 </script>

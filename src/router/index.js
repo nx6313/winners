@@ -6,6 +6,8 @@ import 'echarts/lib/chart/pie'
 import 'echarts/lib/chart/line'
 import 'echarts/lib/component/title'
 import 'echarts/lib/component/tooltip'
+import 'echarts/lib/component/dataZoom'
+import 'echarts/lib/component/dataZoomInside'
 import Moment from '@/utils/moment.js'
 import ComFun from '@/utils/comfun.js'
 import Directives from '@/plugins/directives.js'
@@ -18,6 +20,7 @@ import '@/assets/fonts/iconfont.css'
 import Login from '@/components/Login'
 import Home from '@/components/Home'
 import HomeManager from '@/components/HomeManager'
+import HomeBoss from '@/components/HomeBoss'
 import SalePerformance from '@/components/SalePerformance'
 import SaleList from '@/components/SaleList'
 import Me from '@/components/Me'
@@ -52,6 +55,11 @@ var router = new Router({
       path: '/home-manager',
       name: 'HomeManager',
       component: HomeManager
+    },
+    {
+      path: '/home-boss',
+      name: 'HomeBoss',
+      component: HomeBoss
     },
     {
       path: '/sale-performance',

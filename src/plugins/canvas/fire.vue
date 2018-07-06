@@ -14,7 +14,7 @@ export default {
       ctx: null,
       scale: 3,
       numParticles: 100,
-      bg: [2, 2, 2],
+      bg: [2, 2, 2, 1],
       cols: ['#ff0000', '#ff0000', '#ff0000', '#ff0000', '#ff0000', '#ff9900', '#ffffff', '#990000'],
       particles: []
     }
@@ -42,7 +42,7 @@ export default {
       this.ctx.scale(1, 1)
       this.ctx.beginPath()
       this.ctx.rect(0, 0, this.canvas.width, this.canvas.height)
-      this.ctx.fillStyle = `rgba(${this.bg[0]}, ${this.bg[1]}, ${this.bg[2]}, ${1})`
+      this.ctx.fillStyle = `rgba(${this.bg[0]}, ${this.bg[1]}, ${this.bg[2]}, ${this.bg[3]})`
       this.ctx.fill()
     },
     animate () {
@@ -70,7 +70,6 @@ export default {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  z-index: -1;
 }
 
 #cvs-fire-wrap > canvas {

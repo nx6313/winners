@@ -1,14 +1,9 @@
 <template>
-  <div id="page-home-manager" class="page-home-manager" @scroll="scrollPage">
+  <div id="page-home-boss" class="page-home-boss" @scroll="scrollPage">
     <div class="page-header-wrap">
       <span class="user-head" :style="{ 'background-image': `url(${userHead})` }"></span>
-      <div class="user-name-wrap flex-r flex-b">
+      <div class="user-name-wrap">
         <span class="user-name">{{userName}}</span>
-        <div class="online-count-wrap">
-          <span>在线销售人员</span>
-          <span class="online-count">~</span>
-          <span>人</span>
-        </div>
       </div>
       <div class="head-tab-wrap">
         <div class="date-tab-rail" ref="date-tab-rail">
@@ -59,6 +54,14 @@
         <span class="loading-tip">正在加载中...</span>
       </div>
     </div>
+    <div class="online-count-wrap">
+        <span>在线销售人员</span>
+        <span class="online-count">~</span>
+        <span>人</span>
+        <span>&nbsp;&nbsp;&nbsp;&nbsp;销售代表</span>
+        <span class="online-count">~</span>
+        <span>人</span>
+    </div>
     <div class="sell-chart-wrap">
       <div class="sell-tab-wrap" ref="sell-tab-wrap" :style="isFixed ? { 'position': 'fixed', 'top': '0px', 'left': '0px', 'background': 'rgba(255, 255, 255, 1)' } : {}">
         <div class="date-tab-rail">
@@ -77,7 +80,7 @@
 
 <script>
 export default {
-  name: 'HomeManager',
+  name: 'HomeBoss',
   data () {
     return {
       headerIsLoading: true,
@@ -97,7 +100,7 @@ export default {
       sellTabWrapScrollTop: 52.2 * 16,
       sellTabWrapHeight: 3.9 * 16 + 'px',
       userHead: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1060129963,1724829206&fm=27&gp=0.jpg',
-      userName: '刘德华',
+      userName: '大昌集团',
       userLevel: '金牌销售',
       dateTabs: [
         {
@@ -398,7 +401,7 @@ export default {
   },
   methods: {
     scrollPage () {
-      var pageScrollTop = document.querySelector('#page-home-manager').scrollTop
+      var pageScrollTop = document.querySelector('#page-home-boss').scrollTop
       if (pageScrollTop > this.sellTabWrapScrollTop) {
         this.isFixed = true
       } else {
@@ -834,15 +837,6 @@ export default {
       font-size: 1rem;
       vertical-align: bottom;
     }
-    .online-count-wrap {
-      position: relative;
-      font-size: 0.6rem;
-      .online-count {
-        margin: 0 0.2rem;
-        color: #1fff98;
-        font-size: 0.8rem;
-      }
-    }
   }
   .head-tab-wrap {
     position: relative;
@@ -1006,6 +1000,16 @@ export default {
   width: 100% !important;
   height: 8rem;
   padding: 0;
+}
+.online-count-wrap {
+  position: relative;
+  font-size: 0.84rem;
+  padding: 1rem 0.8rem;
+  background-color: #F5F5F5;
+  .online-count {
+    margin: 0 0.2rem;
+    color: #ff721f;
+  }
 }
 .sell-chart-wrap {
   background-color: rgb(255, 255, 255);

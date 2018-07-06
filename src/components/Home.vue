@@ -4,8 +4,12 @@
       <span class="user-head" :style="{ 'background-image': `url(${userHead})` }"></span>
       <div class="user-name-wrap">
         <span class="user-name">{{userName}}</span>
-        <i class="user-level-icon"></i>
-        <span class="user-level">{{userLevel}}</span>
+        <div class="level-wrap">
+          <span>等级</span>
+          <div class="star-wrap">
+            <i :class="['star', starIndex < userLevel ? 'has-star' : '']" v-for="(star, starIndex) in starCount" :key="starIndex"></i>
+          </div>
+        </div>
       </div>
       <div class="head-tab-wrap">
         <div class="date-tab-rail" ref="date-tab-rail">
@@ -15,13 +19,13 @@
       <div @touchstart.prevent="headerTouchStart" @touchmove.prevent="headerTouchMove" @touchend.prevent="headerTouchEnd" :style="headerIsLoading ? { 'height': '0', 'overflow': 'hidden' } : {}">
         <div class="date-every-wrap" ref="date-every-wrap">
           <div class="date-every-rail" ref="date-every-rail" :style="[{ 'width': `calc((100vw) / 5 * ${dateEvery.length})` }, dateEveryRailTrans !== null ? { 'transform': `translateX(${dateEveryRailTrans}px)` } : { 'transform': `translateX(calc((100vw / 5) * 3 - 100%))` }]">
-            <div v-for="(dateEv, dateEvIndex) in dateEvery" :key="dateEvIndex" :class="[curHeaderDateTabType + '-' + dateEvIndex, dateEvIndex === dateEvery.length - 1 ? ['last-date', 'cur'] : '']" :style="{ 'width': `calc(100vw / 5)` }">
+            <div v-for="(dateEv, dateEvIndex) in dateEvery" :key="dateEvIndex" :class="[curHeaderDateTabType + '-' + dateEvIndex, dateEvIndex === 0 ? 'first-date' : '', dateEvIndex === dateEvery.length - 1 ? ['last-date', 'cur'] : '']" :style="{ 'width': `calc(100vw / 5)` }">
               <span class="display-show">{{dateEv.display}}</span>
               <span class="year" v-if="dateEv.year">{{dateEv.year}}</span>
             </div>
           </div>
         </div>
-        <div class="summarizing-wrap">
+        <div class="summarizing-wrap" v-show="!dateChangeLoading">
           <div class="progress-wrap" v-for="(summarizing, summarizingIndex) in summarizings" :key="summarizingIndex" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})`, 'left': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} * ${summarizingIndex} + ${summarizingIndex} * 2 * 0.2rem)` }">
             <div class="wrapper right" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} / 2)`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})` }">
               <div class="circle-progress rightcircle" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} - 6px)`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} - 6px)`, 'transform': progressRotate('right', summarizing.progress) }"></div>
@@ -41,7 +45,7 @@
           </div>
         </div>
       </div>
-      <div class="header-data-is-loading" v-show="headerIsLoading">
+      <div class="header-data-is-loading" v-show="(headerIsLoading || dateChangeLoading)" :style="(!headerIsLoading && dateChangeLoading) ? { 'height': '8.8rem' } : {}">
         <div class="loadster" :style="{ 'transform': 'scale(0.2, 0.2)' }">
           <div class="loadster__body">
             <div class="body__gum"></div>
@@ -64,14 +68,14 @@
         <span class="loading-tip">正在加载中...</span>
       </div>
     </div>
-    <div class="header-date-data-des" :style="headerIsLoading ? { 'max-height': '0' } : {}">
+    <div class="header-date-data-des" :style="(headerIsLoading || dateChangeLoading) ? { 'max-height': '0' } : {}">
       <chart class="mlv-chart" :options="mlvChartOpt" :auto-resize="true"></chart>
       <chart class="gejx-chart" :options="grjxChartOpt" :auto-resize="true"></chart>
     </div>
     <div class="sell-chart-wrap">
       <div class="sell-tab-wrap" ref="sell-tab-wrap" :style="isFixed ? { 'position': 'fixed', 'top': '0px', 'left': '0px', 'background': 'rgba(255, 255, 255, 1)' } : {}">
         <div class="date-tab-rail">
-          <span v-for="(dateTab, dateTabIndex) in dateTabs" :key="dateTabIndex" v-if="dateTabIndex > 0" :class="dateTabIndex === 1 ? 'cur' : ''" :style="{ 'width': `calc(100% / ${dateTabs.length - 1})` }">{{dateTab.txt}}</span>
+          <span v-for="(dateTab, dateTabIndex) in dateTabs" :key="dateTabIndex" v-if="dateTabIndex > 0" :class="dateTabIndex === 1 ? 'cur' : ''" :style="{ 'width': `calc(100% / ${dateTabs.length - 1})` }" @click="changeDate(dateTab, dateTabIndex)">{{dateTab.txt}}</span>
         </div>
       </div>
       <div class="sell-tab-wrap-replace" ref="sell-tab-wrap-replace" :style="{ 'height': sellTabWrapHeight }" v-show="isFixed"></div>
@@ -89,7 +93,10 @@ export default {
   name: 'Home',
   data () {
     return {
+      starCount: 5,
+      userLevel: 3,
       headerIsLoading: true,
+      dateChangeLoading: false,
       curHeaderDateTabType: null,
       headerDateTabTransXMax: 0,
       headerDateTabTransXCeilWidth: 0,
@@ -105,8 +112,7 @@ export default {
       sellTabWrapScrollTop: 52.2 * 16,
       sellTabWrapHeight: 3.9 * 16 + 'px',
       userHead: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1060129963,1724829206&fm=27&gp=0.jpg',
-      userName: '刘德华',
-      userLevel: '金牌销售',
+      userName: '~',
       dateTabs: [
         {
           id: 'day',
@@ -160,7 +166,7 @@ export default {
       ],
       mlvChartOpt: {
         title: {
-          text: '{money|1230}\t\t{unit|万}\n综合毛利',
+          text: '{money|0}\t\t{unit|万}\n综合毛利',
           left: 'center',
           top: '42%',
           textStyle: {
@@ -237,27 +243,23 @@ export default {
             },
             data: [
               {
-                value: 335,
-                name: '整车销售'
-              },
-              {
-                value: 20,
+                value: 0,
                 name: '整车'
               },
               {
-                value: 60,
+                value: 0,
                 name: '保险'
               },
               {
-                value: 335,
+                value: 0,
                 name: '二手车'
               },
               {
-                value: 335,
+                value: 0,
                 name: '金融'
               },
               {
-                value: 335,
+                value: 0,
                 name: '汽车用品'
               }
             ]
@@ -267,7 +269,7 @@ export default {
       },
       grjxChartOpt: {
         title: {
-          text: '{money|30}\t\t{unit|万}\n个人绩效',
+          text: '{money|0}\t\t{unit|万}\n个人绩效',
           left: 'center',
           top: '42%',
           textStyle: {
@@ -344,27 +346,23 @@ export default {
             },
             data: [
               {
-                value: 335,
-                name: '整车销售'
-              },
-              {
-                value: 20,
+                value: 0,
                 name: '整车'
               },
               {
-                value: 60,
+                value: 0,
                 name: '保险'
               },
               {
-                value: 335,
+                value: 0,
                 name: '二手车'
               },
               {
-                value: 335,
+                value: 0,
                 name: '金融'
               },
               {
-                value: 335,
+                value: 0,
                 name: '汽车用品'
               }
             ]
@@ -374,7 +372,7 @@ export default {
       },
       zcChartOpt: {
         title: {
-          text: '整车销售',
+          text: '整车',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -385,17 +383,42 @@ export default {
           trigger: 'item',
           formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
+        dataZoom: [
+          {
+            type: 'inside'
+          }
+        ],
         xAxis: {
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          data: []
         },
         yAxis: {
           type: 'value'
         },
         series: [
           {
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
-            type: 'line'
+            data: [],
+            type: 'line',
+            smooth: true,
+            lineStyle: {
+              color: '#ED8D1B'
+            },
+            areaStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [{
+                  offset: 0, color: '#E6B940'
+                }, {
+                  offset: 0.5, color: '#408AE6'
+                }, {
+                  offset: 1, color: '#2FE321'
+                }]
+              }
+            }
           }
         ],
         animationDuration: 2000
@@ -413,17 +436,42 @@ export default {
           trigger: 'item',
           formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
+        dataZoom: [
+          {
+            type: 'inside'
+          }
+        ],
         xAxis: {
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          data: []
         },
         yAxis: {
           type: 'value'
         },
         series: [
           {
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
-            type: 'line'
+            data: [],
+            type: 'line',
+            smooth: true,
+            lineStyle: {
+              color: '#ED8D1B'
+            },
+            areaStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [{
+                  offset: 0, color: '#E6B940'
+                }, {
+                  offset: 0.5, color: '#408AE6'
+                }, {
+                  offset: 1, color: '#2FE321'
+                }]
+              }
+            }
           }
         ],
         animationDuration: 2000
@@ -441,17 +489,42 @@ export default {
           trigger: 'item',
           formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
+        dataZoom: [
+          {
+            type: 'inside'
+          }
+        ],
         xAxis: {
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          data: []
         },
         yAxis: {
           type: 'value'
         },
         series: [
           {
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
-            type: 'line'
+            data: [],
+            type: 'line',
+            smooth: true,
+            lineStyle: {
+              color: '#ED8D1B'
+            },
+            areaStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [{
+                  offset: 0, color: '#E6B940'
+                }, {
+                  offset: 0.5, color: '#408AE6'
+                }, {
+                  offset: 1, color: '#2FE321'
+                }]
+              }
+            }
           }
         ],
         animationDuration: 2000
@@ -469,17 +542,42 @@ export default {
           trigger: 'item',
           formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
+        dataZoom: [
+          {
+            type: 'inside'
+          }
+        ],
         xAxis: {
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          data: []
         },
         yAxis: {
           type: 'value'
         },
         series: [
           {
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
-            type: 'line'
+            data: [],
+            type: 'line',
+            smooth: true,
+            lineStyle: {
+              color: '#ED8D1B'
+            },
+            areaStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [{
+                  offset: 0, color: '#E6B940'
+                }, {
+                  offset: 0.5, color: '#408AE6'
+                }, {
+                  offset: 1, color: '#2FE321'
+                }]
+              }
+            }
           }
         ],
         animationDuration: 2000
@@ -497,17 +595,42 @@ export default {
           trigger: 'item',
           formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
+        dataZoom: [
+          {
+            type: 'inside'
+          }
+        ],
         xAxis: {
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          data: []
         },
         yAxis: {
           type: 'value'
         },
         series: [
           {
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
-            type: 'line'
+            data: [],
+            type: 'line',
+            smooth: true,
+            lineStyle: {
+              color: '#ED8D1B'
+            },
+            areaStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [{
+                  offset: 0, color: '#E6B940'
+                }, {
+                  offset: 0.5, color: '#408AE6'
+                }, {
+                  offset: 1, color: '#2FE321'
+                }]
+              }
+            }
           }
         ],
         animationDuration: 2000
@@ -517,6 +640,13 @@ export default {
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
     this.resetDateEvery(this.dateTabs[0].id)
+
+    setTimeout(() => {
+      this.userName = this.$moment.userInfo.user.name
+      var startDate = this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy-MM-dd')
+      var endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      this.getLineChartData(2, startDate, endDate)
+    }, 400)
   },
   methods: {
     scrollPage () {
@@ -537,36 +667,40 @@ export default {
       this.resetDateEvery(dateType)
     },
     resetDateEvery (curDateType) {
-      this.curHeaderDateTabType = curDateType
-      this.dateEvery.splice(0, this.dateEvery.length)
-      switch (curDateType) {
-        case 'day':
-          this.getDateSection('2017/01/01', curDateType, 'M/d')
-          break
-        case 'week':
-          this.getDateSection('2017/01/01', curDateType, 'M/d')
-          break
-        case 'month':
-          this.getDateSection('2017/01/01', curDateType, 'M')
-          break
-        case 'year':
-          this.getDateSection('2017/01/01', curDateType, 'yyyy')
-          break
-      }
-      this.dateEveryRailTrans = -document.body.clientWidth
-      this.$nextTick().then(() => {
-        setTimeout(() => {
-          this.curHeaderSearchDate = this.dateEvery[this.dateEvery.length - 1]
-          this.searchHeaderData()
-          var dateEveryRail = this.$refs['date-every-rail']
-          if (dateEveryRail) {
-            this.dateEveryRailTrans = ((document.body.clientWidth - 1.6 * 16 - 1.2 * 16) / 5) * 3 - dateEveryRail.clientWidth
-            this.headerDateTabTransXMax = ((document.body.clientWidth - 1.6 * 16 - 1.2 * 16) / 5) * 3 - dateEveryRail.clientWidth
-
-            this.headerDateTabTransXCeilWidth = dateEveryRail.getElementsByClassName('cur')[0].clientWidth
+      this.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
+        if (loginInfo) {
+          this.curHeaderDateTabType = curDateType
+          this.dateEvery.splice(0, this.dateEvery.length)
+          switch (curDateType) {
+            case 'day':
+              this.getDateSection(this.$comfun.formatDate(loginInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M/d')
+              break
+            case 'week':
+              this.getDateSection(this.$comfun.formatDate(loginInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M/d')
+              break
+            case 'month':
+              this.getDateSection(this.$comfun.formatDate(loginInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M')
+              break
+            case 'year':
+              this.getDateSection(this.$comfun.formatDate(loginInfo.basedate, 'yyyy/MM/dd'), curDateType, 'yyyy')
+              break
           }
-          this.headerIsLoading = false
-        }, 1000)
+          this.dateEveryRailTrans = -document.body.clientWidth
+          this.$nextTick().then(() => {
+            setTimeout(() => {
+              this.curHeaderSearchDate = this.dateEvery[this.dateEvery.length - 1]
+              this.searchHeaderData()
+              var dateEveryRail = this.$refs['date-every-rail']
+              if (dateEveryRail) {
+                this.dateEveryRailTrans = ((document.body.clientWidth - 1.6 * 16 - 1.2 * 16) / 5) * 3 - dateEveryRail.clientWidth
+                this.headerDateTabTransXMax = ((document.body.clientWidth - 1.6 * 16 - 1.2 * 16) / 5) * 3 - dateEveryRail.clientWidth
+
+                this.headerDateTabTransXCeilWidth = dateEveryRail.getElementsByClassName('cur')[0].clientWidth
+              }
+              this.headerIsLoading = false
+            }, 1000)
+          })
+        }
       })
     },
     getDateSection (min, type, format) {
@@ -779,20 +913,36 @@ export default {
       if (this.headerDateTabTransXMax < 0) {
         if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2) {
           this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2
-          this.headerTabToggle = -1
+          if (this.curHeaderDateTabType !== 'day') {
+            this.headerTabToggle = -1
+          } else {
+            this.headerTabToggle = 0
+          }
         } else if (this.headerDateMoveToTansX < this.headerDateTabTransXMax) {
           this.headerDateMoveToTansX = this.headerDateTabTransXMax
-          this.headerTabToggle = 1
+          if (this.curHeaderDateTabType !== 'year') {
+            this.headerTabToggle = 1
+          } else {
+            this.headerTabToggle = 0
+          }
         } else {
           this.headerTabToggle = 0
         }
       } else {
         if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2) {
           this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2
-          this.headerTabToggle = -1
+          if (this.curHeaderDateTabType !== 'day') {
+            this.headerTabToggle = -1
+          } else {
+            this.headerTabToggle = 0
+          }
         } else if (this.headerDateMoveToTansX < this.headerDateTabTransXMax) {
           this.headerDateMoveToTansX = this.headerDateTabTransXMax
-          this.headerTabToggle = 1
+          if (this.curHeaderDateTabType !== 'year') {
+            this.headerTabToggle = 1
+          } else {
+            this.headerTabToggle = 0
+          }
         } else {
           this.headerTabToggle = 0
         }
@@ -831,50 +981,66 @@ export default {
         var moveOverItemNum = Math.floor(this.moveDistance / this.headerDateTabTransXCeilWidth)
         var moveOverItemBalanceNum = this.moveDistance % this.headerDateTabTransXCeilWidth
         if (this.moveDistance > 0) {
-          if (moveOverItemBalanceNum > this.headerDateTabTransXCeilWidth / 2) {
-            this.headerDateMoveToTansX = this.headerTouchStartTransX + (this.headerDateTabTransXCeilWidth - moveOverItemBalanceNum)
-            this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
-            curDateEvery.classList.remove('cur')
-            let moveToIndex = Number(curDateEvery.classList[0].split('-')[1]) - (moveOverItemNum + 1)
-            document.querySelector('.' + this.curHeaderDateTabType + '-' + moveToIndex).classList.add('cur')
-            this.curHeaderSearchDate = this.dateEvery[moveToIndex]
-            this.searchHeaderData()
-          } else {
-            let moveToIndex = Number(curDateEvery.classList[0].split('-')[1])
-            if (moveOverItemNum >= 1) {
-              this.headerDateMoveToTansX -= moveOverItemBalanceNum
-              moveToIndex -= moveOverItemNum
+          if (!curDateEvery.classList.contains('first-date')) {
+            if (moveOverItemBalanceNum > this.headerDateTabTransXCeilWidth / 2) {
+              this.headerDateMoveToTansX = this.headerTouchStartTransX + (this.headerDateTabTransXCeilWidth - moveOverItemBalanceNum)
+              this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
               curDateEvery.classList.remove('cur')
+              let moveToIndex = Number(curDateEvery.classList[0].split('-')[1]) - (moveOverItemNum + 1)
+              if (moveToIndex < 0) {
+                moveToIndex = 0
+              }
               document.querySelector('.' + this.curHeaderDateTabType + '-' + moveToIndex).classList.add('cur')
+              this.curHeaderSearchDate = this.dateEvery[moveToIndex]
+              this.searchHeaderData(true)
             } else {
-              this.headerDateMoveToTansX -= this.moveDistance
+              let moveToIndex = Number(curDateEvery.classList[0].split('-')[1])
+              if (moveOverItemNum >= 1) {
+                this.headerDateMoveToTansX -= moveOverItemBalanceNum
+                moveToIndex -= moveOverItemNum
+                curDateEvery.classList.remove('cur')
+                if (moveToIndex < 0) {
+                  moveToIndex = 0
+                }
+                document.querySelector('.' + this.curHeaderDateTabType + '-' + moveToIndex).classList.add('cur')
+              } else {
+                this.headerDateMoveToTansX -= this.moveDistance
+              }
+              this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
+              this.curHeaderSearchDate = this.dateEvery[moveToIndex]
+              this.searchHeaderData(true)
             }
-            this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
-            this.curHeaderSearchDate = this.dateEvery[moveToIndex]
-            this.searchHeaderData()
           }
         } else {
-          if (Math.abs(moveOverItemBalanceNum) > this.headerDateTabTransXCeilWidth / 2) {
-            this.headerDateMoveToTansX = this.headerTouchStartTransX - (this.headerDateTabTransXCeilWidth - Math.abs(moveOverItemBalanceNum))
-            this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
-            curDateEvery.classList.remove('cur')
-            let moveToIndex = Number(curDateEvery.classList[0].split('-')[1]) + Math.abs(moveOverItemNum)
-            document.querySelector('.' + this.curHeaderDateTabType + '-' + moveToIndex).classList.add('cur')
-            this.curHeaderSearchDate = this.dateEvery[moveToIndex]
-            this.searchHeaderData()
-          } else {
-            let moveToIndex = Number(curDateEvery.classList[0].split('-')[1])
-            if (Math.abs(moveOverItemNum) >= 1) {
-              this.headerDateMoveToTansX -= moveOverItemBalanceNum
-              moveToIndex += (Math.abs(moveOverItemNum) - 1)
+          if (!curDateEvery.classList.contains('last-date')) {
+            if (Math.abs(moveOverItemBalanceNum) > this.headerDateTabTransXCeilWidth / 2) {
+              this.headerDateMoveToTansX = this.headerTouchStartTransX - (this.headerDateTabTransXCeilWidth - Math.abs(moveOverItemBalanceNum))
+              this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
               curDateEvery.classList.remove('cur')
+              let moveToIndex = Number(curDateEvery.classList[0].split('-')[1]) + Math.abs(moveOverItemNum)
+              if (moveToIndex > this.dateEvery.length - 1) {
+                moveToIndex = this.dateEvery.length - 1
+              }
               document.querySelector('.' + this.curHeaderDateTabType + '-' + moveToIndex).classList.add('cur')
+              this.curHeaderSearchDate = this.dateEvery[moveToIndex]
+              this.searchHeaderData(true)
             } else {
-              this.headerDateMoveToTansX += this.moveDistance
+              let moveToIndex = Number(curDateEvery.classList[0].split('-')[1])
+              if (Math.abs(moveOverItemNum) >= 1) {
+                this.headerDateMoveToTansX -= moveOverItemBalanceNum
+                moveToIndex += (Math.abs(moveOverItemNum) - 1)
+                curDateEvery.classList.remove('cur')
+                if (moveToIndex > this.dateEvery.length - 1) {
+                  moveToIndex = this.dateEvery.length - 1
+                }
+                document.querySelector('.' + this.curHeaderDateTabType + '-' + moveToIndex).classList.add('cur')
+              } else {
+                this.headerDateMoveToTansX += this.moveDistance
+              }
+              this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
+              this.curHeaderSearchDate = this.dateEvery[moveToIndex]
+              this.searchHeaderData(true)
             }
-            this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
-            this.curHeaderSearchDate = this.dateEvery[moveToIndex]
-            this.searchHeaderData()
           }
         }
       }
@@ -882,7 +1048,10 @@ export default {
       this.headerDateMoveToTansX = -1
       this.headerTabToggle = 0
     },
-    searchHeaderData () {
+    searchHeaderData (isChange) {
+      if (isChange === true) {
+        // this.dateChangeLoading = true
+      }
       var type = 1
       var startDate = ''
       var endDate = ''
@@ -903,7 +1072,7 @@ export default {
         startDate = this.curHeaderSearchDate.val[0]
         endDate = this.curHeaderSearchDate.val[1]
       }
-      this.$comfun.http_post(this, `contrast/${this.$moment.userInfo.id}`, {
+      this.$comfun.http_post(this, `contrast/${this.$moment.userInfo.user.id}`, {
         type: type,
         startDate: startDate,
         endDate: endDate
@@ -919,6 +1088,287 @@ export default {
           this.summarizings[3].num = response.body.contrast.personInsuranceNum
           this.summarizings[4].progress = Math.floor(response.body.contrast.personOldcarNum / response.body.contrast.maxOldcarNum * 100)
           this.summarizings[4].num = response.body.contrast.personOldcarNum
+        }
+        this.$comfun.http_post(this, `profit/${this.$moment.userInfo.user.id}`, {
+          startDate: startDate,
+          endDate: endDate
+        }).then((response) => {
+          if (response.body.success === '1') {
+            this.mlvChartOpt.title.text = `{money|${response.body.profit.profitSum}}\t\t{unit|万}\n综合毛利`
+            this.mlvChartOpt.series[0].data[0].value = response.body.profit.newcarProfit
+            this.mlvChartOpt.series[0].data[1].value = response.body.profit.insuranceProfit
+            this.mlvChartOpt.series[0].data[2].value = response.body.profit.oldcarProfit
+            this.mlvChartOpt.series[0].data[3].value = response.body.profit.financeProfit
+            this.mlvChartOpt.series[0].data[4].value = response.body.profit.accessoryProfit
+          }
+          this.$comfun.http_post(this, `perf/${this.$moment.userInfo.user.id}`, {
+            startDate: startDate,
+            endDate: endDate
+          }).then((response) => {
+            this.dateChangeLoading = false
+            if (response.body.success === '1') {
+              this.grjxChartOpt.title.text = `{money|${response.body.perf.profitSum}}\t\t{unit|万}\n个人绩效`
+              this.grjxChartOpt.series[0].data[0].value = response.body.perf.newcarPerf
+              this.grjxChartOpt.series[0].data[1].value = response.body.perf.insurancePerf
+              this.grjxChartOpt.series[0].data[2].value = response.body.perf.oldcarPerf
+              this.grjxChartOpt.series[0].data[3].value = response.body.perf.financePerf
+              this.grjxChartOpt.series[0].data[4].value = response.body.perf.accessoryPerf
+            }
+          })
+        })
+      })
+    },
+    changeDate (dateTab, dateIndex) {
+      event.target.parentNode.getElementsByClassName('cur')[0].classList.remove('cur')
+      event.target.classList.add('cur')
+
+      var type = 2
+      var startDate = this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy-MM-dd')
+      var endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      if (dateTab.id === 'week') {
+        type = 2
+      } else if (dateTab.id === 'month') {
+        type = 3
+      } else if (dateTab.id === 'year') {
+        type = 4
+      }
+      this.getLineChartData(type, startDate, endDate)
+    },
+    getLineChartData (type, startDate, endDate) {
+      var chartLimitDate = ''
+      // 整车
+      this.$comfun.http_post(this, `newcar/curve/${this.$moment.userInfo.user.id}`, {
+        type: type,
+        startDate: startDate,
+        endDate: endDate
+      }).then((response) => {
+        if (response.body.success === '1') {
+          var xAxisData = []
+          var seriesData = []
+          for (let i = 0; i < response.body.newcar.length; i++) {
+            let startDate = null
+            let endDate = null
+            if (type === 2) {
+              startDate = new Date(response.body.newcar[i].startDate.replace(/-/g, '/'))
+              endDate = new Date(response.body.newcar[i].endDate.replace(/-/g, '/'))
+              let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
+              xAxisData.push(xAxis)
+            } else if (type === 3) {
+              xAxisData.push(String(response.body.newcar[i].yearnum).substr(2, 2) + '-' + response.body.newcar[i].monthnum)
+            } else if (type === 4) {
+              xAxisData.push(String(response.body.newcar[i].yearnum))
+            }
+            seriesData.push({
+              value: response.body.newcar[i].num ? response.body.newcar[i].num : 0,
+              itemStyle: {
+                color: '#ED8D1B',
+                borderColor: '#ED8D1B'
+              }
+            })
+          }
+          if (xAxisData.length > 7) {
+            chartLimitDate = xAxisData[xAxisData.length - 7]
+          } else {
+            chartLimitDate = xAxisData[0]
+          }
+          this.zcChartOpt.xAxis.data = xAxisData
+          this.zcChartOpt.series[0].data = seriesData
+          this.zcChartOpt.dataZoom = [
+            {
+              startValue: chartLimitDate
+            },
+            {
+              type: 'inside'
+            }
+          ]
+        }
+      })
+      // 二手车
+      this.$comfun.http_post(this, `oldcar/curve/${this.$moment.userInfo.user.id}`, {
+        type: type,
+        startDate: startDate,
+        endDate: endDate
+      }).then((response) => {
+        if (response.body.success === '1') {
+          var xAxisData = []
+          var seriesData = []
+          for (let i = 0; i < response.body.oldcar.length; i++) {
+            let startDate = null
+            let endDate = null
+            if (type === 2) {
+              startDate = new Date(response.body.oldcar[i].startDate.replace(/-/g, '/'))
+              endDate = new Date(response.body.oldcar[i].endDate.replace(/-/g, '/'))
+              let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
+              xAxisData.push(xAxis)
+            } else if (type === 3) {
+              xAxisData.push(String(response.body.oldcar[i].yearnum).substr(2, 2) + '-' + response.body.oldcar[i].monthnum)
+            } else if (type === 4) {
+              xAxisData.push(String(response.body.oldcar[i].yearnum))
+            }
+            seriesData.push({
+              value: response.body.oldcar[i].num ? response.body.oldcar[i].num : 0,
+              itemStyle: {
+                color: '#ED8D1B',
+                borderColor: '#ED8D1B'
+              }
+            })
+          }
+          if (xAxisData.length > 7) {
+            chartLimitDate = xAxisData[xAxisData.length - 7]
+          } else {
+            chartLimitDate = xAxisData[0]
+          }
+          this.escChartOpt.xAxis.data = xAxisData
+          this.escChartOpt.series[0].data = seriesData
+          this.escChartOpt.dataZoom = [
+            {
+              startValue: chartLimitDate
+            },
+            {
+              type: 'inside'
+            }
+          ]
+        }
+      })
+      // 保险
+      this.$comfun.http_post(this, `insurance/curve/${this.$moment.userInfo.user.id}`, {
+        type: type,
+        startDate: startDate,
+        endDate: endDate
+      }).then((response) => {
+        if (response.body.success === '1') {
+          var xAxisData = []
+          var seriesData = []
+          for (let i = 0; i < response.body.insurance.length; i++) {
+            let startDate = null
+            let endDate = null
+            if (type === 2) {
+              startDate = new Date(response.body.insurance[i].startDate.replace(/-/g, '/'))
+              endDate = new Date(response.body.insurance[i].endDate.replace(/-/g, '/'))
+              let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
+              xAxisData.push(xAxis)
+            } else if (type === 3) {
+              xAxisData.push(String(response.body.insurance[i].yearnum).substr(2, 2) + '-' + response.body.insurance[i].monthnum)
+            } else if (type === 4) {
+              xAxisData.push(String(response.body.insurance[i].yearnum))
+            }
+            seriesData.push({
+              value: response.body.insurance[i].num ? response.body.insurance[i].num : 0,
+              itemStyle: {
+                color: '#ED8D1B',
+                borderColor: '#ED8D1B'
+              }
+            })
+          }
+          if (xAxisData.length > 7) {
+            chartLimitDate = xAxisData[xAxisData.length - 7]
+          } else {
+            chartLimitDate = xAxisData[0]
+          }
+          this.bxChartOpt.xAxis.data = xAxisData
+          this.bxChartOpt.series[0].data = seriesData
+          this.bxChartOpt.dataZoom = [
+            {
+              startValue: chartLimitDate
+            },
+            {
+              type: 'inside'
+            }
+          ]
+        }
+      })
+      // 汽车用品
+      this.$comfun.http_post(this, `accessory/curve/${this.$moment.userInfo.user.id}`, {
+        type: type,
+        startDate: startDate,
+        endDate: endDate
+      }).then((response) => {
+        if (response.body.success === '1') {
+          var xAxisData = []
+          var seriesData = []
+          for (let i = 0; i < response.body.accessory.length; i++) {
+            let startDate = null
+            let endDate = null
+            if (type === 2) {
+              startDate = new Date(response.body.accessory[i].startDate.replace(/-/g, '/'))
+              endDate = new Date(response.body.accessory[i].endDate.replace(/-/g, '/'))
+              let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
+              xAxisData.push(xAxis)
+            } else if (type === 3) {
+              xAxisData.push(String(response.body.accessory[i].yearnum).substr(2, 2) + '-' + response.body.accessory[i].monthnum)
+            } else if (type === 4) {
+              xAxisData.push(String(response.body.accessory[i].yearnum))
+            }
+            seriesData.push({
+              value: response.body.accessory[i].num ? response.body.accessory[i].num : 0,
+              itemStyle: {
+                color: '#ED8D1B',
+                borderColor: '#ED8D1B'
+              }
+            })
+          }
+          if (xAxisData.length > 7) {
+            chartLimitDate = xAxisData[xAxisData.length - 7]
+          } else {
+            chartLimitDate = xAxisData[0]
+          }
+          this.qcypChartOpt.xAxis.data = xAxisData
+          this.qcypChartOpt.series[0].data = seriesData
+          this.qcypChartOpt.dataZoom = [
+            {
+              startValue: chartLimitDate
+            },
+            {
+              type: 'inside'
+            }
+          ]
+        }
+      })
+      // 金融
+      this.$comfun.http_post(this, `finance/curve/${this.$moment.userInfo.user.id}`, {
+        type: type,
+        startDate: startDate,
+        endDate: endDate
+      }).then((response) => {
+        if (response.body.success === '1') {
+          var xAxisData = []
+          var seriesData = []
+          for (let i = 0; i < response.body.finance.length; i++) {
+            let startDate = null
+            let endDate = null
+            if (type === 2) {
+              startDate = new Date(response.body.finance[i].startDate.replace(/-/g, '/'))
+              endDate = new Date(response.body.finance[i].endDate.replace(/-/g, '/'))
+              let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
+              xAxisData.push(xAxis)
+            } else if (type === 3) {
+              xAxisData.push(String(response.body.finance[i].yearnum).substr(2, 2) + '-' + response.body.finance[i].monthnum)
+            } else if (type === 4) {
+              xAxisData.push(String(response.body.finance[i].yearnum))
+            }
+            seriesData.push({
+              value: response.body.finance[i].num ? response.body.finance[i].num : 0,
+              itemStyle: {
+                color: '#ED8D1B',
+                borderColor: '#ED8D1B'
+              }
+            })
+          }
+          if (xAxisData.length > 7) {
+            chartLimitDate = xAxisData[xAxisData.length - 7]
+          } else {
+            chartLimitDate = xAxisData[0]
+          }
+          this.jrChartOpt.xAxis.data = xAxisData
+          this.jrChartOpt.series[0].data = seriesData
+          this.jrChartOpt.dataZoom = [
+            {
+              startValue: chartLimitDate
+            },
+            {
+              type: 'inside'
+            }
+          ]
         }
       })
     }
@@ -956,24 +1406,41 @@ export default {
       font-size: 1rem;
       vertical-align: bottom;
     }
-    .user-level-icon {
-      position: relative;
+    .level-wrap {
+      position: absolute;
       display: inline-block;
-      width: 0.9rem;
-      height: 0.9rem;
-      margin-left: 1.6rem;
-      background-image: url('./../assets/level-j.png');
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: 100% auto;
-      vertical-align: bottom;
-    }
-    .user-level {
-      position: relative;
-      display: inline-block;
-      font-size: 0.8rem;
-      color: #f5f8ff;
-      vertical-align: bottom;
+      left: 4.2rem;
+      bottom: 0;
+      span {
+        display: inline-block;
+        font-size: 0.8rem;
+        color: #ffffff;
+        vertical-align: bottom;
+      }
+      .star-wrap {
+        position: relative;
+        display: inline-block;
+        margin-left: 0.6rem;
+        vertical-align: bottom;
+        i.star {
+          position: relative;
+          display: inline-block;
+          vertical-align: middle;
+          width: 0.9rem;
+          height: 0.9rem;
+          background-image: url('./../assets/star-2.png');
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: 100% auto;
+        }
+        i.star:nth-of-type(n + 2) {
+          margin-left: 0.3rem;
+        }
+        i.has-star {
+          width: 0.93rem;
+          background-image: url('./../assets/star-1.png');
+        }
+      }
     }
   }
   .head-tab-wrap {
@@ -1264,7 +1731,7 @@ export default {
         position: absolute;
         left: 20%;
         right: 20%;
-        bottom: -0.4rem;
+        bottom: -0.36rem;
         border-bottom: 4px solid #246dc1;
         z-index: 9;
       }

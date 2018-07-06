@@ -11,10 +11,13 @@
         <button class="btn-sure" @click="login">登陆</button>
       </div>
     </div>
+    <canvas id="smokeCanvas" width="1008" height="1000"></canvas>
   </div>
 </template>
 
 <script>
+import '@/plugins/canvas/smoke.js'
+
 export default {
   name: 'Login',
   data () {
@@ -24,7 +27,6 @@ export default {
     }
   },
   beforeCreate () {
-    this.$cvs_fire()
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'none'
@@ -32,7 +34,7 @@ export default {
       if (loginInfo) {
         if (Date.now() - loginInfo.loginDate.getTime() < 1 * 24 * 60 * 60 * 1000) {
           this.userPhone = loginInfo.user.phone
-          this.userPwd = loginInfo.user.password || ''
+          // this.userPwd = loginInfo.user.password || ''
         } else {
           this.$moment.localforage.removeItem('userLoginInfo')
         }
@@ -66,7 +68,13 @@ export default {
             basedate: new Date(response.body.basedate),
             user: response.body.user
           })
-          this.$router.replace('/home')
+          if (Number(response.body.user.grade) === 1) { // 个人
+            this.$router.replace('/home')
+          } else if (Number(response.body.user.grade) === 2) { // 公司
+            this.$router.replace('/home-manager')
+          } else if (Number(response.body.user.grade) === 3) { // 集团
+            this.$router.replace('/home')
+          }
         } else {
           this.$dialog_msg({
             msg: '登陆失败'
@@ -90,17 +98,25 @@ export default {
   height: 100vh;
 }
 
+.page-login {
+  position: relative;
+  background-image: url('./../assets/login-bg.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
 .login-wrap {
   position: absolute;
   top: calc((100% - 9.6rem) / 2);
   left: 10vw;
   width: 80vw;
   height: 9.6rem;
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(0, 0, 0, 0);
   border-radius: 0.4rem;
-  overflow: hidden;
   padding: 1.2rem 0;
-  box-shadow: 0 0 10px rgba(107, 107, 107, 0.8);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0);
 }
 
 .login-wrap > .form-item-wrap {
@@ -117,10 +133,24 @@ export default {
   outline: none;
   width: calc(100% - 1.6rem - 2rem);
   padding: 0.6rem 0.8rem;
-  background-color: rgba(119, 119, 119, 0.4);
+  background-color: rgba(214, 214, 214, 0.5);
   border: none;
-  border-radius: 6px;
+  border-radius: 0px;
   font-size: 0.8rem;
+  color: #181818;
+}
+
+.login-wrap > .form-item-wrap > input::-webkit-input-placeholder { /* WebKit browsers */
+  color: rgb(49, 49, 49);
+}
+.login-wrap > .form-item-wrap > input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+  color: rgb(49, 49, 49);
+}
+.login-wrap > .form-item-wrap > input::-moz-placeholder { /* Mozilla Firefox 19+ */
+  color: rgb(49, 49, 49);
+}
+.login-wrap > .form-item-wrap > input:-ms-input-placeholder { /* Internet Explorer 10+ */
+  color: rgb(49, 49, 49);
 }
 
 .login-wrap > .form-btn-wrap {
@@ -134,16 +164,38 @@ export default {
   position: relative;
   outline: none;
   width: calc(100% - 2rem);
-  padding: 0.6rem 0;
-  background-color: rgba(207, 43, 43, 0.4);
+  padding: 0.8rem 0;
+  background-color: rgba(16, 93, 180, 0.9);
   border: none;
-  border-radius: 6px;
+  border-radius: 0px;
   font-size: 0.8rem;
-  color: #cfcfcf;
+  color: #ececec;
   font-weight: bold;
+  letter-spacing: 20px;
+  text-indent: 20px;
 }
 
 .login-wrap > .form-btn-wrap > button:active {
-  background-color: rgba(158, 18, 18, 0.4);
+  background-color: rgba(35, 90, 153, 0.9);
+}
+
+.login-wrap::before {
+  content: '';
+  position: absolute;
+  top: -20rem;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: 46vw;
+  height: 20rem;
+  background-image: url('./../assets/login-logo.png');
+  background-repeat: no-repeat;
+  background-size: 100% auto;
+  background-position: bottom;
+}
+
+#smokeCanvas {
+  width: 100%;
+  height: 100%;
 }
 </style>

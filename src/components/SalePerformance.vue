@@ -4,8 +4,23 @@
       <span class="user-head" :style="{ 'background-image': `url(${userHead})` }"></span>
       <div class="user-name-wrap">
         <span class="user-name">{{userName}}</span>
-        <i class="user-level-icon"></i>
-        <span class="user-level">{{userLevel}}</span>
+        <div class="seeing-user-name">
+          <span>正在查看</span>
+          <span class="see-user-name" v-if="seeingUser.name">{{seeingUser.name}}</span>
+          <span class="see-user-name" v-if="!seeingUser.name">~</span>
+        </div>
+      </div>
+      <div class="user-tab-wrap">
+        <div :class="['left-arrow iconfont icon-left', curSeeUserIndex === 0 ? 'arrow-bound' : '']" @click="arrowUsers(-1, curSeeUserIndex > 0)"></div>
+        <div class="user-info-wrap">
+          <div class="user-tab-rail" ref="user-tab-rail" :style="{ 'transform': `translateX(0px)` }">
+            <span class="user-info-item" v-for="(userTab, userTabIndex) in userTabs" :key="userTabIndex" :ref="'date-tab-' + userTab.userId" :class="userTabIndex === 0 ? 'cur' : ''" :style="{ 'width': `calc(100% / 6)` }" @click="seeThisUser(userTab, userTabIndex)">
+              <i class="user-head" :style="{ 'background-image': `url(${userHead})` }"></i>
+              <span class="user-name">{{userTab.name}}</span>
+            </span>
+          </div>
+        </div>
+        <div :class="['right-arrow iconfont icon-right', curSeeUserIndex === userTabs.length - 1 ? 'arrow-bound' : '']" @click="arrowUsers(1, curSeeUserIndex < userTabs.length - 1)"></div>
       </div>
       <div class="head-tab-wrap">
         <div class="date-tab-rail" ref="date-tab-rail">
@@ -15,7 +30,7 @@
       <div @touchstart.prevent="headerTouchStart" @touchmove.prevent="headerTouchMove" @touchend.prevent="headerTouchEnd" :style="headerIsLoading ? { 'height': '0', 'overflow': 'hidden' } : {}">
         <div class="date-every-wrap" ref="date-every-wrap">
           <div class="date-every-rail" ref="date-every-rail" :style="[{ 'width': `calc((100vw) / 5 * ${dateEvery.length})` }, dateEveryRailTrans !== null ? { 'transform': `translateX(${dateEveryRailTrans}px)` } : { 'transform': `translateX(calc((100vw / 5) * 3 - 100%))` }]">
-            <div v-for="(dateEv, dateEvIndex) in dateEvery" :key="dateEvIndex" :class="[curHeaderDateTabType + '-' + dateEvIndex, dateEvIndex === dateEvery.length - 1 ? ['last-date', 'cur'] : '']" :style="{ 'width': `calc(100vw / 5)` }">
+            <div v-for="(dateEv, dateEvIndex) in dateEvery" :key="dateEvIndex" :class="[curHeaderDateTabType + '-' + dateEvIndex, dateEvIndex === 0 ? 'first-date' : '', dateEvIndex === dateEvery.length - 1 ? ['last-date', 'cur'] : '']" :style="{ 'width': `calc(100vw / 5)` }">
               <span class="display-show">{{dateEv.display}}</span>
               <span class="year" v-if="dateEv.year">{{dateEv.year}}</span>
             </div>
@@ -91,6 +106,8 @@ export default {
     return {
       headerIsLoading: true,
       curHeaderDateTabType: null,
+      curSeeUserIndex: 0,
+      seeingUser: {},
       headerDateTabTransXMax: 0,
       headerDateTabTransXCeilWidth: 0,
       headerTouchStartTransX: null,
@@ -100,13 +117,17 @@ export default {
       headerTabToggle: 0,
       moveDistance: 0,
       curHeaderSearchDate: null,
+      userTabTransXCurPage: 0,
+      userTabTransXPageWidth: 0,
+      userTabTransXCeilWidth: 0,
       reg: /[-?\d.]+/g,
       isFixed: false,
-      sellTabWrapScrollTop: 52.2 * 16,
+      sellTabWrapScrollTop: 60 * 16,
       sellTabWrapHeight: 3.9 * 16 + 'px',
       userHead: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1060129963,1724829206&fm=27&gp=0.jpg',
-      userName: '刘德华',
+      userName: '销售业绩',
       userLevel: '金牌销售',
+      userTabs: [],
       dateTabs: [
         {
           id: 'day',
@@ -518,8 +539,49 @@ export default {
     this.$comfun.http_post(this, 'contrast/8')
   },
   mounted () {
+    this.userTabTransXPageWidth = document.body.clientWidth - 1.6 * 16 - 3.2 * 16
+    this.userTabTransXCeilWidth = (document.body.clientWidth - 1.6 * 16 - 3.2 * 16) / 6
     document.querySelector('#app-footer').style.display = 'flex'
     this.resetDateEvery(this.dateTabs[0].id)
+
+    this.userTabs = [
+      {
+        userId: '',
+        head: '',
+        name: '刘德华'
+      },
+      {
+        userId: '',
+        head: '',
+        name: '刘德华'
+      },
+      {
+        userId: '',
+        head: '',
+        name: '刘德华'
+      },
+      {
+        userId: '',
+        head: '',
+        name: '刘德华'
+      },
+      {
+        userId: '',
+        head: '',
+        name: '刘德华'
+      },
+      {
+        userId: '',
+        head: '',
+        name: '刘德华'
+      },
+      {
+        userId: '',
+        head: '',
+        name: '刘德华'
+      }
+    ]
+    this.seeingUser = this.userTabs[0]
   },
   methods: {
     scrollPage () {
@@ -782,20 +844,36 @@ export default {
       if (this.headerDateTabTransXMax < 0) {
         if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2) {
           this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2
-          this.headerTabToggle = -1
+          if (this.curHeaderDateTabType !== 'day') {
+            this.headerTabToggle = -1
+          } else {
+            this.headerTabToggle = 0
+          }
         } else if (this.headerDateMoveToTansX < this.headerDateTabTransXMax) {
           this.headerDateMoveToTansX = this.headerDateTabTransXMax
-          this.headerTabToggle = 1
+          if (this.curHeaderDateTabType !== 'year') {
+            this.headerTabToggle = 1
+          } else {
+            this.headerTabToggle = 0
+          }
         } else {
           this.headerTabToggle = 0
         }
       } else {
         if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2) {
           this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2
-          this.headerTabToggle = -1
+          if (this.curHeaderDateTabType !== 'day') {
+            this.headerTabToggle = -1
+          } else {
+            this.headerTabToggle = 0
+          }
         } else if (this.headerDateMoveToTansX < this.headerDateTabTransXMax) {
           this.headerDateMoveToTansX = this.headerDateTabTransXMax
-          this.headerTabToggle = 1
+          if (this.curHeaderDateTabType !== 'year') {
+            this.headerTabToggle = 1
+          } else {
+            this.headerTabToggle = 0
+          }
         } else {
           this.headerTabToggle = 0
         }
@@ -834,50 +912,66 @@ export default {
         var moveOverItemNum = Math.floor(this.moveDistance / this.headerDateTabTransXCeilWidth)
         var moveOverItemBalanceNum = this.moveDistance % this.headerDateTabTransXCeilWidth
         if (this.moveDistance > 0) {
-          if (moveOverItemBalanceNum > this.headerDateTabTransXCeilWidth / 2) {
-            this.headerDateMoveToTansX = this.headerTouchStartTransX + (this.headerDateTabTransXCeilWidth - moveOverItemBalanceNum)
-            this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
-            curDateEvery.classList.remove('cur')
-            let moveToIndex = Number(curDateEvery.classList[0].split('-')[1]) - (moveOverItemNum + 1)
-            document.querySelector('.' + this.curHeaderDateTabType + '-' + moveToIndex).classList.add('cur')
-            this.curHeaderSearchDate = this.dateEvery[moveToIndex]
-            this.searchHeaderData()
-          } else {
-            let moveToIndex = Number(curDateEvery.classList[0].split('-')[1])
-            if (moveOverItemNum >= 1) {
-              this.headerDateMoveToTansX -= moveOverItemBalanceNum
-              moveToIndex -= moveOverItemNum
+          if (!curDateEvery.classList.contains('first-date')) {
+            if (moveOverItemBalanceNum > this.headerDateTabTransXCeilWidth / 2) {
+              this.headerDateMoveToTansX = this.headerTouchStartTransX + (this.headerDateTabTransXCeilWidth - moveOverItemBalanceNum)
+              this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
               curDateEvery.classList.remove('cur')
+              let moveToIndex = Number(curDateEvery.classList[0].split('-')[1]) - (moveOverItemNum + 1)
+              if (moveToIndex < 0) {
+                moveToIndex = 0
+              }
               document.querySelector('.' + this.curHeaderDateTabType + '-' + moveToIndex).classList.add('cur')
+              this.curHeaderSearchDate = this.dateEvery[moveToIndex]
+              this.searchHeaderData()
             } else {
-              this.headerDateMoveToTansX -= this.moveDistance
+              let moveToIndex = Number(curDateEvery.classList[0].split('-')[1])
+              if (moveOverItemNum >= 1) {
+                this.headerDateMoveToTansX -= moveOverItemBalanceNum
+                moveToIndex -= moveOverItemNum
+                curDateEvery.classList.remove('cur')
+                if (moveToIndex < 0) {
+                  moveToIndex = 0
+                }
+                document.querySelector('.' + this.curHeaderDateTabType + '-' + moveToIndex).classList.add('cur')
+              } else {
+                this.headerDateMoveToTansX -= this.moveDistance
+              }
+              this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
+              this.curHeaderSearchDate = this.dateEvery[moveToIndex]
+              this.searchHeaderData()
             }
-            this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
-            this.curHeaderSearchDate = this.dateEvery[moveToIndex]
-            this.searchHeaderData()
           }
         } else {
-          if (Math.abs(moveOverItemBalanceNum) > this.headerDateTabTransXCeilWidth / 2) {
-            this.headerDateMoveToTansX = this.headerTouchStartTransX - (this.headerDateTabTransXCeilWidth - Math.abs(moveOverItemBalanceNum))
-            this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
-            curDateEvery.classList.remove('cur')
-            let moveToIndex = Number(curDateEvery.classList[0].split('-')[1]) + Math.abs(moveOverItemNum)
-            document.querySelector('.' + this.curHeaderDateTabType + '-' + moveToIndex).classList.add('cur')
-            this.curHeaderSearchDate = this.dateEvery[moveToIndex]
-            this.searchHeaderData()
-          } else {
-            let moveToIndex = Number(curDateEvery.classList[0].split('-')[1])
-            if (Math.abs(moveOverItemNum) >= 1) {
-              this.headerDateMoveToTansX -= moveOverItemBalanceNum
-              moveToIndex += (Math.abs(moveOverItemNum) - 1)
+          if (!curDateEvery.classList.contains('last-date')) {
+            if (Math.abs(moveOverItemBalanceNum) > this.headerDateTabTransXCeilWidth / 2) {
+              this.headerDateMoveToTansX = this.headerTouchStartTransX - (this.headerDateTabTransXCeilWidth - Math.abs(moveOverItemBalanceNum))
+              this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
               curDateEvery.classList.remove('cur')
+              let moveToIndex = Number(curDateEvery.classList[0].split('-')[1]) + Math.abs(moveOverItemNum)
+              if (moveToIndex > this.dateEvery.length - 1) {
+                moveToIndex = this.dateEvery.length - 1
+              }
               document.querySelector('.' + this.curHeaderDateTabType + '-' + moveToIndex).classList.add('cur')
+              this.curHeaderSearchDate = this.dateEvery[moveToIndex]
+              this.searchHeaderData()
             } else {
-              this.headerDateMoveToTansX += this.moveDistance
+              let moveToIndex = Number(curDateEvery.classList[0].split('-')[1])
+              if (Math.abs(moveOverItemNum) >= 1) {
+                this.headerDateMoveToTansX -= moveOverItemBalanceNum
+                moveToIndex += (Math.abs(moveOverItemNum) - 1)
+                curDateEvery.classList.remove('cur')
+                if (moveToIndex > this.dateEvery.length - 1) {
+                  moveToIndex = this.dateEvery.length - 1
+                }
+                document.querySelector('.' + this.curHeaderDateTabType + '-' + moveToIndex).classList.add('cur')
+              } else {
+                this.headerDateMoveToTansX += this.moveDistance
+              }
+              this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
+              this.curHeaderSearchDate = this.dateEvery[moveToIndex]
+              this.searchHeaderData()
             }
-            this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
-            this.curHeaderSearchDate = this.dateEvery[moveToIndex]
-            this.searchHeaderData()
           }
         }
       }
@@ -887,6 +981,42 @@ export default {
     },
     searchHeaderData () {
       // this.curHeaderSearchDate
+    },
+    arrowUsers (direction, flag) {
+      if (flag) {
+        this.curSeeUserIndex += direction
+        // if (direction > 0) {
+        //   if (this.userTabs.length) {
+        //   }
+        //   this.userTabTransXCurPage += 1
+        // }
+        if (direction > 0) {
+          let usersCurTransX = Number(this.$refs['user-tab-rail'].style.transform.match(this.reg)[0])
+          let usersToTransX = usersCurTransX - this.userTabTransXPageWidth
+          if (this.userTabTransXCeilWidth * this.userTabs.length > this.userTabTransXPageWidth) {
+            if (usersToTransX < -(this.userTabTransXCeilWidth * this.userTabs.length - this.userTabTransXPageWidth)) {
+              usersToTransX = -(this.userTabTransXCeilWidth * this.userTabs.length - this.userTabTransXPageWidth)
+            }
+          } else {
+            if (usersToTransX < 0) {
+              usersToTransX = 0
+            }
+          }
+          this.$refs['user-tab-rail'].style.transform = `translateX(${usersToTransX}px)`
+        } else {
+          let usersCurTransX = Number(this.$refs['user-tab-rail'].style.transform.match(this.reg)[0])
+          let usersToTransX = usersCurTransX + this.userTabTransXPageWidth
+          if (usersToTransX > 0) {
+            usersToTransX = 0
+          }
+          this.$refs['user-tab-rail'].style.transform = `translateX(${usersToTransX}px)`
+        }
+      }
+    },
+    seeThisUser (userTab, index) {
+      event.target.parentNode.getElementsByClassName('cur')[0].classList.remove('cur')
+      event.target.classList.add('cur')
+      this.seeingUser = userTab
     }
   }
 }
@@ -922,24 +1052,117 @@ export default {
       font-size: 1rem;
       vertical-align: bottom;
     }
-    .user-level-icon {
+    .seeing-user-name {
       position: relative;
-      display: inline-block;
-      width: 0.9rem;
-      height: 0.9rem;
-      margin-left: 1.6rem;
-      background-image: url('./../assets/level-j.png');
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: 100% auto;
-      vertical-align: bottom;
+      margin-top: 0.3rem;
+      font-size: 0.7rem;
+      span.see-user-name {
+        margin-left: 0.4rem;
+        color: #1FFF98;
+      }
     }
-    .user-level {
+  }
+  .user-tab-wrap {
+    position: relative;
+    .left-arrow {
+      position: absolute;
+      font-size: 1.4rem;
+      width: 2rem;
+      height: 8rem;
+      line-height: 8rem;
+      top: -2rem;
+      left: 0;
+      z-index: 9;
+      color: #73a7e3;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .right-arrow {
+      position: absolute;
+      font-size: 1.4rem;
+      width: 2rem;
+      height: 8rem;
+      line-height: 8rem;
+      top: -2rem;
+      right: 0;
+      z-index: 9;
+      color: #73a7e3;
+      text-align: right;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .arrow-bound {
+      color: rgba(115, 167, 227, .3);
+    }
+    .user-info-wrap {
       position: relative;
-      display: inline-block;
-      font-size: 0.8rem;
-      color: #f5f8ff;
-      vertical-align: bottom;
+      height: 4.8rem;
+      margin-top: 1.8rem;
+      left: 1.6rem;
+      right: 1.6rem;
+      width: calc(100% - 3.2rem);
+      overflow: hidden;
+      .user-tab-rail {
+        position: relative;
+        height: 4.2rem;
+        white-space: nowrap;
+        overflow-x: visible;
+        transition: all 0.2s ease 0s;
+        span.user-info-item {
+          position: relative;
+          display: inline-block;
+          text-align: center;
+          i.user-head {
+            position: relative;
+            top: 0;
+            left: 0;
+            margin: 0 auto;
+            display: block;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 100% auto;
+            pointer-events: none;
+          }
+          i.user-head::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            bottom: -2px;
+            right: -2px;
+            border-radius: 50%;
+            background-color: rgba(30, 30, 30, 0.3);
+            pointer-events: none;
+            transition: all 0.4s ease 0s;
+          }
+          span.user-name {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            font-size: 0.6rem;
+            color: #438cdf;
+            margin-top: 0.6rem;
+            pointer-events: none;
+            transition: all 0.4s ease 0s;
+          }
+        }
+        span.cur {
+          i.user-head {
+            width: 2.5rem;
+            height: 2.5rem;
+          }
+          i.user-head::after {
+            background-color: rgba(0, 0, 0, 0);
+          }
+          span.user-name {
+            color: #ffffff;
+          }
+        }
+      }
     }
   }
   .head-tab-wrap {
@@ -1182,7 +1405,7 @@ export default {
       font-size: 0.8rem;
       height: 4rem;
       line-height: 4rem;
-      top: 11rem;
+      top: 18.6rem;
     }
   }
 }
