@@ -116,6 +116,9 @@ export default {
             this.curMenuIndex = 2
           }
         } else if (Number(loginInfo.user.grade) === 3) { // 集团
+          if (curRouterPath.indexOf('/home-boss') === 0) {
+            this.curMenuIndex = 0
+          }
         }
       }
     })
