@@ -78,6 +78,7 @@ export default {
     return {
       curTabType: 'newcar',
       curDateTabType: 'week',
+      curOrderWay: 'com',
       defaultUserHead: '',
       tabs: [
         {
@@ -126,7 +127,8 @@ export default {
         saleNum: '~',
         saleUnit: '~',
         factory: '~',
-        duty: '~'
+        duty: '~',
+        up: 0
       },
       saleList: []
     }
@@ -138,10 +140,30 @@ export default {
   },
   methods: {
     getOrderList () {
-      var startDate = '2018-07-01'
-      var endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
-      var startOldDate = '2018-06-24'
-      var endOldDate = '2018-06-30'
+      var startDate = ''
+      var endDate = ''
+      var startOldDate = ''
+      var endOldDate = ''
+      if (this.curDateTabType === 'week') {
+        var curWeek = this.$comfun.getWeekStartEnd()
+        var beforeWeek = this.$comfun.getWeekStartEnd(-1)
+        startDate = this.$comfun.formatDate(curWeek[0], 'yyyy-MM-dd')
+        endDate = this.$comfun.formatDate(curWeek[1], 'yyyy-MM-dd')
+        startOldDate = this.$comfun.formatDate(beforeWeek[0], 'yyyy-MM-dd')
+        endOldDate = this.$comfun.formatDate(beforeWeek[1], 'yyyy-MM-dd')
+      } else if (this.curDateTabType === 'month') {
+        var curMonth = this.$comfun.getMonthStartEnd()
+        var beforeMonth = this.$comfun.getMonthStartEnd(-1)
+        startDate = this.$comfun.formatDate(curMonth[0], 'yyyy-MM-dd')
+        endDate = this.$comfun.formatDate(curMonth[1], 'yyyy-MM-dd')
+        startOldDate = this.$comfun.formatDate(beforeMonth[0], 'yyyy-MM-dd')
+        endOldDate = this.$comfun.formatDate(beforeMonth[1], 'yyyy-MM-dd')
+      } else if (this.curDateTabType === 'year') {
+        startDate = new Date().getFullYear() + '-01-01'
+        endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+        startOldDate = (new Date().getFullYear() - 1) + '-01-01'
+        endOldDate = this.$comfun.formatDate(this.$comfun.getLastDay(new Date().getFullYear() - 1, 12), 'yyyy-MM-dd')
+      }
       this.$comfun.http_post(this, this.curTabType + `/order/${this.$moment.userInfo.user.id}`, {
         startDate: startDate,
         endDate: endDate,

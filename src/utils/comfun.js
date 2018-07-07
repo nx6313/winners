@@ -198,6 +198,9 @@ export default {
       },
       // 获取指定周的起止日期
       getWeekStartEnd (addWeekCount) {
+        if (!addWeekCount) {
+          addWeekCount = 0
+        }
         var startEnd = []
         var milliSecond = 1000 * 60 * 60 * 24
         var currentDate = new Date()
@@ -208,6 +211,27 @@ export default {
         var currentWeekLastDay = new Date(currentWeekFirstDay.getTime() + (milliSecond * 6))
         startEnd.push(currentWeekFirstDay)
         startEnd.push(currentWeekLastDay)
+        return startEnd
+      },
+      // 获取指定月的起止日期
+      getMonthStartEnd (addMonthCount) {
+        if (!addMonthCount) {
+          addMonthCount = 0
+        }
+        var startEnd = []
+        var currentDate = new Date()
+        currentDate.setDate(1)
+        currentDate.setMonth(currentDate.getMonth() + addMonthCount)
+        var year = currentDate.getFullYear()
+        var month = currentDate.getMonth()
+        var currentMonthLastDay = null
+        if (year === new Date().getFullYear() && month === new Date().getMonth()) {
+          currentMonthLastDay = new Date()
+        } else {
+          currentMonthLastDay = this.getLastDay(year, month + 1)
+        }
+        startEnd.push(currentDate)
+        startEnd.push(currentMonthLastDay)
         return startEnd
       },
       // 获取某月最后一天日期
