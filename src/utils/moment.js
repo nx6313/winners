@@ -1,7 +1,7 @@
 var HttpIp = ''
 var HttpPort = ''
-var HttpAddress = 'http://172.18.168.222:8080/data/public/'
-// var HttpAddress = 'http://wx.dcsc520.cn/lhp/data/public/'
+// var HttpAddress = 'http://172.18.168.222:8080/data/public/'
+var HttpAddress = 'http://wx.dcsc520.cn/lhp/data/public/'
 var localforage = require('localforage')
 
 export default {

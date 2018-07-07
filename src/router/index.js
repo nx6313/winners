@@ -102,24 +102,24 @@ router.beforeEach((to, from, next) => {
   } else {
     document.title = document.querySelector('meta[name="web-describe"]').getAttribute('content')
   }
-  this.a.app.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
+  router.app.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
     if (loginInfo) {
-      this.a.app.$moment.userInfo = loginInfo
+      router.app.$moment.userInfo = loginInfo
       if (to.path !== '/') {
-        this.a.app.$root.eventHub.$emit('init-menu')
+        router.app.$root.eventHub.$emit('init-menu')
       } else {
-        this.a.app.$root.eventHub.$emit('clear-menu')
+        router.app.$root.eventHub.$emit('clear-menu')
       }
       next()
       if (to.path !== '/') {
-        this.a.app.$root.eventHub.$emit('ref-menu')
+        router.app.$root.eventHub.$emit('ref-menu')
       } else {
-        this.a.app.$root.eventHub.$emit('clear-menu')
+        router.app.$root.eventHub.$emit('clear-menu')
       }
     } else {
-      this.a.app.$root.eventHub.$emit('clear-menu')
+      router.app.$root.eventHub.$emit('clear-menu')
       if (to.path !== '/') {
-        this.a.app.$dialog_msg({
+        router.app.$dialog_msg({
           msg: '登陆信息失效'
         })
         next('/')
