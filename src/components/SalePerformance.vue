@@ -1,7 +1,7 @@
 <template>
   <div id="page-home-performance" class="page-home-performance" @scroll="scrollPage">
     <div class="page-header-wrap">
-      <span class="user-head" :style="{ 'background-image': `url(${userHead})` }"></span>
+      <span class="user-head" :style="{ 'background-image': `url(${defaultUserHead})` }"></span>
       <div class="user-name-wrap">
         <span class="user-name">{{userName}}</span>
         <div class="seeing-user-name">
@@ -15,7 +15,7 @@
         <div class="user-info-wrap">
           <div class="user-tab-rail" ref="user-tab-rail" :style="{ 'transform': `translateX(0px)` }">
             <span class="user-info-item" v-for="(userTab, userTabIndex) in userTabs" :key="userTabIndex" :ref="'date-tab-' + userTab.userId" :class="userTabIndex === 0 ? 'cur' : ''" :style="{ 'width': `calc(100% / 6)` }" @click="seeThisUser(userTab, userTabIndex)">
-              <i class="user-head" :style="{ 'background-image': `url(${userHead})` }"></i>
+              <i class="user-head" :style="{ 'background-image': `url(${defaultUserHead})` }"></i>
               <span class="user-name">{{userTab.name}}</span>
             </span>
           </div>
@@ -104,6 +104,7 @@ export default {
   name: 'HomePerformance',
   data () {
     return {
+      defaultUserHead: '',
       headerIsLoading: true,
       curHeaderDateTabType: null,
       curSeeUserIndex: 0,
@@ -124,7 +125,6 @@ export default {
       isFixed: false,
       sellTabWrapScrollTop: 60 * 16,
       sellTabWrapHeight: 3.9 * 16 + 'px',
-      userHead: require('@/assets/default-head.png'),
       userName: '销售业绩',
       userTabs: [],
       dateTabs: [
@@ -538,9 +538,10 @@ export default {
     this.$comfun.http_post(this, 'contrast/8')
   },
   mounted () {
+    document.querySelector('#app-footer').style.display = 'flex'
+    this.defaultUserHead = this.$moment.defaultHead
     this.userTabTransXPageWidth = document.body.clientWidth - 1.6 * 16 - 3.2 * 16
     this.userTabTransXCeilWidth = (document.body.clientWidth - 1.6 * 16 - 3.2 * 16) / 6
-    document.querySelector('#app-footer').style.display = 'flex'
     this.resetDateEvery(this.dateTabs[0].id)
 
     this.userTabs = [

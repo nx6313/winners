@@ -4,6 +4,8 @@ var HttpPort = ''
 var HttpAddress = 'http://wx.dcsc520.cn/lhp/data/public/'
 var localforage = require('localforage')
 
+var defaultHead = require('@/assets/default-head.png')
+
 export default {
   install: function (Vue, options) {
     var Moment = {
@@ -14,7 +16,8 @@ export default {
       debug: true,
       // localForage
       localforage: localforage,
-      userInfo: {}
+      userInfo: {},
+      defaultHead: defaultHead
     }
 
     Object.defineProperty(Vue.prototype, '$moment', { value: Moment })

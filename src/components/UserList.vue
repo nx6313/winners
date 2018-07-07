@@ -47,7 +47,7 @@ export default {
   data () {
     return {
       starCount: 5,
-      defaultUserHead: require('@/assets/default-head.png'),
+      defaultUserHead: './../assets/default-head.png',
       searchTimer: null,
       searchVal: '',
       showSearchPanel: false,

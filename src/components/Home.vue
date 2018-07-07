@@ -93,7 +93,7 @@ export default {
   name: 'Home',
   data () {
     return {
-      defaultUserHead: require('@/assets/default-head.png'),
+      defaultUserHead: '',
       starCount: 5,
       userLevel: 3,
       headerIsLoading: true,
@@ -639,6 +639,7 @@ export default {
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
+    this.defaultUserHead = this.$moment.defaultHead
     this.resetDateEvery(this.dateTabs[0].id)
 
     setTimeout(() => {

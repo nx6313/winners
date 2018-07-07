@@ -78,7 +78,7 @@ export default {
     return {
       curTabType: 'newcar',
       curDateTabType: 'week',
-      defaultUserHead: require('@/assets/default-head.png'),
+      defaultUserHead: '',
       tabs: [
         {
           id: 'newcar',
@@ -133,6 +133,7 @@ export default {
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
+    this.defaultUserHead = this.$moment.defaultHead
     this.getOrderList()
   },
   methods: {

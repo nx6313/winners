@@ -80,7 +80,7 @@ export default {
   name: 'HomeManager',
   data () {
     return {
-      defaultUserHead: require('@/assets/default-head.png'),
+      defaultUserHead: '',
       headerIsLoading: true,
       curHeaderDateTabType: null,
       headerDateTabTransXMax: 0,
@@ -394,6 +394,7 @@ export default {
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
+    this.defaultUserHead = this.$moment.defaultHead
     this.resetDateEvery(this.dateTabs[0].id)
   },
   methods: {

@@ -26,13 +26,15 @@ export default {
   data () {
     return {
       starCount: 5,
-      defaultUserHead: require('@/assets/default-head.png'),
+      defaultUserHead: '',
       userInfo: {},
       userLevel: 3,
       userInfos: []
     }
   },
   mounted () {
+    document.querySelector('#app-footer').style.display = 'flex'
+    this.defaultUserHead = this.$moment.defaultHead
     this.$set(this.userInfo, 'userHead', '')
     this.$set(this.userInfo, 'userName', this.$moment.userInfo.user.name)
     this.userInfos = [
@@ -49,7 +51,6 @@ export default {
         content: this.$moment.userInfo.user.phone || '未设置'
       }
     ]
-    document.querySelector('#app-footer').style.display = 'flex'
   }
 }
 </script>
