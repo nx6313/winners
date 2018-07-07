@@ -1,9 +1,26 @@
 <template>
-  <div id="page-home-boss" class="page-home-boss" @scroll="scrollPage">
+  <div id="page-company-performance" class="page-company-performance" @scroll="scrollPage">
     <div class="page-header-wrap">
-      <span class="user-head" :style="{ 'background-image': `url(${defaultUserHead})` }"></span>
+      <span class="user-head" :style="{ 'background-image': `url(${userHead})` }"></span>
       <div class="user-name-wrap">
         <span class="user-name">{{userName}}</span>
+        <div class="seeing-user-name">
+          <span>正在查看</span>
+          <span class="see-user-name" v-if="seeingUser.name">{{seeingUser.name}}</span>
+          <span class="see-user-name" v-if="!seeingUser.name">~</span>
+        </div>
+      </div>
+      <div class="user-tab-wrap">
+        <div :class="['left-arrow iconfont icon-left', curSeeUserIndex === 0 ? 'arrow-bound' : '']" @click="arrowUsers(-1, curSeeUserIndex > 0)"></div>
+        <div class="user-info-wrap">
+          <div class="user-tab-rail" ref="user-tab-rail" :style="{ 'transform': `translateX(0px)` }">
+            <span class="user-info-item" v-for="(userTab, userTabIndex) in userTabs" :key="userTabIndex" :ref="'date-tab-' + userTab.userId" :class="userTabIndex === 0 ? 'cur' : ''" :style="{ 'width': `calc(100% / 6)` }" @click="seeThisUser(userTab, userTabIndex)">
+              <i class="user-head" :style="{ 'background-image': `url(${userHead})` }"></i>
+              <span class="user-name">{{userTab.name}}</span>
+            </span>
+          </div>
+        </div>
+        <div :class="['right-arrow iconfont icon-right', curSeeUserIndex === userTabs.length - 1 ? 'arrow-bound' : '']" @click="arrowUsers(1, curSeeUserIndex < userTabs.length - 1)"></div>
       </div>
       <div class="head-tab-wrap">
         <div class="date-tab-rail" ref="date-tab-rail">
@@ -20,16 +37,24 @@
           </div>
         </div>
         <div class="summarizing-wrap">
-          <div class="statistics-content">
-            <chart class="policy-chart" :options="policyChartOpt" :auto-resize="true"></chart>
+          <div class="progress-wrap" v-for="(summarizing, summarizingIndex) in summarizings" :key="summarizingIndex" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})`, 'left': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} * ${summarizingIndex} + ${summarizingIndex} * 2 * 0.2rem)` }">
+            <div class="wrapper right" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} / 2)`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})` }">
+              <div class="circle-progress rightcircle" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} - 6px)`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} - 6px)`, 'transform': progressRotate('right', summarizing.progress) }"></div>
+            </div>
+            <div class="wrapper left" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} / 2)`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})` }">
+              <div class="circle-progress leftcircle" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} - 6px)`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} - 6px)`, 'transform': progressRotate('left', summarizing.progress) }"></div>
+            </div>
+            <div class="progress-val" :style="{ 'line-height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})` }" v-html="circleProgressVal(summarizing.progress)"></div>
+            <div class="water-wrap">
+              <div class="water-wave" :style="{ 'bottom': getWaterHeight(summarizing.progress) }"></div>
+            </div>
+          </div>
+          <div class="progress-des-wrap" v-for="(summarizingDes, summarizingDesIndex) in summarizings" :key="'des-' + summarizingDesIndex" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})`, 'left': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} * ${summarizingDesIndex} + ${summarizingDesIndex} * 2 * 0.2rem)` }">
+            <span class="title">{{summarizingDes.title}}</span>
+            <span class="num" :ref="'des-num-' + summarizingDesIndex" v-num-scroll:opt="{ number: summarizingDes.num, precision: 0 }">0</span>
+            <span class="des">{{summarizingDes.des}}</span>
           </div>
         </div>
-      </div>
-      <div :class="['header-arrow left-arrow iconfont icon-left', curHeaderTypeIndex === 0 ? 'arrow-bound' : '']" @click.stop="arrowHeader(-1, curHeaderTypeIndex > 0)"></div>
-      <div :class="['header-arrow right-arrow iconfont icon-right', curHeaderTypeIndex === summarizings.length - 1 ? 'arrow-bound' : '']" @click.stop="arrowHeader(1, curHeaderTypeIndex < summarizings.length - 1)"></div>
-      <div class="header-indicator">
-        <span class="header-item" v-for="(summarizing, summarizingIndex) in summarizings" :key="summarizingIndex" :style="[{ 'width': `calc(100% / ${summarizings.length})` }]">{{summarizing.title}}</span>
-        <i class="indicator" :style="[{ 'left': `calc(${curHeaderTypeIndex} * 100% / ${summarizings.length} + (100% / ${summarizings.length} - 1rem) / 2)` }]"></i>
       </div>
       <div class="header-data-is-loading" v-show="headerIsLoading">
         <div class="loadster" :style="{ 'transform': 'scale(0.2, 0.2)' }">
@@ -54,13 +79,9 @@
         <span class="loading-tip">正在加载中...</span>
       </div>
     </div>
-    <div class="online-count-wrap">
-        <span>在线销售人员</span>
-        <span class="online-count">~</span>
-        <span>人</span>
-        <span>&nbsp;&nbsp;&nbsp;&nbsp;销售代表</span>
-        <span class="online-count">~</span>
-        <span>人</span>
+    <div class="header-date-data-des" :style="headerIsLoading ? { 'max-height': '0' } : {}">
+      <chart class="mlv-chart" :options="mlvChartOpt" :auto-resize="true"></chart>
+      <chart class="gejx-chart" :options="grjxChartOpt" :auto-resize="true"></chart>
     </div>
     <div class="sell-chart-wrap">
       <div class="sell-tab-wrap" ref="sell-tab-wrap" :style="isFixed ? { 'position': 'fixed', 'top': '0px', 'left': '0px', 'background': 'rgba(255, 255, 255, 1)' } : {}">
@@ -80,12 +101,13 @@
 
 <script>
 export default {
-  name: 'HomeBoss',
+  name: 'CompanyPerformance',
   data () {
     return {
-      defaultUserHead: require('@/assets/default-head.png'),
       headerIsLoading: true,
       curHeaderDateTabType: null,
+      curSeeUserIndex: 0,
+      seeingUser: {},
       headerDateTabTransXMax: 0,
       headerDateTabTransXCeilWidth: 0,
       headerTouchStartTransX: null,
@@ -95,13 +117,16 @@ export default {
       headerTabToggle: 0,
       moveDistance: 0,
       curHeaderSearchDate: null,
-      curHeaderTypeIndex: 0,
+      userTabTransXCurPage: 0,
+      userTabTransXPageWidth: 0,
+      userTabTransXCeilWidth: 0,
       reg: /[-?\d.]+/g,
       isFixed: false,
-      sellTabWrapScrollTop: 23 * 16,
+      sellTabWrapScrollTop: 60 * 16,
       sellTabWrapHeight: 3.9 * 16 + 'px',
-      userName: '大昌集团',
-      userLevel: '金牌销售',
+      userHead: require('@/assets/default-head.png'),
+      userName: '集团各厂销售业绩',
+      userTabs: [],
       dateTabs: [
         {
           id: 'day',
@@ -123,47 +148,57 @@ export default {
       dateEvery: [],
       summarizings: [
         {
-          title: '整车销售',
-          unit: '台'
+          progress: 10,
+          title: '整车',
+          num: 15,
+          des: '销售（台）'
         },
         {
+          progress: 23,
           title: '汽车用品',
-          des: '万元'
+          num: 37,
+          des: '销售额（万元）'
         },
         {
+          progress: 46,
           title: '金融',
-          des: '单'
+          num: 8,
+          des: '信贷量（单）'
         },
         {
+          progress: 80,
           title: '保险',
-          des: '单'
+          num: 10,
+          des: '投保量（单）'
         },
         {
+          progress: 100,
           title: '二手车',
-          des: '台'
+          num: 7,
+          des: '销售（台）'
         }
       ],
-      policyChartOpt: {
+      mlvChartOpt: {
         title: {
-          text: '{money|1230}\t\t{unit|台}\n整车销售',
+          text: '{money|1230}\t\t{unit|万}\n综合毛利',
           left: 'center',
-          top: '34%',
+          top: '42%',
           textStyle: {
-            color: '#73a7e3',
+            color: '#4D4D4D',
             fontSize: 13,
             align: 'center',
             lineHeight: 20,
             fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
             rich: {
               money: {
-                color: '#ffffff',
+                color: '#ff721f',
                 fontSize: 20,
                 fontWeight: 'bold',
                 verticalAlign: 'bottom',
                 fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
               },
               unit: {
-                color: '#ffffff',
+                color: '#ff721f',
                 fontSize: 8,
                 fontWeight: 'bold',
                 verticalAlign: 'bottom',
@@ -179,12 +214,12 @@ export default {
         },
         series: [
           {
-            name: '整车销售',
+            name: '毛利占比率',
             type: 'pie',
-            radius: ['100%', '72%'],
+            radius: ['44%', '30%'],
             label: {
               normal: {
-                show: false,
+                show: true,
                 position: 'outside',
                 formatter: [
                   '{rate|{d}}\t\t{rateTip|%}',
@@ -192,7 +227,114 @@ export default {
                   '{b}'
                 ].join('\n'),
                 lineHeight: 10,
-                fontSize: 10,
+                fontSize: 8,
+                color: '#4D4D4D',
+                fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
+                rich: {
+                  rate: {
+                    fontSize: 16,
+                    color: '#003B8D',
+                    fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
+                    verticalAlign: 'bottom',
+                    fontWeight: 'bold'
+                  },
+                  rateTip: {
+                    fontSize: 12,
+                    color: '#003B8D',
+                    fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
+                    verticalAlign: 'bottom'
+                  }
+                }
+              }
+            },
+            labelLine: {
+              normal: {
+                show: true,
+                length: 40,
+                length2: 20,
+                smooth: true
+              }
+            },
+            data: [
+              {
+                value: 335,
+                name: '整车销售'
+              },
+              {
+                value: 20,
+                name: '整车'
+              },
+              {
+                value: 60,
+                name: '保险'
+              },
+              {
+                value: 335,
+                name: '二手车'
+              },
+              {
+                value: 335,
+                name: '金融'
+              },
+              {
+                value: 335,
+                name: '汽车用品'
+              }
+            ]
+          }
+        ],
+        animationDuration: 2000
+      },
+      grjxChartOpt: {
+        title: {
+          text: '{money|30}\t\t{unit|万}\n个人绩效',
+          left: 'center',
+          top: '42%',
+          textStyle: {
+            color: '#4D4D4D',
+            fontSize: 13,
+            align: 'center',
+            lineHeight: 20,
+            fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
+            rich: {
+              money: {
+                color: '#ff721f',
+                fontSize: 20,
+                fontWeight: 'bold',
+                verticalAlign: 'bottom',
+                fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
+              },
+              unit: {
+                color: '#ff721f',
+                fontSize: 8,
+                fontWeight: 'bold',
+                verticalAlign: 'bottom',
+                fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
+              }
+            }
+          }
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b}: {c} 万元 ({d}%)',
+          backgroundColor: 'rgba(80, 30, 30, .8)'
+        },
+        series: [
+          {
+            name: '个人绩效',
+            type: 'pie',
+            radius: ['44%', '30%'],
+            label: {
+              normal: {
+                show: true,
+                position: 'outside',
+                formatter: [
+                  '{rate|{d}}\t\t{rateTip|%}',
+                  '{c} 万元',
+                  '{b}'
+                ].join('\n'),
+                lineHeight: 10,
+                fontSize: 8,
                 color: '#4D4D4D',
                 fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
                 rich: {
@@ -397,11 +539,52 @@ export default {
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
+    this.userTabTransXPageWidth = document.body.clientWidth - 1.6 * 16 - 3.2 * 16
+    this.userTabTransXCeilWidth = (document.body.clientWidth - 1.6 * 16 - 3.2 * 16) / 6
     this.resetDateEvery(this.dateTabs[0].id)
+
+    this.userTabs = [
+      {
+        userId: '',
+        head: '',
+        name: '一厂'
+      },
+      {
+        userId: '',
+        head: '',
+        name: '二厂'
+      },
+      {
+        userId: '',
+        head: '',
+        name: '三厂'
+      },
+      {
+        userId: '',
+        head: '',
+        name: '四厂'
+      },
+      {
+        userId: '',
+        head: '',
+        name: '五厂'
+      },
+      {
+        userId: '',
+        head: '',
+        name: '六厂'
+      },
+      {
+        userId: '',
+        head: '',
+        name: '七厂'
+      }
+    ]
+    this.seeingUser = this.userTabs[0]
   },
   methods: {
     scrollPage () {
-      var pageScrollTop = document.querySelector('#page-home-boss').scrollTop
+      var pageScrollTop = document.querySelector('#page-company-performance').scrollTop
       if (pageScrollTop > this.sellTabWrapScrollTop) {
         this.isFixed = true
       } else {
@@ -798,10 +981,41 @@ export default {
     searchHeaderData () {
       // this.curHeaderSearchDate
     },
-    arrowHeader (direction, flag) {
+    arrowUsers (direction, flag) {
       if (flag) {
-        this.curHeaderTypeIndex += direction
+        this.curSeeUserIndex += direction
+        // if (direction > 0) {
+        //   if (this.userTabs.length) {
+        //   }
+        //   this.userTabTransXCurPage += 1
+        // }
+        if (direction > 0) {
+          let usersCurTransX = Number(this.$refs['user-tab-rail'].style.transform.match(this.reg)[0])
+          let usersToTransX = usersCurTransX - this.userTabTransXPageWidth
+          if (this.userTabTransXCeilWidth * this.userTabs.length > this.userTabTransXPageWidth) {
+            if (usersToTransX < -(this.userTabTransXCeilWidth * this.userTabs.length - this.userTabTransXPageWidth)) {
+              usersToTransX = -(this.userTabTransXCeilWidth * this.userTabs.length - this.userTabTransXPageWidth)
+            }
+          } else {
+            if (usersToTransX < 0) {
+              usersToTransX = 0
+            }
+          }
+          this.$refs['user-tab-rail'].style.transform = `translateX(${usersToTransX}px)`
+        } else {
+          let usersCurTransX = Number(this.$refs['user-tab-rail'].style.transform.match(this.reg)[0])
+          let usersToTransX = usersCurTransX + this.userTabTransXPageWidth
+          if (usersToTransX > 0) {
+            usersToTransX = 0
+          }
+          this.$refs['user-tab-rail'].style.transform = `translateX(${usersToTransX}px)`
+        }
       }
+    },
+    seeThisUser (userTab, index) {
+      event.target.parentNode.getElementsByClassName('cur')[0].classList.remove('cur')
+      event.target.classList.add('cur')
+      this.seeingUser = userTab
     }
   }
 }
@@ -836,6 +1050,118 @@ export default {
       display: inline-block;
       font-size: 1rem;
       vertical-align: bottom;
+    }
+    .seeing-user-name {
+      position: relative;
+      margin-top: 0.3rem;
+      font-size: 0.7rem;
+      span.see-user-name {
+        margin-left: 0.4rem;
+        color: #1FFF98;
+      }
+    }
+  }
+  .user-tab-wrap {
+    position: relative;
+    .left-arrow {
+      position: absolute;
+      font-size: 1.4rem;
+      width: 2rem;
+      height: 8rem;
+      line-height: 8rem;
+      top: -2rem;
+      left: 0;
+      z-index: 9;
+      color: #73a7e3;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .right-arrow {
+      position: absolute;
+      font-size: 1.4rem;
+      width: 2rem;
+      height: 8rem;
+      line-height: 8rem;
+      top: -2rem;
+      right: 0;
+      z-index: 9;
+      color: #73a7e3;
+      text-align: right;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .arrow-bound {
+      color: rgba(115, 167, 227, .3);
+    }
+    .user-info-wrap {
+      position: relative;
+      height: 4.8rem;
+      margin-top: 1.8rem;
+      left: 1.6rem;
+      right: 1.6rem;
+      width: calc(100% - 3.2rem);
+      overflow: hidden;
+      .user-tab-rail {
+        position: relative;
+        height: 4.2rem;
+        white-space: nowrap;
+        overflow-x: visible;
+        transition: all 0.2s ease 0s;
+        span.user-info-item {
+          position: relative;
+          display: inline-block;
+          text-align: center;
+          i.user-head {
+            position: relative;
+            top: 0;
+            left: 0;
+            margin: 0 auto;
+            display: block;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: auto 100%;
+            pointer-events: none;
+          }
+          i.user-head::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            bottom: -2px;
+            right: -2px;
+            border-radius: 50%;
+            background-color: rgba(30, 30, 30, 0.3);
+            pointer-events: none;
+            transition: all 0.4s ease 0s;
+          }
+          span.user-name {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            font-size: 0.6rem;
+            color: #438cdf;
+            margin-top: 0.6rem;
+            pointer-events: none;
+            transition: all 0.4s ease 0s;
+          }
+        }
+        span.cur {
+          i.user-head {
+            width: 2.5rem;
+            height: 2.5rem;
+          }
+          i.user-head::after {
+            background-color: rgba(0, 0, 0, 0);
+          }
+          span.user-name {
+            color: #ffffff;
+          }
+        }
+      }
     }
   }
   .head-tab-wrap {
@@ -906,59 +1232,146 @@ export default {
     position: relative;
     padding: 0rem 0 2.4rem;
     height: 8.4rem;
-    .statistics-content {
+    pointer-events: none;
+    div.progress-wrap {
       position: absolute;
-      height: 100%;
-      width: calc(100% - 8rem);
-      right: 4rem;
-      top: 0rem;
-      pointer-events: none;
+      top: 0.6rem;
+      border-radius: 50%;
+      border: 1px solid rgb(78, 146, 223);
+      color: #ffffff;
+      font-size: 0px;
       overflow: hidden;
+      z-index: 1;
+      .wrapper {
+        position: absolute;
+        top: 0;
+        overflow: hidden;
+        z-index: 1;
+        .circle-progress {
+          position: absolute;
+          border-radius: 50%;
+          top: -1px;
+          overflow: hidden;
+          border: 4px solid transparent;
+        }
+        .rightcircle {
+          border-top: 4px solid #1FFF98;
+          border-right: 4px solid #1FFF98;
+          right: -1px;
+        }
+        .leftcircle {
+          border-bottom: 4px solid #1FFF98;
+          border-left: 4px solid #1FFF98;
+          left: -1px;
+        }
+      }
+      .right {
+        right: 0;
+      }
+      .left {
+        left: 0;
+      }
+      .progress-val {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        z-index: 9;
+        font-weight: bold;
+        color: #3AB9FF;
+        z-index: 99;
+      }
+      .water-wrap {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        width: calc(100% - 8px);
+        height: calc(100% - 8px);
+        border-radius: 50%;
+        overflow: hidden;
+        z-index: 5;
+        .water-wave {
+          position: absolute;
+          bottom: -120%;
+          left: 0px;
+          width: 100%;
+          height: 100%;
+          border-radius: 38% 42%;
+          z-index: 5;
+          background: rgba(6, 139, 213, 0.781);
+          box-shadow: 0 0 10px rgba(93, 62, 129, 0.4);
+          transition: bottom 0.4s ease 0s;
+          transform-origin: 50% 50%;
+          animation: spin 16s infinite linear;
+        }
+        .water-wave::before {
+          content: '';
+          position: absolute;
+          bottom: 20%;
+          left: 0px;
+          width: 100%;
+          height: 100%;
+          border-radius: 60% 38%;
+          z-index: 5;
+          background: rgba(6, 139, 213, 0.568);
+          box-shadow: 0 0 10px rgba(122, 132, 219, 0.3);
+          transform-origin: 49% 51%;
+          animation: spin 13s infinite linear;
+        }
+        .water-wave::after {
+          content: '';
+          position: absolute;
+          bottom: 10%;
+          left: 0px;
+          width: 110%;
+          height: 110%;
+          border-radius: 40% 49%;
+          z-index: 5;
+          background: rgba(6, 139, 213, 0.568);
+          box-shadow: 0 0 10px rgba(55, 111, 231, 0.4);
+          transform-origin: 51% 49%;
+          animation: spin 10s infinite linear;
+        }
+      }
     }
-  }
-  .header-arrow {
-    position: absolute;
-    font-size: 2.4rem;
-    width: 3.6rem;
-    height: 8rem;
-    line-height: 8rem;
-    top: 8.6rem;
-    color: #73a7e3;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .left-arrow {
-    left: 1.2rem;
-    text-align: left;
-  }
-  .right-arrow {
-    right: 1.2rem;
-    text-align: right;
-  }
-  .arrow-bound {
-    color: rgba(115, 167, 227, .3);
-  }
-  .header-indicator {
-    position: absolute;
-    left: 0.8rem;
-    right: 0.8rem;
-    bottom: 1.4rem;
-    .header-item {
-      position: relative;
-      display: inline-block;
-      text-align: center;
-      color: #73a7e3;
-    }
-    .indicator {
+    div.progress-des-wrap {
       position: absolute;
-      width: 1rem;
-      height: 4px;
-      border-radius: 4px;
-      background-color: rgba(115, 167, 227, 0.6);
-      bottom: -0.6rem;
-      left: 0;
-      transition: all 0.4s ease 0s;
+      top: 5.4rem;
+      color: #ffffff;
+      font-size: 0.8rem;
+      overflow: hidden;
+      z-index: 1;
+      text-align: center;
+      span {
+        position: relative;
+        display: block;
+        white-space: nowrap;
+      }
+      span.num {
+        font-weight: bold;
+        font-size: 1.4rem;
+        margin: 0.8rem 0 0.4rem;
+      }
+      span.des {
+        color: #73a7e3;
+        font-size: 0.6rem;
+        transform: scale(0.8);
+      }
     }
+  }
+  .summarizing-wrap::after {
+    content: '';
+    position: absolute;
+    bottom: -2.4rem;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 2rem;
+    height: 2rem;
+    transform: rotate(45deg);
+    background-color: #F5F5F5;
   }
   .header-data-is-loading {
     height: 11.64rem;
@@ -991,25 +1404,24 @@ export default {
       font-size: 0.8rem;
       height: 4rem;
       line-height: 4rem;
-      top: 11rem;
+      top: 18.6rem;
     }
   }
 }
-.policy-chart {
-  background-color: transparent;
-  width: 100% !important;
-  height: 8rem;
-  padding: 0;
-}
-.online-count-wrap {
+.header-date-data-des {
   position: relative;
-  font-size: 0.84rem;
-  padding: 1rem 0.8rem;
+  transition: all 0.6s ease 0s;
+  max-height: 32rem;
+  overflow: hidden;
+}
+.mlv-chart {
   background-color: #F5F5F5;
-  .online-count {
-    margin: 0 0.2rem;
-    color: #ff721f;
-  }
+  height: 16rem;
+}
+.gejx-chart {
+  background-color: #F5F5F5;
+  height: 16rem;
+  margin-top: -3rem;
 }
 .sell-chart-wrap {
   background-color: rgb(255, 255, 255);

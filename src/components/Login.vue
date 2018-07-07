@@ -30,16 +30,15 @@ export default {
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'none'
-    this.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
-      if (loginInfo) {
-        if (Date.now() - loginInfo.loginDate.getTime() < 1 * 24 * 60 * 60 * 1000) {
-          this.userPhone = loginInfo.user.phone
-          // this.userPwd = loginInfo.user.password || ''
-        } else {
-          this.$moment.localforage.removeItem('userLoginInfo')
-        }
+    if (this.$moment.userInfo.loginDate) {
+      if (Date.now() - this.$moment.userInfo.loginDate.getTime() < 1 * 24 * 60 * 60 * 1000) {
+        this.userPhone = this.$moment.userInfo.user.phone
+        // this.userPwd = this.$moment.userInfo.user.password || ''
+      } else {
+        this.$moment.localforage.removeItem('userLoginInfo')
+        this.$moment.userInfo = {}
       }
-    })
+    }
   },
   methods: {
     login () {
@@ -67,18 +66,19 @@ export default {
             loginDate: new Date(),
             basedate: new Date(response.body.basedate),
             user: response.body.user
+          }).then(() => {
+            if (Number(response.body.user.grade) === 1) { // 个人
+              this.$router.replace('/home')
+            } else if (Number(response.body.user.grade) === 2) { // 公司
+              this.$router.replace('/home-manager')
+            } else if (Number(response.body.user.grade) === 3) { // 集团
+              this.$router.replace('/home-boss')
+            } else {
+              this.$dialog_msg({
+                msg: '无效的登陆权限'
+              })
+            }
           })
-          if (Number(response.body.user.grade) === 1) { // 个人
-            this.$router.replace('/home')
-          } else if (Number(response.body.user.grade) === 2) { // 公司
-            this.$router.replace('/home-manager')
-          } else if (Number(response.body.user.grade) === 3) { // 集团
-            this.$router.replace('/home')
-          } else {
-            this.$dialog_msg({
-              msg: '无效的登陆权限'
-            })
-          }
         } else {
           this.$dialog_msg({
             msg: '登陆失败'

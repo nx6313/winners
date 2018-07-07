@@ -124,9 +124,8 @@ export default {
       isFixed: false,
       sellTabWrapScrollTop: 60 * 16,
       sellTabWrapHeight: 3.9 * 16 + 'px',
-      userHead: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1060129963,1724829206&fm=27&gp=0.jpg',
+      userHead: require('@/assets/default-head.png'),
       userName: '销售业绩',
-      userLevel: '金牌销售',
       userTabs: [],
       dateTabs: [
         {
@@ -1040,7 +1039,7 @@ export default {
     border: 2px solid #ffffff;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 100% auto;
+    background-size: auto 100%;
   }
   .user-name-wrap {
     position: relative;
@@ -1124,7 +1123,7 @@ export default {
             border: 2px solid #ffffff;
             background-repeat: no-repeat;
             background-position: center;
-            background-size: 100% auto;
+            background-size: auto 100%;
             pointer-events: none;
           }
           i.user-head::after {

@@ -1,7 +1,9 @@
 <template>
   <div v-if="isShow" id="dialog-msg-wrap" class="dialog-msg-wrap">
     <div class="msg-shade animated fadeIn" @click="closeMsg"></div>
-    <div class="msg-content animated bounceIn">{{msg}}</div>
+    <div class="msg-content animated fadeIn" ref="msg-content">
+      <div>{{msg}}</div>
+    </div>
   </div>
 </template>
 
@@ -40,7 +42,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .msg-shade {
   position: fixed;
   top: 0;
@@ -58,17 +60,21 @@ export default {
 .msg-content {
   position: fixed;
   top: calc((100% - 2rem) / 2);
-  left: calc((100% - 10rem) / 2);
-  width: 10rem;
+  width: 100%;
+  text-align: center;
   height: 2rem;
   text-align: center;
   line-height: 2rem;
-  background-color: #ffffff;
-  color: #4e4e4e;
   font-size: 0.8rem;
   font-weight: bold;
-  border-radius: 3px;
   z-index: 999999;
-  box-shadow: 0 0 20px 0px rgba(131, 131, 131, 0.31);
+  div {
+    position: relative;
+    display: inline-block;
+    background-color: #474747;
+    color: #ffffff;
+    border-radius: 3px;
+    padding: 0 0.8rem;
+  }
 }
 </style>

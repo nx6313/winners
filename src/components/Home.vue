@@ -1,7 +1,7 @@
 <template>
   <div id="page-home" class="page-home" @scroll="scrollPage">
     <div class="page-header-wrap">
-      <span class="user-head" :style="{ 'background-image': `url(${userHead})` }"></span>
+      <span class="user-head" :style="{ 'background-image': `url(${defaultUserHead})` }"></span>
       <div class="user-name-wrap">
         <span class="user-name">{{userName}}</span>
         <div class="level-wrap">
@@ -93,6 +93,7 @@ export default {
   name: 'Home',
   data () {
     return {
+      defaultUserHead: require('@/assets/default-head.png'),
       starCount: 5,
       userLevel: 3,
       headerIsLoading: true,
@@ -111,7 +112,6 @@ export default {
       isFixed: false,
       sellTabWrapScrollTop: 52.2 * 16,
       sellTabWrapHeight: 3.9 * 16 + 'px',
-      userHead: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1060129963,1724829206&fm=27&gp=0.jpg',
       userName: '~',
       dateTabs: [
         {
@@ -667,40 +667,36 @@ export default {
       this.resetDateEvery(dateType)
     },
     resetDateEvery (curDateType) {
-      this.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
-        if (loginInfo) {
-          this.curHeaderDateTabType = curDateType
-          this.dateEvery.splice(0, this.dateEvery.length)
-          switch (curDateType) {
-            case 'day':
-              this.getDateSection(this.$comfun.formatDate(loginInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M/d')
-              break
-            case 'week':
-              this.getDateSection(this.$comfun.formatDate(loginInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M/d')
-              break
-            case 'month':
-              this.getDateSection(this.$comfun.formatDate(loginInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M')
-              break
-            case 'year':
-              this.getDateSection(this.$comfun.formatDate(loginInfo.basedate, 'yyyy/MM/dd'), curDateType, 'yyyy')
-              break
-          }
-          this.dateEveryRailTrans = -document.body.clientWidth
-          this.$nextTick().then(() => {
-            setTimeout(() => {
-              this.curHeaderSearchDate = this.dateEvery[this.dateEvery.length - 1]
-              this.searchHeaderData()
-              var dateEveryRail = this.$refs['date-every-rail']
-              if (dateEveryRail) {
-                this.dateEveryRailTrans = ((document.body.clientWidth - 1.6 * 16 - 1.2 * 16) / 5) * 3 - dateEveryRail.clientWidth
-                this.headerDateTabTransXMax = ((document.body.clientWidth - 1.6 * 16 - 1.2 * 16) / 5) * 3 - dateEveryRail.clientWidth
+      this.curHeaderDateTabType = curDateType
+      this.dateEvery.splice(0, this.dateEvery.length)
+      switch (curDateType) {
+        case 'day':
+          this.getDateSection(this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M/d')
+          break
+        case 'week':
+          this.getDateSection(this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M/d')
+          break
+        case 'month':
+          this.getDateSection(this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M')
+          break
+        case 'year':
+          this.getDateSection(this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy/MM/dd'), curDateType, 'yyyy')
+          break
+      }
+      this.dateEveryRailTrans = -document.body.clientWidth
+      this.$nextTick().then(() => {
+        setTimeout(() => {
+          this.curHeaderSearchDate = this.dateEvery[this.dateEvery.length - 1]
+          this.searchHeaderData()
+          var dateEveryRail = this.$refs['date-every-rail']
+          if (dateEveryRail) {
+            this.dateEveryRailTrans = ((document.body.clientWidth - 1.6 * 16 - 1.2 * 16) / 5) * 3 - dateEveryRail.clientWidth
+            this.headerDateTabTransXMax = ((document.body.clientWidth - 1.6 * 16 - 1.2 * 16) / 5) * 3 - dateEveryRail.clientWidth
 
-                this.headerDateTabTransXCeilWidth = dateEveryRail.getElementsByClassName('cur')[0].clientWidth
-              }
-              this.headerIsLoading = false
-            }, 1000)
-          })
-        }
+            this.headerDateTabTransXCeilWidth = dateEveryRail.getElementsByClassName('cur')[0].clientWidth
+          }
+          this.headerIsLoading = false
+        }, 1000)
       })
     },
     getDateSection (min, type, format) {
@@ -1394,7 +1390,7 @@ export default {
     border: 2px solid #ffffff;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 100% auto;
+    background-size: auto 100%;
   }
   .user-name-wrap {
     position: relative;

@@ -24,6 +24,8 @@ import HomeBoss from '@/components/HomeBoss'
 import SalePerformance from '@/components/SalePerformance'
 import SaleList from '@/components/SaleList'
 import Me from '@/components/Me'
+import CompanyPerformance from '@/components/CompanyPerformance'
+import UserList from '@/components/UserList'
 
 Vue.use(Router)
 Vue.use(VueResource)
@@ -69,22 +71,63 @@ var router = new Router({
     {
       path: '/sale-list',
       name: 'SaleList',
-      component: SaleList
+      component: SaleList,
+      meta: {
+        title: '龙虎榜'
+      }
     },
     {
       path: '/me',
       name: 'Me',
       component: Me
+    },
+    {
+      path: '/company-performance',
+      name: 'CompanyPerformance',
+      component: CompanyPerformance
+    },
+    {
+      path: '/user-list',
+      name: 'UserList',
+      component: UserList,
+      meta: {
+        title: '通讯录'
+      }
     }
   ]
 })
-router.beforeEach(function (to, from, next) {
+router.beforeEach((to, from, next) => {
   if (to.meta.title) {
     document.title = to.meta.title
   } else {
     document.title = document.querySelector('meta[name="web-describe"]').getAttribute('content')
   }
-  next()
+  this.a.app.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
+    if (loginInfo) {
+      this.a.app.$moment.userInfo = loginInfo
+      if (to.path !== '/') {
+        this.a.app.$root.eventHub.$emit('init-menu')
+      } else {
+        this.a.app.$root.eventHub.$emit('clear-menu')
+      }
+      next()
+      if (to.path !== '/') {
+        this.a.app.$root.eventHub.$emit('ref-menu')
+      } else {
+        this.a.app.$root.eventHub.$emit('clear-menu')
+      }
+    } else {
+      this.a.app.$root.eventHub.$emit('clear-menu')
+      if (to.path !== '/') {
+        this.a.app.$dialog_msg({
+          msg: '登陆信息失效'
+        })
+        next('/')
+      } else {
+        next()
+      }
+    }
+  })
 })
 
 export default router

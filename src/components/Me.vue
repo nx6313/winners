@@ -26,7 +26,7 @@ export default {
   data () {
     return {
       starCount: 5,
-      defaultUserHead: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1060129963,1724829206&fm=27&gp=0.jpg',
+      defaultUserHead: require('@/assets/default-head.png'),
       userInfo: {},
       userLevel: 3,
       userInfos: []
@@ -34,19 +34,19 @@ export default {
   },
   mounted () {
     this.$set(this.userInfo, 'userHead', '')
-    this.$set(this.userInfo, 'userName', '刘德华')
+    this.$set(this.userInfo, 'userName', this.$moment.userInfo.user.name)
     this.userInfos = [
       {
         title: '公司',
-        content: '大昌集团13厂'
+        content: this.$moment.userInfo.user.companyName || '未设置'
       },
       {
         title: '职务',
-        content: '销售经理'
+        content: this.$moment.userInfo.user.dutyName || '未设置'
       },
       {
         title: '电话',
-        content: '13000000000'
+        content: this.$moment.userInfo.user.phone || '未设置'
       }
     ]
     document.querySelector('#app-footer').style.display = 'flex'
@@ -77,7 +77,7 @@ export default {
     border: 2px solid #f0f0f0;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 100% auto;
+    background-size: auto 100%;
     z-index: 9;
   }
   .user-head::after {

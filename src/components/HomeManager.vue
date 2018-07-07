@@ -1,7 +1,7 @@
 <template>
   <div id="page-home-manager" class="page-home-manager" @scroll="scrollPage">
     <div class="page-header-wrap">
-      <span class="user-head" :style="{ 'background-image': `url(${userHead})` }"></span>
+      <span class="user-head" :style="{ 'background-image': `url(${defaultUserHead})` }"></span>
       <div class="user-name-wrap flex-r flex-b">
         <span class="user-name">{{userName}}</span>
         <div class="online-count-wrap">
@@ -80,6 +80,7 @@ export default {
   name: 'HomeManager',
   data () {
     return {
+      defaultUserHead: require('@/assets/default-head.png'),
       headerIsLoading: true,
       curHeaderDateTabType: null,
       headerDateTabTransXMax: 0,
@@ -96,7 +97,6 @@ export default {
       isFixed: false,
       sellTabWrapScrollTop: 52.2 * 16,
       sellTabWrapHeight: 3.9 * 16 + 'px',
-      userHead: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1060129963,1724829206&fm=27&gp=0.jpg',
       userName: '刘德华',
       userLevel: '金牌销售',
       dateTabs: [
@@ -822,7 +822,7 @@ export default {
     border: 2px solid #ffffff;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 100% auto;
+    background-size: auto 100%;
   }
   .user-name-wrap {
     position: relative;

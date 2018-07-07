@@ -19,8 +19,10 @@
           </div>
         </div>
         <div class="line-two flex-r flex-b">
-          <span>{{userSaleInfo.factory}}</span>
-          <span class="duty">{{userSaleInfo.duty}}</span>
+          <div>
+            <span>{{userSaleInfo.factory}}</span>
+            <span class="duty">{{userSaleInfo.duty}}</span>
+          </div>
           <span class="up-dowm">
             <i :class="['iconfont', userSaleInfo.up >= 0 ? ['icon-shang', 'up'] : ['icon-xia', 'down']]"></i>
             <span v-if="userSaleInfo.up >= 0">上升 {{userSaleInfo.up}} 名</span>
@@ -53,8 +55,10 @@
             </div>
           </div>
           <div class="line-two flex-r flex-b">
-            <span>{{sale.factory}}</span>
-            <span class="duty">{{sale.duty}}</span>
+            <div>
+              <span>{{sale.factory}}</span>
+              <span class="duty">{{sale.duty}}</span>
+            </div>
             <span class="up-dowm">
               <i :class="['iconfont', sale.up >= 0 ? ['icon-shang', 'up'] : ['icon-xia', 'down']]"></i>
               <span v-if="sale.up >= 0">上升 {{sale.up}} 名</span>
@@ -74,7 +78,7 @@ export default {
     return {
       curTabType: 'newcar',
       curDateTabType: 'week',
-      defaultUserHead: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=1060129963,1724829206&fm=27&gp=0.jpg',
+      defaultUserHead: require('@/assets/default-head.png'),
       tabs: [
         {
           id: 'newcar',
@@ -118,97 +122,58 @@ export default {
       userSaleInfo: {
         ranking: 0,
         userHead: '',
-        userName: '',
-        saleNum: '',
-        saleUnit: '',
-        factory: '',
-        duty: ''
+        userName: '~',
+        saleNum: '~',
+        saleUnit: '~',
+        factory: '~',
+        duty: '~'
       },
-      saleList: [
-        {
-          userHead: '',
-          userName: '张三丰',
-          saleNum: '18',
-          saleUnit: '台',
-          factory: '七厂',
-          duty: '销售顾问',
-          up: 8
-        },
-        {
-          userHead: '',
-          userName: '张三丰',
-          saleNum: '18',
-          saleUnit: '台',
-          factory: '七厂',
-          duty: '销售顾问',
-          up: 8
-        },
-        {
-          userHead: '',
-          userName: '张三丰',
-          saleNum: '18',
-          saleUnit: '台',
-          factory: '七厂',
-          duty: '销售顾问',
-          up: 8
-        },
-        {
-          userHead: '',
-          userName: '张三丰',
-          saleNum: '18',
-          saleUnit: '台',
-          factory: '七厂',
-          duty: '销售顾问',
-          up: 8
-        },
-        {
-          userHead: '',
-          userName: '张三丰',
-          saleNum: '18',
-          saleUnit: '台',
-          factory: '七厂',
-          duty: '销售顾问',
-          up: -10
-        },
-        {
-          userHead: '',
-          userName: '张三丰',
-          saleNum: '18',
-          saleUnit: '台',
-          factory: '七厂',
-          duty: '销售顾问',
-          up: 8
-        }
-      ]
+      saleList: []
     }
   },
   mounted () {
-    this.$set(this.userSaleInfo, 'ranking', 2)
-    this.$set(this.userSaleInfo, 'userHead', '')
-    this.$set(this.userSaleInfo, 'userName', '张三丰')
-    this.$set(this.userSaleInfo, 'saleNum', 16)
-    this.$set(this.userSaleInfo, 'saleUnit', '台')
-    this.$set(this.userSaleInfo, 'factory', '六厂')
-    this.$set(this.userSaleInfo, 'duty', '销售顾问')
-    this.$set(this.userSaleInfo, 'up', 2)
     document.querySelector('#app-footer').style.display = 'flex'
     this.getOrderList()
   },
   methods: {
     getOrderList () {
-      this.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
-        if (loginInfo) {
-          var startDate = '2018-07-01'
-          var endDate = '2018-07-06'
-          var startOldDate = '2018-06-24'
-          var endOldDate = '2018-06-30'
-          this.$comfun.http_post(this, this.curTabType + `/order/${loginInfo.user.id}`, {
-            startDate: startDate,
-            endDate: endDate,
-            startOldDate: startOldDate,
-            endOldDate: endOldDate,
-            start: 0,
-            limit: 10
+      var startDate = '2018-07-01'
+      var endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      var startOldDate = '2018-06-24'
+      var endOldDate = '2018-06-30'
+      this.$comfun.http_post(this, this.curTabType + `/order/${this.$moment.userInfo.user.id}`, {
+        startDate: startDate,
+        endDate: endDate,
+        startOldDate: startOldDate,
+        endOldDate: endOldDate,
+        start: 0,
+        limit: 10
+      }).then((response) => {
+        if (response.body.success === '1') {
+          this.$set(this.userSaleInfo, 'ranking', response.body.user.rank)
+          this.$set(this.userSaleInfo, 'userHead', '')
+          this.$set(this.userSaleInfo, 'userName', response.body.user.name)
+          this.$set(this.userSaleInfo, 'saleNum', response.body.user.num)
+          this.$set(this.userSaleInfo, 'saleUnit', '台')
+          this.$set(this.userSaleInfo, 'factory', response.body.user.companyName)
+          this.$set(this.userSaleInfo, 'duty', response.body.user.dutyName)
+          this.$set(this.userSaleInfo, 'up', !response.body.user.oldRank || response.body.user.oldRank === 0 ? 0 : response.body.user.oldRank - response.body.user.rank)
+
+          this.saleList = []
+          for (let s = 0; s < response.body[this.curTabType].length; s++) {
+            this.saleList.push({
+              userHead: '',
+              userName: response.body[this.curTabType][s].name,
+              saleNum: response.body[this.curTabType][s].num,
+              saleUnit: '台',
+              factory: response.body[this.curTabType][s].companyName,
+              duty: response.body[this.curTabType][s].dutyName,
+              up: !response.body[this.curTabType][s].oldRank || response.body[this.curTabType][s].oldRank === 0 ? 0 : response.body[this.curTabType][s].oldRank - response.body[this.curTabType][s].rank
+            })
+          }
+        } else {
+          this.$dialog_msg({
+            msg: '获取排名数据失败'
           })
         }
       })
@@ -304,15 +269,15 @@ export default {
       border: 2px solid #e2e2e2;
       background-repeat: no-repeat;
       background-position: center;
-      background-size: 100% auto;
+      background-size: auto 100%;
     }
     .user-info-wrap {
       position: absolute;
       top: 1.6rem;
-      left: 8.2rem;
+      left: 8.8rem;
       div.line-first {
         position: relative;
-        width: calc(100vw - 9rem);
+        width: calc(100vw - 9.6rem);
         span.user-name {
           position: relative;
           font-size: 1rem;
@@ -334,14 +299,21 @@ export default {
         position: relative;
         margin-top: 1rem;
         font-size: 0.8rem;
-        span {
-          color: #3b3b3b;
-        }
-        span.duty {
-          position: absolute;
-          display: inline-block;
-          top: 0;
-          left: 3.6rem;
+        div {
+          position: relative;
+          top: -0.6rem;
+          span {
+            position: relative;
+            color: #3b3b3b;
+          }
+          span.duty {
+            position: absolute;
+            display: inline-block;
+            width: 8rem;
+            top: 1.2rem;
+            left: 0;
+            color: #727272;
+          }
         }
         span.up-dowm {
           position: relative;

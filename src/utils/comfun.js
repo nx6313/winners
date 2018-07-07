@@ -196,6 +196,20 @@ export default {
         targetday.setTime(targetdayMilliseconds)
         return targetday
       },
+      // 获取指定周的起止日期
+      getWeekStartEnd (addWeekCount) {
+        var startEnd = []
+        var milliSecond = 1000 * 60 * 60 * 24
+        var currentDate = new Date()
+        currentDate = new Date(currentDate.getTime() + (milliSecond * 7 * addWeekCount))
+        var week = currentDate.getDay()
+        var minusDay = week !== 0 ? week - 1 : 6
+        var currentWeekFirstDay = new Date(currentDate.getTime() - (milliSecond * minusDay))
+        var currentWeekLastDay = new Date(currentWeekFirstDay.getTime() + (milliSecond * 6))
+        startEnd.push(currentWeekFirstDay)
+        startEnd.push(currentWeekLastDay)
+        return startEnd
+      },
       // 获取某月最后一天日期
       getLastDay (year, month) {
         var newYear = year

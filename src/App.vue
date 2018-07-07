@@ -12,6 +12,10 @@ export default {
   name: 'App',
   components: {
     'comm-footer': Footer
+  },
+  methods: {
+    appTouchMove () {
+    }
   }
 }
 </script>

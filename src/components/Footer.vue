@@ -17,116 +17,125 @@ export default {
       menus: []
     }
   },
-  beforeCreate () {
-    this.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
-      if (loginInfo) {
-        this.$moment.userInfo = loginInfo
-        if (Number(loginInfo.user.grade) === 1) { // 个人
-          this.menus = [
-            {
-              txt: '我的业绩',
-              path: '/home',
-              icon_normal: 'icon-lhb',
-              icon_select: 'icon-lhb1'
-            },
-            {
-              txt: '龙虎榜',
-              path: '/sale-list',
-              icon_normal: 'icon-gryj1',
-              icon_select: 'icon-gryj'
-            },
-            {
-              txt: '我的',
-              path: '/me',
-              icon_normal: 'icon-wdyj',
-              icon_select: 'icon-wdyj1'
-            }
-          ]
-        } else if (Number(loginInfo.user.grade) === 2) { // 公司
-          this.menus = [
-            {
-              txt: '智能决策',
-              path: '/home-manager',
-              icon_normal: 'icon-znjc1',
-              icon_select: 'icon-znjc'
-            },
-            {
-              txt: '销售业绩',
-              path: '/sale-performance',
-              icon_normal: 'icon-gryj1',
-              icon_select: 'icon-gryj'
-            },
-            {
-              txt: '龙虎榜',
-              path: '/sale-list',
-              icon_normal: 'icon-lhb',
-              icon_select: 'icon-lhb1'
-            }
-          ]
-        } else if (Number(loginInfo.user.grade) === 3) { // 集团
-          this.menus = [
-            {
-              txt: '智能决策',
-              path: '/home-boss',
-              icon_normal: 'icon-gryj1',
-              icon_select: 'icon-gryj'
-            },
-            {
-              txt: '公司业绩',
-              path: '/sale-list',
-              icon_normal: 'icon-gryj1',
-              icon_select: 'icon-gryj'
-            },
-            {
-              txt: '龙虎榜',
-              path: '/me',
-              icon_normal: 'icon-lhb',
-              icon_select: 'icon-lhb1'
-            },
-            {
-              txt: '通讯录',
-              path: '/me',
-              icon_normal: 'icon-txl',
-              icon_select: 'icon-txl1'
-            }
-          ]
-        }
+  mounted () {
+    this.$root.eventHub.$on('init-menu', () => {
+      if (this.menus.length === 0) {
+        this.initMenu()
       }
     })
-  },
-  mounted () {
-    // 恢复刷新引起的指示器错位
-    var curRouterPath = this.$router.currentRoute.path
-    this.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
-      if (loginInfo) {
-        if (Number(loginInfo.user.grade) === 1) { // 个人
-          if (curRouterPath.indexOf('/home') === 0) {
-            this.curMenuIndex = 0
-          } else if (curRouterPath.indexOf('/sale-list') === 0) {
-            this.curMenuIndex = 1
-          } else if (curRouterPath.indexOf('/me') === 0) {
-            this.curMenuIndex = 2
-          }
-        } else if (Number(loginInfo.user.grade) === 2) { // 公司
-          if (curRouterPath.indexOf('/home-manager') === 0) {
-            this.curMenuIndex = 0
-          } else if (curRouterPath.indexOf('/sale-performance') === 0) {
-            this.curMenuIndex = 1
-          } else if (curRouterPath.indexOf('/sale-list') === 0) {
-            this.curMenuIndex = 2
-          }
-        } else if (Number(loginInfo.user.grade) === 3) { // 集团
-          if (curRouterPath.indexOf('/home-boss') === 0) {
-            this.curMenuIndex = 0
-          }
-        }
-      }
+    this.$root.eventHub.$on('clear-menu', () => {
+      this.menus.splice(0, this.menus.length)
+    })
+    this.$root.eventHub.$on('ref-menu', () => {
+      this.resetMenuIndicator()
     })
   },
   methods: {
     toPage (path, menuIndex) {
       this.curMenuIndex = menuIndex
       this.$router.replace(path)
+    },
+    initMenu () {
+      if (Number(this.$moment.userInfo.user.grade) === 1) { // 个人
+        this.menus = [
+          {
+            txt: '我的业绩',
+            path: '/home',
+            icon_normal: 'icon-lhb',
+            icon_select: 'icon-lhb1'
+          },
+          {
+            txt: '龙虎榜',
+            path: '/sale-list',
+            icon_normal: 'icon-gryj1',
+            icon_select: 'icon-gryj'
+          },
+          {
+            txt: '我的',
+            path: '/me',
+            icon_normal: 'icon-wdyj',
+            icon_select: 'icon-wdyj1'
+          }
+        ]
+      } else if (Number(this.$moment.userInfo.user.grade) === 2) { // 公司
+        this.menus = [
+          {
+            txt: '智能决策',
+            path: '/home-manager',
+            icon_normal: 'icon-znjc1',
+            icon_select: 'icon-znjc'
+          },
+          {
+            txt: '销售业绩',
+            path: '/sale-performance',
+            icon_normal: 'icon-gryj1',
+            icon_select: 'icon-gryj'
+          },
+          {
+            txt: '龙虎榜',
+            path: '/sale-list',
+            icon_normal: 'icon-lhb',
+            icon_select: 'icon-lhb1'
+          }
+        ]
+      } else if (Number(this.$moment.userInfo.user.grade) === 3) { // 集团
+        this.menus = [
+          {
+            txt: '智能决策',
+            path: '/home-boss',
+            icon_normal: 'icon-gryj1',
+            icon_select: 'icon-gryj'
+          },
+          {
+            txt: '公司业绩',
+            path: '/company-performance',
+            icon_normal: 'icon-gryj1',
+            icon_select: 'icon-gryj'
+          },
+          {
+            txt: '龙虎榜',
+            path: '/sale-list',
+            icon_normal: 'icon-lhb',
+            icon_select: 'icon-lhb1'
+          },
+          {
+            txt: '通讯录',
+            path: '/user-list',
+            icon_normal: 'icon-txl',
+            icon_select: 'icon-txl1'
+          }
+        ]
+      }
+    },
+    resetMenuIndicator () {
+      var curRouterPath = this.$router.currentRoute.path
+      if (Number(this.$moment.userInfo.user.grade) === 1) { // 个人
+        if (curRouterPath.indexOf('/home') === 0) {
+          this.curMenuIndex = 0
+        } else if (curRouterPath.indexOf('/sale-list') === 0) {
+          this.curMenuIndex = 1
+        } else if (curRouterPath.indexOf('/me') === 0) {
+          this.curMenuIndex = 2
+        }
+      } else if (Number(this.$moment.userInfo.user.grade) === 2) { // 公司
+        if (curRouterPath.indexOf('/home-manager') === 0) {
+          this.curMenuIndex = 0
+        } else if (curRouterPath.indexOf('/sale-performance') === 0) {
+          this.curMenuIndex = 1
+        } else if (curRouterPath.indexOf('/sale-list') === 0) {
+          this.curMenuIndex = 2
+        }
+      } else if (Number(this.$moment.userInfo.user.grade) === 3) { // 集团
+        if (curRouterPath.indexOf('/home-boss') === 0) {
+          this.curMenuIndex = 0
+        } else if (curRouterPath.indexOf('/company-performance') === 0) {
+          this.curMenuIndex = 1
+        } else if (curRouterPath.indexOf('/sale-list') === 0) {
+          this.curMenuIndex = 2
+        } else if (curRouterPath.indexOf('/user-list') === 0) {
+          this.curMenuIndex = 3
+        }
+      }
     }
   }
 }

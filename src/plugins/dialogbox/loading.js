@@ -12,7 +12,9 @@ Loading.closeLoading = function () {
   if (document.getElementById('dialog-loading-wrap')) {
     document.getElementById('dialog-loading-wrap').style.opacity = 0
     setTimeout(() => {
-      document.querySelector('body').removeChild(document.getElementById('dialog-loading-wrap'))
+      if (document.getElementById('dialog-loading-wrap')) {
+        document.querySelector('body').removeChild(document.getElementById('dialog-loading-wrap'))
+      }
     }, 305)
   }
 }
