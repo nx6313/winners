@@ -125,7 +125,7 @@ export default {
       isFixed: false,
       sellTabWrapScrollTop: 60 * 16,
       sellTabWrapHeight: 3.9 * 16 + 'px',
-      userName: '销售业绩',
+      userName: '',
       userTabs: [],
       dateTabs: [
         {
@@ -540,48 +540,23 @@ export default {
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
     this.defaultUserHead = this.$moment.defaultHead
+    this.userName = this.$moment.userInfo.user.name
     this.userTabTransXPageWidth = document.body.clientWidth - 1.6 * 16 - 3.2 * 16
     this.userTabTransXCeilWidth = (document.body.clientWidth - 1.6 * 16 - 3.2 * 16) / 6
     this.resetDateEvery(this.dateTabs[0].id)
 
-    this.userTabs = [
-      {
-        userId: '',
-        head: '',
-        name: '刘德华'
-      },
-      {
-        userId: '',
-        head: '',
-        name: '刘德华'
-      },
-      {
-        userId: '',
-        head: '',
-        name: '刘德华'
-      },
-      {
-        userId: '',
-        head: '',
-        name: '刘德华'
-      },
-      {
-        userId: '',
-        head: '',
-        name: '刘德华'
-      },
-      {
-        userId: '',
-        head: '',
-        name: '刘德华'
-      },
-      {
-        userId: '',
-        head: '',
-        name: '刘德华'
+    this.$comfun.http_post(this, `query/consultant/${this.$moment.userInfo.user.companyId}`).then((response) => {
+      if (response.body.success === '1') {
+        for (let u = 0; u < response.body.result.length; u++) {
+          this.userTabs.push({
+            userId: response.body.result[u].id,
+            head: '',
+            name: response.body.result[u].name
+          })
+        }
+        this.seeingUser = this.userTabs[0]
       }
-    ]
-    this.seeingUser = this.userTabs[0]
+    })
   },
   methods: {
     scrollPage () {

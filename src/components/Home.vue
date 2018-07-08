@@ -143,7 +143,7 @@ export default {
           progress: 0,
           title: '汽车用品',
           num: 0,
-          des: '销售额（万元）'
+          des: '销售额（元）'
         },
         {
           progress: 0,
@@ -642,8 +642,8 @@ export default {
     this.defaultUserHead = this.$moment.defaultHead
     this.resetDateEvery(this.dateTabs[0].id)
 
+    this.userName = this.$moment.userInfo.user.name
     setTimeout(() => {
-      this.userName = this.$moment.userInfo.user.name
       var startDate = this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy-MM-dd')
       var endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
       this.getLineChartData(2, startDate, endDate)
@@ -752,6 +752,9 @@ export default {
                 }
               }
               dateObj.val[0] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
+              if (this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd') === this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')) {
+                dateObj.val[1] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
+              }
               if (endTime.getTime() - startTime.getTime() < 0) {
                 dateObj.display = '本周'
               } else {
@@ -772,11 +775,14 @@ export default {
                 }
               }
               if (week === 6 || endTime.getTime() - startTime.getTime() < 0) {
+                if (!dateObj.val[0]) {
+                  dateObj.val[0] = this.$comfun.formatDate(new Date(min), 'yyyy-MM-dd')
+                }
                 dateObj.val[1] = curValData
                 if (endTime.getTime() - startTime.getTime() < 0) {
                   dateObj.display = '本周'
                 } else {
-                  dateObj.display += '-' + curDisplayData
+                  dateObj.display = (dateObj.display || this.$comfun.formatDate(new Date(min), format)) + '-' + curDisplayData
                 }
               }
               if (hasWeek['week-' + dateIndex] === undefined) {
@@ -796,6 +802,9 @@ export default {
                 }
               }
               dateObj.val[0] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
+              if (this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd') === this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')) {
+                dateObj.val[1] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
+              }
               if (endTime.getTime() - startTime.getTime() < 0) {
                 dateObj.display = '本月'
               } else {
@@ -816,6 +825,9 @@ export default {
                 }
               }
               if (this.$comfun.getLastDay(year, month_).getDate() === day_ || endTime.getTime() - startTime.getTime() < 0) {
+                if (!dateObj.val[0]) {
+                  dateObj.val[0] = year + '-' + month + '-01'
+                }
                 dateObj.val[1] = curValData
                 if (endTime.getTime() - startTime.getTime() < 0) {
                   dateObj.display = '本月'
@@ -838,6 +850,9 @@ export default {
                 }
               }
               dateObj.val[0] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
+              if (this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd') === this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')) {
+                dateObj.val[1] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
+              }
               if (endTime.getTime() - startTime.getTime() < 0) {
                 dateObj.display = '本年'
               } else {
@@ -855,6 +870,9 @@ export default {
                 }
               }
               if ((month_ === 12 && this.$comfun.getLastDay(year, month_).getDate() === day_) || endTime.getTime() - startTime.getTime() < 0) {
+                if (!dateObj.val[0]) {
+                  dateObj.val[0] = year + '-01-01'
+                }
                 dateObj.val[1] = curValData
                 if (endTime.getTime() - startTime.getTime() < 0) {
                   dateObj.display = '本年'
@@ -870,6 +888,7 @@ export default {
           }
         }
         if (type === 'week') {
+          console.log(hasWeek)
           for (let key in hasWeek) {
             this.dateEvery.push(hasWeek[key])
           }
@@ -1092,7 +1111,8 @@ export default {
           this.summarizings[0].progress = !response.body.contrast.personNewcarNum || !response.body.contrast.maxNewcarNum ? 0 : Math.floor(response.body.contrast.personNewcarNum / response.body.contrast.maxNewcarNum * 100)
           this.summarizings[0].num = response.body.contrast.personNewcarNum || 0
           this.summarizings[1].progress = !response.body.contrast.personAccessorySum || !response.body.contrast.maxAccessorySum ? 0 : Math.floor(response.body.contrast.personAccessorySum / response.body.contrast.maxAccessorySum * 100)
-          this.summarizings[1].num = response.body.contrast.personAccessorySum || 0
+          this.summarizings[1].num = (response.body.contrast.personAccessorySum || 0) > 10000 ? Math.floor((response.body.contrast.personAccessorySum || 0) / 10000) : (response.body.contrast.personAccessorySum || 0)
+          this.summarizings[1].des = (response.body.contrast.personAccessorySum || 0) > 10000 ? '销售额（万元）' : '销售额（元）'
           this.summarizings[2].progress = !response.body.contrast.personFinanceNum || !response.body.contrast.maxFinanceNum ? 0 : Math.floor(response.body.contrast.personFinanceNum / response.body.contrast.maxFinanceNum * 100)
           this.summarizings[2].num = response.body.contrast.personFinanceNum || 0
           this.summarizings[3].progress = !response.body.contrast.personInsuranceNum || !response.body.contrast.maxInsuranceNum ? 0 : Math.floor(response.body.contrast.personInsuranceNum / response.body.contrast.maxInsuranceNum * 100)
@@ -1481,7 +1501,7 @@ export default {
     left: -5.4rem;
     right: -0.8rem;
     bottom: -0.4rem;
-    border-bottom: 0.1rem solid #2168BB;
+    border-bottom: 0.06rem solid #2168BB;
   }
   .date-every-wrap {
     padding: 1rem 0.6rem 1rem;

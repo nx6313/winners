@@ -47,7 +47,7 @@ export default {
   data () {
     return {
       starCount: 5,
-      defaultUserHead: './../assets/default-head.png',
+      defaultUserHead: '',
       searchTimer: null,
       searchVal: '',
       showSearchPanel: false,
@@ -57,164 +57,35 @@ export default {
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
-    this.userList = [
-      {
-        groupId: '',
-        groupName: '一厂',
-        users: [
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          },
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          }
-        ]
-      },
-      {
-        groupId: '',
-        groupName: '二厂',
-        users: [
-          {
-            userId: '',
-            userHead: '',
-            userDuty: '销售顾问',
-            userName: '刘德华',
-            phone: '15555555555',
-            level: 3
-          }
-        ]
+    this.defaultUserHead = this.$moment.defaultHead
+
+    this.$comfun.http_post(this, `query/company`).then((company) => {
+      if (company.body.success === '1') {
+        for (let c = 0; c < company.body.result.length; c++) {
+          this.$comfun.http_post(this, `query/consultant/${company.body.result[c].id}`).then((response) => {
+            if (response.body.success === '1') {
+              let users = []
+              for (let u = 0; u < response.body.result.length; u++) {
+                users.push({
+                  userId: response.body.result[u].id,
+                  userHead: '',
+                  userDuty: response.body.result[u].dutyName || '职位未设置',
+                  userName: response.body.result[u].name,
+                  phone: response.body.result[u].phone,
+                  level: 3
+                })
+              }
+              this.userList.push({
+                groupId: company.body.result[c].id,
+                head: '',
+                groupName: company.body.result[c].name,
+                users: users
+              })
+            }
+          })
+        }
       }
-    ]
+    })
   },
   methods: {
     toggleItem (group, groupIndex) {

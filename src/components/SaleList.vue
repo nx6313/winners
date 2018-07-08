@@ -2,7 +2,7 @@
   <div class="page-sale-list">
     <div class="tabs-wrap">
       <div class="tabs-rail-wrap">
-        <span v-for="(tab, tabIndex) in tabs" :key="tabIndex" :class="tabIndex === 0 ? 'cur-tab' : ''" :style="{ 'width': `calc(100vw / 4)` }">{{tab.txt}}</span>
+        <span v-for="(tab, tabIndex) in tabs" :key="tabIndex" :class="tabIndex === 0 ? 'cur' : ''" :style="{ 'width': `calc(100vw / 5)` }" @click="refOrder('tabType', tab.id)">{{tab.txt}}</span>
       </div>
     </div>
     <div class="sale-item-wrap user-self" :class="['sale-item-wrap', 'user-self', (userSaleInfo.ranking >= 1 && userSaleInfo.ranking <= 3)? 'ranking-' + userSaleInfo.ranking : '']">
@@ -12,13 +12,13 @@
       <div class="user-info-wrap">
         <div class="line-first flex-r flex-b">
           <span class="user-name">本人</span>
-          <div class="sale-num-wrap">
+          <div class="sale-num-wrap" v-if="userSaleInfo.userName">
             <span>销量:</span>
             <span class="big">{{userSaleInfo.saleNum}}</span>
             <span>{{userSaleInfo.saleUnit}}</span>
           </div>
         </div>
-        <div class="line-two flex-r flex-b">
+        <div class="line-two flex-r flex-b" v-if="userSaleInfo.userName">
           <div>
             <span>{{userSaleInfo.factory}}</span>
             <span class="duty">{{userSaleInfo.duty}}</span>
@@ -29,16 +29,17 @@
             <span v-if="userSaleInfo.up < 0">下降 {{userSaleInfo.up}} 名</span>
           </span>
         </div>
+        <div class="no-sale-data" v-if="!userSaleInfo.userName">暂无销售记录</div>
       </div>
     </div>
     <div class="tabs-wrap sort-list-tab-wrap">
       <div class="tabs-rail-wrap">
-        <span v-for="(tab2, tab2Index) in tabs2" :key="tab2Index" :class="tab2Index === 0 ? 'cur-tab' : ''" :style="{ 'width': `calc(100vw / ${tabs2.length})` }">{{tab2.txt}}</span>
+        <span v-for="(tab2, tab2Index) in tabs2" :key="tab2Index" :class="tab2Index === 0 ? 'cur' : ''" :style="{ 'width': `calc(100vw / ${tabs2.length})` }" @click="refOrder('orderType', tab2.id)">{{tab2.txt}}</span>
       </div>
     </div>
     <div class="sort-type-wrap flex-r flex-a">
-      <span class="cur">集团</span>
-      <span>本厂</span>
+      <span class="cur" @click="refOrder('way', 8)">集团</span>
+      <span @click="refOrder('way', 9)">本厂</span>
     </div>
     <div class="all-sale-list-wrap">
       <div :class="['sale-item-wrap', ((saleIndex + 1) >= 1 && (saleIndex + 1) <= 3)? 'ranking-' + (saleIndex + 1) : '']" v-for="(sale, saleIndex) in saleList" :key="saleIndex">
@@ -78,7 +79,7 @@ export default {
     return {
       curTabType: 'newcar',
       curDateTabType: 'week',
-      curOrderWay: 'com',
+      curOrderWay: 8, // 8 集团 、9 公司
       defaultUserHead: '',
       tabs: [
         {
@@ -123,7 +124,7 @@ export default {
       userSaleInfo: {
         ranking: 0,
         userHead: '',
-        userName: '~',
+        userName: '',
         saleNum: '~',
         saleUnit: '~',
         factory: '~',
@@ -139,6 +140,18 @@ export default {
     this.getOrderList()
   },
   methods: {
+    refOrder (type, val) {
+      event.target.parentNode.getElementsByClassName('cur')[0].classList.remove('cur')
+      event.target.classList.add('cur')
+      if (type === 'tabType') {
+        this.curTabType = val
+      } else if (type === 'orderType') {
+        this.curDateTabType = val
+      } else if (type === 'way') {
+        this.curOrderWay = val
+      }
+      this.getOrderList()
+    },
     getOrderList () {
       var startDate = ''
       var endDate = ''
@@ -164,23 +177,40 @@ export default {
         startOldDate = (new Date().getFullYear() - 1) + '-01-01'
         endOldDate = this.$comfun.formatDate(this.$comfun.getLastDay(new Date().getFullYear() - 1, 12), 'yyyy-MM-dd')
       }
+      var unit = ''
+      if (this.curTabType === 'newcar') {
+        unit = '台'
+      } else if (this.curTabType === 'accessory') {
+        unit = '元'
+      } else if (this.curTabType === 'finance') {
+        unit = '单'
+      } else if (this.curTabType === 'insurance') {
+        unit = '单'
+      } else if (this.curTabType === 'oldcar') {
+        unit = '台'
+      } else if (this.curTabType === 'accessory') {
+        unit = '台'
+      }
       this.$comfun.http_post(this, this.curTabType + `/order/${this.$moment.userInfo.user.id}`, {
+        type: this.curOrderWay,
         startDate: startDate,
         endDate: endDate,
         startOldDate: startOldDate,
         endOldDate: endOldDate,
         start: 0,
-        limit: 10
+        limit: 20
       }).then((response) => {
         if (response.body.success === '1') {
-          this.$set(this.userSaleInfo, 'ranking', response.body.user.rank)
-          this.$set(this.userSaleInfo, 'userHead', '')
-          this.$set(this.userSaleInfo, 'userName', response.body.user.name)
-          this.$set(this.userSaleInfo, 'saleNum', response.body.user.num)
-          this.$set(this.userSaleInfo, 'saleUnit', '台')
-          this.$set(this.userSaleInfo, 'factory', response.body.user.companyName)
-          this.$set(this.userSaleInfo, 'duty', response.body.user.dutyName)
-          this.$set(this.userSaleInfo, 'up', !response.body.user.oldRank || response.body.user.oldRank === 0 ? 0 : response.body.user.oldRank - response.body.user.rank)
+          if (response.body.user) {
+            this.$set(this.userSaleInfo, 'ranking', response.body.user.rank)
+            this.$set(this.userSaleInfo, 'userHead', '')
+            this.$set(this.userSaleInfo, 'userName', response.body.user.name)
+            this.$set(this.userSaleInfo, 'saleNum', response.body.user.num)
+            this.$set(this.userSaleInfo, 'saleUnit', unit)
+            this.$set(this.userSaleInfo, 'factory', response.body.user.companyName)
+            this.$set(this.userSaleInfo, 'duty', response.body.user.dutyName)
+            this.$set(this.userSaleInfo, 'up', !response.body.user.oldRank || response.body.user.oldRank === 0 ? 0 : response.body.user.oldRank - response.body.user.rank)
+          }
 
           this.saleList = []
           for (let s = 0; s < response.body[this.curTabType].length; s++) {
@@ -188,7 +218,7 @@ export default {
               userHead: '',
               userName: response.body[this.curTabType][s].name,
               saleNum: response.body[this.curTabType][s].num,
-              saleUnit: '台',
+              saleUnit: unit,
               factory: response.body[this.curTabType][s].companyName,
               duty: response.body[this.curTabType][s].dutyName,
               up: !response.body[this.curTabType][s].oldRank || response.body[this.curTabType][s].oldRank === 0 ? 0 : response.body[this.curTabType][s].oldRank - response.body[this.curTabType][s].rank
@@ -225,10 +255,10 @@ export default {
         line-height: 3rem;
         text-align: center;
       }
-      .cur-tab {
+      .cur {
         color: #ff721f;
       }
-      .cur-tab::after {
+      .cur::after {
         content: '';
         position: absolute;
         bottom: 0;
@@ -263,7 +293,7 @@ export default {
     }
   }
   .user-self {
-    margin: 0.6rem 0;
+    margin-top: 0.6rem;
   }
   .sale-item-wrap {
     position: relative;
@@ -359,6 +389,12 @@ export default {
             color: #9b9b9b;
           }
         }
+      }
+      div.no-sale-data {
+        position: relative;
+        color: #9b9b9b;
+        font-size: 0.8rem;
+        top: 0.8rem;
       }
     }
   }
@@ -492,11 +528,13 @@ export default {
     }
   }
   .sort-list-tab-wrap {
+    position: relative;
+    margin-top: 0.6rem;
     .tabs-rail-wrap {
-      .cur-tab {
+      .cur {
         color: #246dc1;
       }
-      .cur-tab::after {
+      .cur::after {
         content: '';
         position: absolute;
         bottom: 0;

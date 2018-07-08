@@ -156,6 +156,7 @@ export default {
     position: relative;
     padding: 1.2rem 0.8rem;
     background-color: #ffffff;
+    font-size: 0.8rem;
     .title {
       position: relative;
       display: inline-block;

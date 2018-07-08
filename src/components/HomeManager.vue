@@ -95,10 +95,9 @@ export default {
       curHeaderTypeIndex: 0,
       reg: /[-?\d.]+/g,
       isFixed: false,
-      sellTabWrapScrollTop: 52.2 * 16,
+      sellTabWrapScrollTop: 20.2 * 16,
       sellTabWrapHeight: 3.9 * 16 + 'px',
-      userName: '刘德华',
-      userLevel: '金牌销售',
+      userName: '',
       dateTabs: [
         {
           id: 'day',
@@ -395,6 +394,7 @@ export default {
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
     this.defaultUserHead = this.$moment.defaultHead
+    this.userName = this.$moment.userInfo.user.name
     this.resetDateEvery(this.dateTabs[0].id)
   },
   methods: {
@@ -872,7 +872,7 @@ export default {
     left: -5.4rem;
     right: -0.8rem;
     bottom: -0.4rem;
-    border-bottom: 0.1rem solid #2168BB;
+    border-bottom: 0.06rem solid #2168BB;
   }
   .date-every-wrap {
     padding: 1rem 0.6rem 1rem;

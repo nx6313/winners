@@ -544,44 +544,18 @@ export default {
     this.userTabTransXCeilWidth = (document.body.clientWidth - 1.6 * 16 - 3.2 * 16) / 6
     this.resetDateEvery(this.dateTabs[0].id)
 
-    this.userTabs = [
-      {
-        userId: '',
-        head: '',
-        name: '一厂'
-      },
-      {
-        userId: '',
-        head: '',
-        name: '二厂'
-      },
-      {
-        userId: '',
-        head: '',
-        name: '三厂'
-      },
-      {
-        userId: '',
-        head: '',
-        name: '四厂'
-      },
-      {
-        userId: '',
-        head: '',
-        name: '五厂'
-      },
-      {
-        userId: '',
-        head: '',
-        name: '六厂'
-      },
-      {
-        userId: '',
-        head: '',
-        name: '七厂'
+    this.$comfun.http_post(this, `query/company`).then((response) => {
+      if (response.body.success === '1') {
+        for (let u = 0; u < response.body.result.length; u++) {
+          this.userTabs.push({
+            userId: response.body.result[u].id,
+            head: '',
+            name: response.body.result[u].name
+          })
+        }
+        this.seeingUser = this.userTabs[0]
       }
-    ]
-    this.seeingUser = this.userTabs[0]
+    })
   },
   methods: {
     scrollPage () {
