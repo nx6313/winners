@@ -9,14 +9,14 @@ export default {
               callUrl = url
             }
             context.$http.get(callUrl).then(response => {
-              context.$comfun.consoleBeautiful(context, '接口访问完成：url【' + url + '】', '#0FB0BF', 'https://img.zcool.cn/community/01db9f579571700000012e7e9da0fb.gif', {
+              console.log('接口访问完成：url【' + url + '】', {
                 '链接': callUrl,
                 '请求返回': response
               })
               context.$dialog_close_loading()
               resolve(response)
             }, response => {
-              context.$comfun.consoleBeautiful(context, '接口访问出错：url【' + url + '】', '#BF0F3D', 'https://img.zcool.cn/community/014db6579571700000012e7e602493.gif', {
+              console.log('接口访问出错：url【' + url + '】', {
                 '链接': callUrl,
                 '请求返回': response
               })
@@ -38,7 +38,7 @@ export default {
               callUrl = url
             }
             context.$http.post(callUrl, paramsData).then(response => {
-              context.$comfun.consoleBeautiful(context, '接口访问完成：url【' + url + '】', '#0FB0BF', 'https://img.zcool.cn/community/01db9f579571700000012e7e9da0fb.gif', {
+              console.log('接口访问完成：url【' + url + '】', {
                 '链接': callUrl,
                 '请求返回': response,
                 '相关参数': paramsData
@@ -46,7 +46,7 @@ export default {
               context.$dialog_close_loading()
               resolve(response)
             }, response => {
-              context.$comfun.consoleBeautiful(context, '接口访问出错：url【' + url + '】', '#BF0F3D', 'https://img.zcool.cn/community/014db6579571700000012e7e602493.gif', {
+              console.log('接口访问出错：url【' + url + '】', {
                 '链接': callUrl,
                 '请求返回': response,
                 '相关参数': paramsData
@@ -62,7 +62,7 @@ export default {
       },
       http_file: function (context, url, aboutKey, file, progressFn) {
         if (context && url && file) {
-          context.$comfun.console(context, '要上传的视频对象', file)
+          console.log('要上传的视频对象', file)
           const formData = new FormData()
           formData.append(aboutKey, file)
           var http = new Promise((resolve, reject) => {
@@ -76,13 +76,13 @@ export default {
                 'Access-Control-Allow-Origin': '*'
               },
               progress (event) {
-                context.$comfun.console(context, '视频上传进度', parseFloat(event.loaded / event.total * 100))
+                console.log('视频上传进度', parseFloat(event.loaded / event.total * 100))
                 if (progressFn && typeof progressFn === 'function' && Object.prototype.toString.call(progressFn).toLowerCase() === '[object function]') {
                   progressFn(parseFloat(event.loaded / event.total))
                 }
               }
             }).then(response => {
-              context.$comfun.consoleBeautiful(context, '接口访问完成：url【' + url + '】', '#0FB0BF', 'https://img.zcool.cn/community/01db9f579571700000012e7e9da0fb.gif', {
+              console.log('接口访问完成：url【' + url + '】', {
                 '链接': callUrl,
                 '请求返回': response,
                 '要上传的视频对象': file
@@ -90,7 +90,7 @@ export default {
               context.$dialog_close_loading()
               resolve(response)
             }, response => {
-              context.$comfun.consoleBeautiful(context, '接口访问出错：url【' + url + '】', '#BF0F3D', 'https://img.zcool.cn/community/014db6579571700000012e7e602493.gif', {
+              console.log('接口访问出错：url【' + url + '】', {
                 '链接': callUrl,
                 '请求返回': response,
                 '要上传的视频对象': file
@@ -102,36 +102,6 @@ export default {
           return http
         } else {
           console.error('上下文对象或请求地址不能为空', 'http_file(context, url)')
-        }
-      },
-      console: function (context, tip, data, type) {
-        context.$comfun.consoleBeautiful(context, tip, null, null, data, type)
-      },
-      consoleBeautiful: function (context, tip, tipColor, tipPic, consoleData, type) {
-        if (!tipColor) {
-          tipColor = '#0FB0BF'
-        }
-        if (!tipPic) {
-          tipPic = 'https://img.zcool.cn/community/01c3365795716f0000012e7ef2e489.gif'
-        }
-        if (type) {
-          if (type === 'error') {
-            tipColor = '#BF0F3D'
-            tipPic = 'https://img.zcool.cn/community/014db6579571700000012e7e602493.gif'
-          } else if (type === 'warn') {
-            tipColor = '#BF720F'
-            tipPic = 'https://img.zcool.cn/community/01db9f579571700000012e7e9da0fb.gif'
-          } else if (type === 'info') {
-            tipColor = '#0FB0BF'
-            tipPic = 'https://img.zcool.cn/community/01c3365795716f0000012e7ef2e489.gif'
-          }
-        }
-        if (context.$moment.debug) {
-          if (consoleData) {
-            console.log(`%c ${tip}`, `height: 40px; padding-left: 60px; line-height: 56px; color: ${tipColor}; background-repeat: no-repeat; background-size: auto 100%; background-image: url(${tipPic});`, consoleData)
-          } else {
-            console.log(`%c ${tip}`, `height: 40px; padding-left: 60px; line-height: 56px; color: ${tipColor}; background-repeat: no-repeat; background-size: auto 100%; background-image: url(${tipPic});`)
-          }
         }
       },
       // 判断字符串是否为空

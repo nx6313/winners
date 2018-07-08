@@ -17,7 +17,6 @@ import Cvsbg from '@/plugins/canvas/cvsbg.js'
 import '@/plugins/comm.css'
 import '@/plugins/animate.css'
 import '@/assets/fonts/iconfont.css'
-import Login from '@/components/Login'
 import Home from '@/components/Home'
 import HomeManager from '@/components/HomeManager'
 import HomeBoss from '@/components/HomeBoss'
@@ -46,7 +45,7 @@ var router = new Router({
     {
       path: '/',
       name: 'Login',
-      component: Login
+      component: resolve => require(['@/components/Login'], resolve)
     },
     {
       path: '/home',

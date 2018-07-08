@@ -672,18 +672,28 @@ export default {
       this.dateEvery.splice(0, this.dateEvery.length)
       switch (curDateType) {
         case 'day':
-          this.getDateSection(this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M/d')
+          this.getDateSection(this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M/d').then(() => {
+            this.loadHeaderAfterDateSection()
+          })
           break
         case 'week':
-          this.getDateSection(this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M/d')
+          this.getDateSection(this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M/d').then(() => {
+            this.loadHeaderAfterDateSection()
+          })
           break
         case 'month':
-          this.getDateSection(this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M')
+          this.getDateSection(this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy/MM/dd'), curDateType, 'M').then(() => {
+            this.loadHeaderAfterDateSection()
+          })
           break
         case 'year':
-          this.getDateSection(this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy/MM/dd'), curDateType, 'yyyy')
+          this.getDateSection(this.$comfun.formatDate(this.$moment.userInfo.basedate, 'yyyy/MM/dd'), curDateType, 'yyyy').then(() => {
+            this.loadHeaderAfterDateSection()
+          })
           break
       }
+    },
+    loadHeaderAfterDateSection () {
       this.dateEveryRailTrans = -document.body.clientWidth
       this.$nextTick().then(() => {
         setTimeout(() => {
@@ -701,176 +711,180 @@ export default {
       })
     },
     getDateSection (min, type, format) {
-      var startTime = new Date(min)
-      var endTime = new Date()
-      var hasWeek = {}
-      var hasMonth = {}
-      var hasYear = {}
-      var dateIndex = 0
-      while ((endTime.getTime() - startTime.getTime()) >= 0) {
-        var year = startTime.getFullYear()
-        var month_ = startTime.getMonth() + 1
-        var month = (startTime.getMonth() + 1).toString().length === 1 ? '0' + (startTime.getMonth() + 1) : (startTime.getMonth() + 1)
-        var day_ = startTime.getDate()
-        var day = startTime.getDate().toString().length === 1 ? '0' + startTime.getDate() : startTime.getDate()
-        var week = startTime.getDay()
-        var thisDate = new Date(year + '/' + month + '/' + day)
-        startTime.setDate(startTime.getDate() + 1)
-        var curValData = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
-        var curDisplayData = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), format)
-        let dateObj = {}
-        if (type === 'day') {
-          if (thisDate.getTime() === new Date(this.$comfun.formatDate(new Date(), 'yyyy/MM/dd')).getTime()) {
-            dateObj.display = '今日'
-            dateObj.val = curValData
-          } else {
-            dateObj.display = curDisplayData
-            dateObj.val = curValData
-            if (Number(month) === 1 && Number(day) === 1) {
-              dateObj.year = year
-            }
-          }
-          this.dateEvery.push(dateObj)
-        } else if (type === 'week') {
-          if (week === 0) {
-            if (hasWeek['week-' + dateIndex]) {
-              dateObj = hasWeek['week-' + dateIndex]
-            } else {
-              if (dateObj.val === undefined) {
-                dateObj.val = []
-              }
-            }
-            dateObj.val[0] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
-            if (endTime.getTime() - startTime.getTime() < 0) {
-              dateObj.display = '本周'
+      var dateSectionPromise = new Promise((resolve, reject) => {
+        var startTime = new Date(min)
+        var endTime = new Date()
+        var hasWeek = {}
+        var hasMonth = {}
+        var hasYear = {}
+        var dateIndex = 0
+        while ((endTime.getTime() / (24 * 60 * 60 * 1000) - startTime.getTime() / (24 * 60 * 60 * 1000)) >= 0) {
+          var year = startTime.getFullYear()
+          var month_ = startTime.getMonth() + 1
+          var month = (startTime.getMonth() + 1).toString().length === 1 ? '0' + (startTime.getMonth() + 1) : (startTime.getMonth() + 1)
+          var day_ = startTime.getDate()
+          var day = startTime.getDate().toString().length === 1 ? '0' + startTime.getDate() : startTime.getDate()
+          var week = startTime.getDay()
+          var thisDate = new Date(year + '/' + month + '/' + day)
+          startTime.setDate(startTime.getDate() + 1)
+          var curValData = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
+          var curDisplayData = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), format)
+          let dateObj = {}
+          if (type === 'day') {
+            if (thisDate.getTime() === new Date(this.$comfun.formatDate(new Date(), 'yyyy/MM/dd')).getTime()) {
+              dateObj.display = '今日'
+              dateObj.val = curValData
             } else {
               dateObj.display = curDisplayData
-            }
-            if (year !== this.$comfun.getTargetDate(7, new Date(year + '/' + month + '/' + day)).getFullYear()) {
-              dateObj.year = year
-            }
-            if (hasWeek['week-' + dateIndex] === undefined) {
-              hasWeek['week-' + dateIndex] = dateObj
-            }
-          } else {
-            if (hasWeek['week-' + dateIndex]) {
-              dateObj = hasWeek['week-' + dateIndex]
-            } else {
-              if (dateObj.val === undefined) {
-                dateObj.val = []
+              dateObj.val = curValData
+              if (Number(month) === 1 && Number(day) === 1) {
+                dateObj.year = year
               }
             }
-            if (week === 6 || endTime.getTime() - startTime.getTime() < 0) {
-              dateObj.val[1] = curValData
+            this.dateEvery.push(dateObj)
+          } else if (type === 'week') {
+            if (week === 0) {
+              if (hasWeek['week-' + dateIndex]) {
+                dateObj = hasWeek['week-' + dateIndex]
+              } else {
+                if (dateObj.val === undefined) {
+                  dateObj.val = []
+                }
+              }
+              dateObj.val[0] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
               if (endTime.getTime() - startTime.getTime() < 0) {
                 dateObj.display = '本周'
               } else {
-                dateObj.display += '-' + curDisplayData
+                dateObj.display = curDisplayData
+              }
+              if (year !== this.$comfun.getTargetDate(7, new Date(year + '/' + month + '/' + day)).getFullYear()) {
+                dateObj.year = year
+              }
+              if (hasWeek['week-' + dateIndex] === undefined) {
+                hasWeek['week-' + dateIndex] = dateObj
+              }
+            } else {
+              if (hasWeek['week-' + dateIndex]) {
+                dateObj = hasWeek['week-' + dateIndex]
+              } else {
+                if (dateObj.val === undefined) {
+                  dateObj.val = []
+                }
+              }
+              if (week === 6 || endTime.getTime() - startTime.getTime() < 0) {
+                dateObj.val[1] = curValData
+                if (endTime.getTime() - startTime.getTime() < 0) {
+                  dateObj.display = '本周'
+                } else {
+                  dateObj.display += '-' + curDisplayData
+                }
+              }
+              if (hasWeek['week-' + dateIndex] === undefined) {
+                hasWeek['week-' + dateIndex] = dateObj
+              }
+              if (week === 6 || endTime.getTime() - startTime.getTime() < 0) {
+                dateIndex += 1
               }
             }
-            if (hasWeek['week-' + dateIndex] === undefined) {
-              hasWeek['week-' + dateIndex] = dateObj
-            }
-            if (week === 6 || endTime.getTime() - startTime.getTime() < 0) {
-              dateIndex += 1
-            }
-          }
-        } else if (type === 'month') {
-          if (day_ === 1) {
-            if (hasMonth['month-' + dateIndex]) {
-              dateObj = hasMonth['month-' + dateIndex]
-            } else {
-              if (dateObj.val === undefined) {
-                dateObj.val = []
+          } else if (type === 'month') {
+            if (day_ === 1) {
+              if (hasMonth['month-' + dateIndex]) {
+                dateObj = hasMonth['month-' + dateIndex]
+              } else {
+                if (dateObj.val === undefined) {
+                  dateObj.val = []
+                }
               }
-            }
-            dateObj.val[0] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
-            if (endTime.getTime() - startTime.getTime() < 0) {
-              dateObj.display = '本月'
-            } else {
-              dateObj.display = curDisplayData
-            }
-            if (month_ === 12) {
-              dateObj.year = year
-            }
-            if (hasMonth['month-' + dateIndex] === undefined) {
-              hasMonth['month-' + dateIndex] = dateObj
-            }
-          } else {
-            if (hasMonth['month-' + dateIndex]) {
-              dateObj = hasMonth['month-' + dateIndex]
-            } else {
-              if (dateObj.val === undefined) {
-                dateObj.val = []
-              }
-            }
-            if (this.$comfun.getLastDay(year, month_).getDate() === day_ || endTime.getTime() - startTime.getTime() < 0) {
-              dateObj.val[1] = curValData
+              dateObj.val[0] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
               if (endTime.getTime() - startTime.getTime() < 0) {
                 dateObj.display = '本月'
+              } else {
+                dateObj.display = curDisplayData
+              }
+              if (month_ === 12) {
+                dateObj.year = year
+              }
+              if (hasMonth['month-' + dateIndex] === undefined) {
+                hasMonth['month-' + dateIndex] = dateObj
+              }
+            } else {
+              if (hasMonth['month-' + dateIndex]) {
+                dateObj = hasMonth['month-' + dateIndex]
+              } else {
+                if (dateObj.val === undefined) {
+                  dateObj.val = []
+                }
+              }
+              if (this.$comfun.getLastDay(year, month_).getDate() === day_ || endTime.getTime() - startTime.getTime() < 0) {
+                dateObj.val[1] = curValData
+                if (endTime.getTime() - startTime.getTime() < 0) {
+                  dateObj.display = '本月'
+                }
+              }
+              if (hasMonth['month-' + dateIndex] === undefined) {
+                hasMonth['month-' + dateIndex] = dateObj
+              }
+              if (this.$comfun.getLastDay(year, month_).getDate() === day_ || endTime.getTime() - startTime.getTime() < 0) {
+                dateIndex += 1
               }
             }
-            if (hasMonth['month-' + dateIndex] === undefined) {
-              hasMonth['month-' + dateIndex] = dateObj
-            }
-            if (this.$comfun.getLastDay(year, month_).getDate() === day_ || endTime.getTime() - startTime.getTime() < 0) {
-              dateIndex += 1
-            }
-          }
-        } else if (type === 'year') {
-          if (month_ === 1 && day_ === 1) {
-            if (hasYear['year-' + dateIndex]) {
-              dateObj = hasYear['year-' + dateIndex]
-            } else {
-              if (dateObj.val === undefined) {
-                dateObj.val = []
+          } else if (type === 'year') {
+            if (month_ === 1 && day_ === 1) {
+              if (hasYear['year-' + dateIndex]) {
+                dateObj = hasYear['year-' + dateIndex]
+              } else {
+                if (dateObj.val === undefined) {
+                  dateObj.val = []
+                }
               }
-            }
-            dateObj.val[0] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
-            if (endTime.getTime() - startTime.getTime() < 0) {
-              dateObj.display = '本年'
-            } else {
-              dateObj.display = curDisplayData
-            }
-            if (hasYear['year-' + dateIndex] === undefined) {
-              hasYear['year-' + dateIndex] = dateObj
-            }
-          } else {
-            if (hasYear['year-' + dateIndex]) {
-              dateObj = hasYear['year-' + dateIndex]
-            } else {
-              if (dateObj.val === undefined) {
-                dateObj.val = []
-              }
-            }
-            if ((month_ === 12 && this.$comfun.getLastDay(year, month_).getDate() === day_) || endTime.getTime() - startTime.getTime() < 0) {
-              dateObj.val[1] = curValData
+              dateObj.val[0] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
               if (endTime.getTime() - startTime.getTime() < 0) {
                 dateObj.display = '本年'
+              } else {
+                dateObj.display = curDisplayData
               }
-            }
-            if (hasYear['year-' + dateIndex] === undefined) {
-              hasYear['year-' + dateIndex] = dateObj
-            }
-            if ((month_ === 12 && this.$comfun.getLastDay(year, month_).getDate() === day_) || endTime.getTime() - startTime.getTime() < 0) {
-              dateIndex += 1
+              if (hasYear['year-' + dateIndex] === undefined) {
+                hasYear['year-' + dateIndex] = dateObj
+              }
+            } else {
+              if (hasYear['year-' + dateIndex]) {
+                dateObj = hasYear['year-' + dateIndex]
+              } else {
+                if (dateObj.val === undefined) {
+                  dateObj.val = []
+                }
+              }
+              if ((month_ === 12 && this.$comfun.getLastDay(year, month_).getDate() === day_) || endTime.getTime() - startTime.getTime() < 0) {
+                dateObj.val[1] = curValData
+                if (endTime.getTime() - startTime.getTime() < 0) {
+                  dateObj.display = '本年'
+                }
+              }
+              if (hasYear['year-' + dateIndex] === undefined) {
+                hasYear['year-' + dateIndex] = dateObj
+              }
+              if ((month_ === 12 && this.$comfun.getLastDay(year, month_).getDate() === day_) || endTime.getTime() - startTime.getTime() < 0) {
+                dateIndex += 1
+              }
             }
           }
         }
-      }
-      if (type === 'week') {
-        for (let key in hasWeek) {
-          this.dateEvery.push(hasWeek[key])
+        if (type === 'week') {
+          for (let key in hasWeek) {
+            this.dateEvery.push(hasWeek[key])
+          }
+        } else if (type === 'month') {
+          for (let key in hasMonth) {
+            this.dateEvery.push(hasMonth[key])
+          }
+        } else if (type === 'year') {
+          for (let key in hasYear) {
+            this.dateEvery.push(hasYear[key])
+          }
         }
-      } else if (type === 'month') {
-        for (let key in hasMonth) {
-          this.dateEvery.push(hasMonth[key])
-        }
-      } else if (type === 'year') {
-        for (let key in hasYear) {
-          this.dateEvery.push(hasYear[key])
-        }
-      }
+        resolve('')
+      })
+      return dateSectionPromise
     },
     circleProgressVal (progress) {
       return `<span style="font-size: 1.2rem;">${progress}</span><span style="font-size: 0.8rem; margin-left: 0.2rem;">%</span>`
@@ -1075,16 +1089,16 @@ export default {
         endDate: endDate
       }).then((response) => {
         if (response.body.success === '1') {
-          this.summarizings[0].progress = Math.floor(response.body.contrast.personNewcarNum / response.body.contrast.maxNewcarNum * 100)
-          this.summarizings[0].num = response.body.contrast.personNewcarNum
-          this.summarizings[1].progress = Math.floor(response.body.contrast.personAccessorySum / response.body.contrast.maxAccessorySum * 100)
-          this.summarizings[1].num = response.body.contrast.personAccessorySum
-          this.summarizings[2].progress = Math.floor(response.body.contrast.personFinanceNum / response.body.contrast.maxFinanceNum * 100)
-          this.summarizings[2].num = response.body.contrast.personFinanceNum
-          this.summarizings[3].progress = Math.floor(response.body.contrast.personInsuranceNum / response.body.contrast.maxInsuranceNum * 100)
-          this.summarizings[3].num = response.body.contrast.personInsuranceNum
-          this.summarizings[4].progress = Math.floor(response.body.contrast.personOldcarNum / response.body.contrast.maxOldcarNum * 100)
-          this.summarizings[4].num = response.body.contrast.personOldcarNum
+          this.summarizings[0].progress = !response.body.contrast.personNewcarNum || !response.body.contrast.maxNewcarNum ? 0 : Math.floor(response.body.contrast.personNewcarNum / response.body.contrast.maxNewcarNum * 100)
+          this.summarizings[0].num = response.body.contrast.personNewcarNum || 0
+          this.summarizings[1].progress = !response.body.contrast.personAccessorySum || !response.body.contrast.maxAccessorySum ? 0 : Math.floor(response.body.contrast.personAccessorySum / response.body.contrast.maxAccessorySum * 100)
+          this.summarizings[1].num = response.body.contrast.personAccessorySum || 0
+          this.summarizings[2].progress = !response.body.contrast.personFinanceNum || !response.body.contrast.maxFinanceNum ? 0 : Math.floor(response.body.contrast.personFinanceNum / response.body.contrast.maxFinanceNum * 100)
+          this.summarizings[2].num = response.body.contrast.personFinanceNum || 0
+          this.summarizings[3].progress = !response.body.contrast.personInsuranceNum || !response.body.contrast.maxInsuranceNum ? 0 : Math.floor(response.body.contrast.personInsuranceNum / response.body.contrast.maxInsuranceNum * 100)
+          this.summarizings[3].num = response.body.contrast.personInsuranceNum || 0
+          this.summarizings[4].progress = !response.body.contrast.personOldcarNum || !response.body.contrast.maxOldcarNum ? 0 : Math.floor(response.body.contrast.personOldcarNum / response.body.contrast.maxOldcarNum * 100)
+          this.summarizings[4].num = response.body.contrast.personOldcarNum || 0
         }
         this.$comfun.http_post(this, `profit/${this.$moment.userInfo.user.id}`, {
           startDate: startDate,

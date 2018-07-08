@@ -64,7 +64,7 @@ export default {
         if (response.body.success === '1') {
           this.$moment.localforage.setItem('userLoginInfo', {
             loginDate: new Date(),
-            basedate: new Date(response.body.basedate),
+            basedate: response.body.basedate ? new Date(response.body.basedate) : new Date(),
             user: response.body.user
           }).then(() => {
             if (Number(response.body.user.grade) === 1) { // 个人
