@@ -166,9 +166,9 @@ export default {
       ],
       mlvChartOpt: {
         title: {
-          text: '{money|0}\t\t{unit|万}\n综合毛利',
+          text: '{money|0}\t\t{unit|元}\n综合毛利',
           left: 'center',
-          top: '42%',
+          top: '52%',
           textStyle: {
             color: '#4D4D4D',
             fontSize: 13,
@@ -195,13 +195,14 @@ export default {
         },
         tooltip: {
           trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} 万元 ({d}%)',
+          formatter: '{a} <br/>{b}: {c} 元 ({d}%)',
           backgroundColor: 'rgba(80, 30, 30, .8)'
         },
         series: [
           {
             name: '毛利占比率',
             type: 'pie',
+            center: ['50%', '60%'],
             radius: ['44%', '30%'],
             label: {
               normal: {
@@ -209,7 +210,7 @@ export default {
                 position: 'outside',
                 formatter: [
                   '{rate|{d}}\t\t{rateTip|%}',
-                  '{c} 万元',
+                  '{c} 元',
                   '{b}'
                 ].join('\n'),
                 lineHeight: 10,
@@ -269,7 +270,7 @@ export default {
       },
       grjxChartOpt: {
         title: {
-          text: '{money|0}\t\t{unit|万}\n个人绩效',
+          text: '{money|0}\t\t{unit|元}\n个人绩效',
           left: 'center',
           top: '42%',
           textStyle: {
@@ -298,7 +299,7 @@ export default {
         },
         tooltip: {
           trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} 万元 ({d}%)',
+          formatter: '{a} <br/>{b}: {c} 元 ({d}%)',
           backgroundColor: 'rgba(80, 30, 30, .8)'
         },
         series: [
@@ -312,7 +313,7 @@ export default {
                 position: 'outside',
                 formatter: [
                   '{rate|{d}}\t\t{rateTip|%}',
-                  '{c} 万元',
+                  '{c} 元',
                   '{b}'
                 ].join('\n'),
                 lineHeight: 10,
@@ -1125,12 +1126,12 @@ export default {
           endDate: endDate
         }).then((response) => {
           if (response.body.success === '1') {
-            this.mlvChartOpt.title.text = `{money|${response.body.profit.profitSum}}\t\t{unit|万}\n综合毛利`
-            this.mlvChartOpt.series[0].data[0].value = response.body.profit.newcarProfit
-            this.mlvChartOpt.series[0].data[1].value = response.body.profit.insuranceProfit
-            this.mlvChartOpt.series[0].data[2].value = response.body.profit.oldcarProfit
-            this.mlvChartOpt.series[0].data[3].value = response.body.profit.financeProfit
-            this.mlvChartOpt.series[0].data[4].value = response.body.profit.accessoryProfit
+            this.mlvChartOpt.title.text = `{money|${response.body.profit.profitSum || 0}}\t\t{unit|元}\n综合毛利`
+            this.mlvChartOpt.series[0].data[0].value = response.body.profit.newcarProfit || 0
+            this.mlvChartOpt.series[0].data[1].value = response.body.profit.insuranceProfit || 0
+            this.mlvChartOpt.series[0].data[2].value = response.body.profit.oldcarProfit || 0
+            this.mlvChartOpt.series[0].data[3].value = response.body.profit.financeProfit || 0
+            this.mlvChartOpt.series[0].data[4].value = response.body.profit.accessoryProfit || 0
           }
           this.$comfun.http_post(this, `perf/${this.$moment.userInfo.user.id}`, {
             startDate: startDate,
@@ -1138,12 +1139,12 @@ export default {
           }).then((response) => {
             this.dateChangeLoading = false
             if (response.body.success === '1') {
-              this.grjxChartOpt.title.text = `{money|${response.body.perf.profitSum}}\t\t{unit|万}\n个人绩效`
-              this.grjxChartOpt.series[0].data[0].value = response.body.perf.newcarPerf
-              this.grjxChartOpt.series[0].data[1].value = response.body.perf.insurancePerf
-              this.grjxChartOpt.series[0].data[2].value = response.body.perf.oldcarPerf
-              this.grjxChartOpt.series[0].data[3].value = response.body.perf.financePerf
-              this.grjxChartOpt.series[0].data[4].value = response.body.perf.accessoryPerf
+              this.grjxChartOpt.title.text = `{money|${response.body.perf.profitSum || 0}}\t\t{unit|元}\n个人绩效`
+              this.grjxChartOpt.series[0].data[0].value = response.body.perf.newcarPerf || 0
+              this.grjxChartOpt.series[0].data[1].value = response.body.perf.insurancePerf || 0
+              this.grjxChartOpt.series[0].data[2].value = response.body.perf.oldcarPerf || 0
+              this.grjxChartOpt.series[0].data[3].value = response.body.perf.financePerf || 0
+              this.grjxChartOpt.series[0].data[4].value = response.body.perf.accessoryPerf || 0
             }
           })
         })
