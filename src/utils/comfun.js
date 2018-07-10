@@ -2,6 +2,9 @@ export default {
   install: function (Vue, options) {
     var ComFun = {
       http_get: function (context, url) {
+        context.$http.options.headers = {
+          'Content-Type': 'application/json;charset=utf-8'
+        }
         if (context && url) {
           var http = new Promise((resolve, reject) => {
             var callUrl = context.$moment.server + url
@@ -30,6 +33,9 @@ export default {
         }
       },
       http_post: function (context, url, params) {
+        context.$http.options.headers = {
+          'Content-Type': 'application/json;charset=utf-8'
+        }
         if (context && url) {
           var paramsData = params || {}
           var http = new Promise((resolve, reject) => {
@@ -60,21 +66,23 @@ export default {
           console.error('上下文对象或请求地址不能为空', 'http_post(context, url)')
         }
       },
-      http_file: function (context, url, aboutKey, file, progressFn) {
+      http_file: function (context, url, aboutKey, file, args, progressFn) {
+        context.$http.options.headers = {
+          'Content-Type': 'multipart/form-data'
+        }
         if (context && url && file) {
           console.log('要上传的视频对象', file)
           const formData = new FormData()
           formData.append(aboutKey, file)
+          if (args) {
+            formData.append('args', JSON.stringify(args))
+          }
           var http = new Promise((resolve, reject) => {
             var callUrl = context.$moment.server + url
             if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
               callUrl = url
             }
             context.$http.post(callUrl, formData, {
-              'headers': {
-                'Content-Type': 'multipart/form-data',
-                'Access-Control-Allow-Origin': '*'
-              },
               progress (event) {
                 console.log('视频上传进度', parseFloat(event.loaded / event.total * 100))
                 if (progressFn && typeof progressFn === 'function' && Object.prototype.toString.call(progressFn).toLowerCase() === '[object function]') {

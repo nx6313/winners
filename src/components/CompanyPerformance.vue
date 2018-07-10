@@ -1012,9 +1012,10 @@ export default {
     height: 2.8rem;
     border-radius: 50%;
     border: 2px solid #ffffff;
+    background-color: #383838;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: auto 100%;
+    background-size: 100% auto;
   }
   .user-name-wrap {
     position: relative;
@@ -1096,9 +1097,10 @@ export default {
             height: 2rem;
             border-radius: 50%;
             border: 2px solid #ffffff;
+            background-color: #383838;
             background-repeat: no-repeat;
             background-position: center;
-            background-size: auto 100%;
+            background-size: 100% auto;
             pointer-events: none;
           }
           i.user-head::after {

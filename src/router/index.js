@@ -36,10 +36,6 @@ Vue.use(Dialogbox)
 Vue.use(FireParticle)
 Vue.use(Cvsbg)
 
-Vue.http.options.headers = {
-  'Content-Type': 'application/json;charset=utf-8'
-}
-
 var router = new Router({
   routes: [
     {

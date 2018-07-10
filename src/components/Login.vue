@@ -62,11 +62,15 @@ export default {
         password: this.userPwd.trim()
       }).then((response) => {
         if (response.body.success === '1') {
-          this.$moment.localforage.setItem('userLoginInfo', {
+          var loginUserInfo = {
             loginDate: new Date(),
             basedate: response.body.basedate ? new Date(response.body.basedate) : new Date(),
             user: response.body.user
-          }).then(() => {
+          }
+          if (response.body.user.args) {
+            loginUserInfo.user.args = JSON.parse(response.body.user.args)
+          }
+          this.$moment.localforage.setItem('userLoginInfo', loginUserInfo).then(() => {
             if (Number(response.body.user.grade) === 1) { // 个人
               this.$router.replace('/home')
             } else if (Number(response.body.user.grade) === 2) { // 公司

@@ -41,14 +41,14 @@ export default {
           {
             txt: '我的业绩',
             path: '/home',
-            icon_normal: 'icon-lhb',
-            icon_select: 'icon-lhb1'
+            icon_normal: 'icon-gryj1',
+            icon_select: 'icon-gryj'
           },
           {
             txt: '龙虎榜',
             path: '/sale-list',
-            icon_normal: 'icon-gryj1',
-            icon_select: 'icon-gryj'
+            icon_normal: 'icon-lhb',
+            icon_select: 'icon-lhb1'
           },
           {
             txt: '我的',
@@ -186,7 +186,6 @@ export default {
   left: 0;
   right: 0;
   top: 0;
-  border-top: 1px solid #f5f5f5;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  border-top: 0.06rem solid rgba(0, 0, 0, 0.08);
 }
 </style>

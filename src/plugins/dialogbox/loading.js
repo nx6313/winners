@@ -18,5 +18,11 @@ Loading.closeLoading = function () {
     }, 305)
   }
 }
+Loading.loadingProgressUpdate = function (progress) {
+  if (document.getElementById('dialog-loading-wrap')) {
+    var totleWidth = document.getElementById('loading-progress-wrap').clientWidth
+    document.getElementById('loading-progress-current').style.width = `${totleWidth * progress}px`
+  }
+}
 
 export default Loading

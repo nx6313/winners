@@ -63,7 +63,6 @@ export default {
   width: 100%;
   text-align: center;
   height: 2rem;
-  text-align: center;
   line-height: 2rem;
   font-size: 0.8rem;
   font-weight: bold;

@@ -8,7 +8,9 @@
     <div class="sale-item-wrap user-self" :class="['sale-item-wrap', 'user-self', (userSaleInfo.ranking >= 1 && userSaleInfo.ranking <= 3)? 'ranking-' + userSaleInfo.ranking : '']">
       <span class="ranking"><span>{{userSaleInfo.ranking}}</span><i></i></span>
       <i class="user-head-wrap"></i>
-      <span class="user-head" :style="userSaleInfo.userHead ? { 'background-image': `url(${userSaleInfo.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></span>
+      <span :class="['user-head', userSaleInfo.userHead ? 'has-head' : '']">
+        <i :style="[userSaleInfo.userHead ? { 'background-image': `url(${userSaleInfo.userHead})` } : { 'background-image': `url(${defaultUserHead})` }, userInfoOpt.scale !== undefined ? { 'transform': `scale(${userInfoOpt.scale}, ${userInfoOpt.scale}) translate(${userInfoOpt.trans[0]}px, ${userInfoOpt.trans[1]}px)` } : {}]"></i>
+      </span>
       <div class="user-info-wrap">
         <div class="line-first flex-r flex-b">
           <span class="user-name">本人</span>
@@ -45,7 +47,9 @@
       <div :class="['sale-item-wrap', ((saleIndex + 1) >= 1 && (saleIndex + 1) <= 3)? 'ranking-' + (saleIndex + 1) : '']" v-for="(sale, saleIndex) in saleList" :key="saleIndex">
         <span class="ranking"><span>{{saleIndex + 1}}</span><i></i></span>
         <i class="user-head-wrap"></i>
-        <span class="user-head" :style="sale.userHead ? { 'background-image': `url(${sale.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></span>
+        <span :class="['user-head', sale.userHead ? 'has-head' : '']">
+          <i :style="sale.userHead ? { 'background-image': `url(${sale.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
+        </span>
         <div class="user-info-wrap">
           <div class="line-first flex-r flex-b">
             <span class="user-name">{{sale.userName}}</span>
@@ -131,12 +135,17 @@ export default {
         duty: '~',
         up: 0
       },
+      userInfoOpt: {},
       saleList: []
     }
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
     this.defaultUserHead = this.$moment.defaultHead
+    if (this.$moment.userInfo.user.args) {
+      this.$set(this.userSaleInfo, 'userHead', this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}`)
+      this.userInfoOpt = this.$moment.userInfo.user.args
+    }
     this.getOrderList()
   },
   methods: {
@@ -203,7 +212,6 @@ export default {
         if (response.body.success === '1') {
           if (response.body.user) {
             this.$set(this.userSaleInfo, 'ranking', response.body.user.rank)
-            this.$set(this.userSaleInfo, 'userHead', '')
             this.$set(this.userSaleInfo, 'userName', response.body.user.name)
             this.$set(this.userSaleInfo, 'saleNum', response.body.user.num)
             this.$set(this.userSaleInfo, 'saleUnit', unit)
@@ -320,9 +328,32 @@ export default {
       border-radius: 50%;
       margin-left: 3.4rem;
       border: 2px solid #e2e2e2;
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: auto 100%;
+      background-color: #383838;
+      overflow: hidden;
+      i {
+        position: relative;
+        top: -0.2rem;
+        left: -0.2rem;
+        display: inline-block;
+        width: 110%;
+        height: 110%;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 100% auto;
+      }
+    }
+    .has-head {
+      i {
+        position: relative;
+        top: 1.72rem;
+        left: -0.18rem;
+        display: inline-block;
+        width: 110%;
+        height: 110%;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 100% auto;
+      }
     }
     .user-info-wrap {
       position: absolute;

@@ -1,7 +1,11 @@
 <template>
   <div class="page-me">
     <div class="user-header-wrap">
-      <span class="user-head" :style="userInfo.userHead ? { 'background-image': `url(${userInfo.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></span>
+      <span class="user-head" @click="selectPic">
+        <span :class="userInfo.userHead ? 'has-head' : ''">
+          <i :style="[userInfo.userHead ? { 'background-image': `url(${userInfo.userHead})` } : { 'background-image': `url(${defaultUserHead})` }, userInfoOpt.scale !== undefined ? { 'transform': `scale(${userInfoOpt.scale}, ${userInfoOpt.scale}) translate(${userInfoOpt.trans[0]}px, ${userInfoOpt.trans[1] * 0.00001}px)` } : {}]"></i>
+        </span>
+      </span>
       <span class="user-name">{{userInfo.userName}}</span>
       <div class="user-level-wrap">
         <span>等级</span>
@@ -28,6 +32,7 @@ export default {
       starCount: 5,
       defaultUserHead: '',
       userInfo: {},
+      userInfoOpt: {},
       userLevel: 3,
       userInfos: []
     }
@@ -35,7 +40,10 @@ export default {
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
     this.defaultUserHead = this.$moment.defaultHead
-    this.$set(this.userInfo, 'userHead', '')
+    if (this.$moment.userInfo.user.args) {
+      this.$set(this.userInfo, 'userHead', this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}`)
+      this.userInfoOpt = this.$moment.userInfo.user.args
+    }
     this.$set(this.userInfo, 'userName', this.$moment.userInfo.user.name)
     this.userInfos = [
       {
@@ -51,6 +59,41 @@ export default {
         content: this.$moment.userInfo.user.phone || '未设置'
       }
     ]
+  },
+  methods: {
+    selectPic () {
+      this.$dialog_pic({
+        callBack: (file, scale, trans) => {
+          this.$dialog_loading({
+            tip: '头像正在上传中...',
+            progress: true
+          })
+          this.$comfun.http_file(this, `consultant/upload/${this.$moment.userInfo.user.id}`, 'file', file, {
+            scale: scale,
+            trans: trans
+          }, (progress) => {
+            this.$dialog_loading_progress_update(progress)
+          }).then((response) => {
+            if (response.body.success === '1') {
+              this.$dialog_msg({
+                msg: '图像设置成功'
+              })
+              this.$set(this.userInfo, 'userHead', this.$moment.HttpAddress + `showFile/${response.body.fid}`)
+              this.userInfoOpt = JSON.parse(response.body.args)
+              this.$moment.localforage.getItem('userLoginInfo').then((userInfo) => {
+                userInfo.user.args = JSON.parse(response.body.args)
+                userInfo.user.photo = response.body.fid
+                this.$moment.localforage.setItem('userLoginInfo', userInfo)
+              })
+            } else {
+              this.$dialog_msg({
+                msg: '图像设置失败'
+              })
+            }
+          })
+        }
+      })
+    }
   }
 }
 </script>
@@ -76,10 +119,40 @@ export default {
     margin: 0 auto;
     margin-top: 2.4rem;
     border: 2px solid #f0f0f0;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: auto 100%;
+    background-color: #383838;
     z-index: 9;
+    span {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 50%;
+      i {
+        position: relative;
+        top: -0.24rem;
+        left: -0.24rem;
+        display: inline-block;
+        width: 110%;
+        height: 110%;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 100% auto;
+      }
+    }
+    span.has-head {
+      i {
+        position: relative;
+        top: -0.14rem;
+        left: -0.24rem;
+        display: inline-block;
+        width: 110%;
+        height: 110%;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 100% auto;
+      }
+    }
   }
   .user-head::after {
     content: '';

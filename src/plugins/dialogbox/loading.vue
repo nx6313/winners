@@ -21,7 +21,11 @@
           <div class="bottom__foot"></div>
         </div>
       </div>
-      <span class="loading-tip">{{tip}}</span>
+      <span :class="['loading-tip', progress ? 'isProgress' : '']">{{tip}}</span>
+      <div id="loading-progress-wrap" class="loading-progress-wrap" ref="loading-progress-wrap">
+        <div id="loading-progress-current" class="loading-progress-current" ref="loading-progress-current"></div>
+        <div class="loading-progress-animate"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -36,7 +40,9 @@ export default {
       isShow: true,
       shadeClose: false,
       scale: 0.16,
-      tip: '数据加载中...'
+      tip: '数据加载中...',
+      progress: false,
+      update: () => {}
     }
   },
   beforeMount () {
@@ -45,17 +51,28 @@ export default {
       dialogLoading.parentNode.removeChild(dialogLoading)
     }
   },
+  mounted () {
+    this.$nextTick(() => {
+      if (this.progress) {
+        this.update(this.updateProgress)
+      }
+    })
+  },
   methods: {
     closeLoading () {
       if (this.shadeClose) {
         this.isShow = false
       }
+    },
+    updateProgress (progress) {
+      var totleWidth = this.$refs['loading-progress-wrap'].clientWidth
+      this.$refs['loading-progress-current'].style.width = `${totleWidth * progress}px`
     }
   }
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 #dialog-loading-wrap {
   position: relative;
   transition: all 0.3s ease 0s;
@@ -68,7 +85,7 @@ export default {
   width: 100vw;
   height: 100vh;
   background-color: rgba(31, 31, 31, 0.3);
-  z-index: 99999;
+  z-index: 999999;
   -vendor-animation-duration: 0.2s;
   animation-duration: 0.2s;
   -vendor-animation-delay: 0.1s;
@@ -85,7 +102,7 @@ export default {
   font-size: 0.8rem;
   font-weight: bold;
   border-radius: 3px;
-  z-index: 999999;
+  z-index: 9999999;
   box-shadow: 0 0 10px 0px rgba(143, 143, 143, 0.3);
 }
 
@@ -99,5 +116,50 @@ export default {
   display: inline-block;
   top: 2.4rem;
   left: 6rem;
+}
+
+.loading-content > span.isProgress {
+  position: absolute;
+  display: inline-block;
+  top: 1.8rem;
+  left: 6rem;
+}
+
+.loading-content > div.loading-progress-wrap {
+  position: absolute;
+  display: inline-block;
+  top: 3.6rem;
+  left: 6rem;
+  width: calc(100% - 6rem - 1rem);
+  height: 6px;
+  border-radius: 10rem;
+  font-size: 0px;
+  background-color: rgba(243, 239, 251, .8);
+  overflow: hidden;
+  div.loading-progress-current {
+    position: relative;
+    height: 100%;
+    width: 0px;
+    background: linear-gradient(to left, #583D9B, #1499CA, #5E3D9B);
+    transition: width 0.3s ease 0s;
+    overflow: hidden;
+  }
+  div.loading-progress-animate {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to left, rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, .4), rgba(243, 239, 251, .6), rgba(243, 239, 251, .8), rgba(243, 239, 251, .6), rgba(243, 239, 251, .4), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0));
+    animation: moveflash 4s ease 0s infinite;
+  }
+}
+
+@keyframes moveflash {
+  0% {
+    transform: translateX(-68%);
+  }
+  100% {
+    transform: translateX(68%);
+  }
 }
 </style>

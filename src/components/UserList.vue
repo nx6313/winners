@@ -244,7 +244,7 @@ export default {
           height: 1.4rem;
           background-repeat: no-repeat;
           background-position: center;
-          background-size: auto 100%;
+          background-size: 100% auto;
           background-image: url('./../assets/item-arrow.png');
           transition: all 0.4s ease 0s;
           pointer-events: none;
@@ -277,7 +277,7 @@ export default {
             margin-right: 0.6rem;
             background-repeat: no-repeat;
             background-position: center;
-            background-size: auto 100%;
+            background-size: 100% auto;
             pointer-events: none;
           }
           div.user-info {
@@ -390,7 +390,7 @@ export default {
         margin-right: 0.6rem;
         background-repeat: no-repeat;
         background-position: center;
-        background-size: auto 100%;
+        background-size: 100% auto;
         pointer-events: none;
       }
       div.user-info {

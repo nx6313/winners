@@ -1,7 +1,9 @@
 <template>
   <div id="page-home" class="page-home" @scroll="scrollPage">
     <div class="page-header-wrap">
-      <span class="user-head" :style="{ 'background-image': `url(${defaultUserHead})` }"></span>
+      <span :class="['user-head', userHead !== '' ? 'has-head' : '']">
+        <i :style="[userHead !== '' ? { 'background-image': `url(${userHead})` } : { 'background-image': `url(${defaultUserHead})` }, userInfoOpt.scale !== undefined ? { 'transform': `scale(${userInfoOpt.scale}, ${userInfoOpt.scale}) translate(${userInfoOpt.trans[0]}px, ${userInfoOpt.trans[1]}px)` } : {}]"></i>
+      </span>
       <div class="user-name-wrap">
         <span class="user-name">{{userName}}</span>
         <div class="level-wrap">
@@ -94,6 +96,8 @@ export default {
   data () {
     return {
       defaultUserHead: '',
+      userHead: '',
+      userInfoOpt: {},
       starCount: 5,
       userLevel: 3,
       headerIsLoading: true,
@@ -641,6 +645,10 @@ export default {
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
     this.defaultUserHead = this.$moment.defaultHead
+    if (this.$moment.userInfo.user.args) {
+      this.userHead = this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}`
+      this.userInfoOpt = this.$moment.userInfo.user.args
+    }
     this.resetDateEvery(this.dateTabs[0].id)
 
     this.userName = this.$moment.userInfo.user.name
@@ -1426,7 +1434,32 @@ export default {
     border: 2px solid #ffffff;
     background-repeat: no-repeat;
     background-position: center;
-    background-size: auto 100%;
+    background-size: 100% auto;
+    overflow: hidden;
+    i {
+      position: relative;
+      top: -0.18rem;
+      left: -0.18rem;
+      display: inline-block;
+      width: 110%;
+      height: 110%;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 100% auto;
+    }
+  }
+  .has-head {
+    i {
+      position: relative;
+      top: 1.72rem;
+      left: -0.18rem;
+      display: inline-block;
+      width: 110%;
+      height: 110%;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 100% auto;
+    }
   }
   .user-name-wrap {
     position: relative;
