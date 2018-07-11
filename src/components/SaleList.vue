@@ -5,33 +5,49 @@
         <span v-for="(tab, tabIndex) in tabs" :key="tabIndex" :class="tabIndex === 0 ? 'cur' : ''" :style="{ 'width': `calc(100vw / 5)` }" @click="refOrder('tabType', tab.id)">{{tab.txt}}</span>
       </div>
     </div>
-    <div class="sale-item-wrap user-self" :class="['sale-item-wrap', 'user-self', (userSaleInfo.ranking >= 1 && userSaleInfo.ranking <= 3)? 'ranking-' + userSaleInfo.ranking : '']">
-      <span class="ranking"><span>{{userSaleInfo.ranking}}</span><i></i></span>
-      <i class="user-head-wrap"></i>
-      <span :class="['user-head', userSaleInfo.userHead ? 'has-head' : '']">
-        <i :style="[userSaleInfo.userHead ? { 'background-image': `url(${userSaleInfo.userHead})` } : { 'background-image': `url(${defaultUserHead})` }, userInfoOpt.scale !== undefined ? { 'transform': `scale(${userInfoOpt.scale}, ${userInfoOpt.scale}) translate(${userInfoOpt.trans[0]}px, ${userInfoOpt.trans[1]}px)` } : {}]"></i>
-      </span>
-      <div class="user-info-wrap">
-        <div class="line-first flex-r flex-b">
-          <span class="user-name">本人</span>
-          <div class="sale-num-wrap" v-if="userSaleInfo.userName">
-            <span>销量:</span>
-            <span class="big">{{userSaleInfo.saleNum}}</span>
-            <span>{{userSaleInfo.saleUnit}}</span>
-          </div>
-        </div>
-        <div class="line-two flex-r flex-b" v-if="userSaleInfo.userName">
-          <div>
-            <span>{{userSaleInfo.factory}}</span>
-            <span class="duty">{{userSaleInfo.duty}}</span>
-          </div>
-          <span class="up-dowm">
-            <i :class="['iconfont', userSaleInfo.up >= 0 ? ['icon-shang', 'up'] : ['icon-xia', 'down']]"></i>
-            <span v-if="userSaleInfo.up >= 0">上升 {{userSaleInfo.up}} 名</span>
-            <span v-if="userSaleInfo.up < 0">下降 {{userSaleInfo.up}} 名</span>
+    <div class="user-self-order-wrap" ref="user-self-order-wrap" @touchstart="userSelfTouchStart" @touchmove="userSelfTouchMove" @touchend="userSelfTouchEnd">
+      <div :id="'user-self-page_' + userSaleInfoIndex" ref="user-self-order" :class="['user-self-order', userSaleInfoIndex === 0 ? 'cur-page-for-user-self' : '', (userSaleInfo.ranking >= 1 && userSaleInfo.ranking <= 3)? 'user-self-ranking-' + userSaleInfo.ranking : '']" v-for="(userSaleInfo, userSaleInfoIndex) in userSaleInfos" :key="userSaleInfoIndex">
+        <div class="user-head-name-wrap">
+          <i class="user-head-wrap"></i>
+          <span :class="['user-head', userSaleInfo.userHead ? 'has-head' : '']">
+            <i :style="userSaleInfo.userHead ? { 'background-image': `url(${userSaleInfo.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
           </span>
+          <span class="user-name">{{userSaleInfo.userName}}</span>
         </div>
-        <div class="no-sale-data" v-if="!userSaleInfo.userName">暂无销售记录</div>
+        <div class="user-info-wrap flex-r flex-b">
+          <div class="order-item">
+            <div class="ranking-wrap">
+              <span class="rank">{{userSaleInfo['company-ranking']}}</span>
+              <span>名</span>
+              <span class="up-dowm">
+                <i :class="['iconfont', userSaleInfo['company-up'] >= 0 ? ['icon-shang', 'up'] : ['icon-xia', 'down']]"></i>
+                <span>{{Math.abs(userSaleInfo['company-up'])}}</span>
+              </span>
+            </div>
+            <div class="ranking-des">本厂{{userSaleInfo.dateType}}排行</div>
+          </div>
+          <div class="order-item">
+            <div class="ranking-wrap">
+              <span class="rank">{{userSaleInfo['group-ranking']}}</span>
+              <span>名</span>
+              <span class="up-dowm">
+                <i :class="['iconfont', userSaleInfo['group-up'] >= 0 ? ['icon-shang', 'up'] : ['icon-xia', 'down']]"></i>
+                <span>{{Math.abs(userSaleInfo['group-up'])}}</span>
+              </span>
+            </div>
+            <div class="ranking-des">集团{{userSaleInfo.dateType}}排行</div>
+          </div>
+          <div class="order-item">
+            <div class="ranking-wrap">
+              <span class="rank">{{userSaleInfo.saleNum}}</span>
+              <span>{{userSaleInfo.saleUnit}}</span>
+            </div>
+            <div class="ranking-des">{{userSaleInfo.salePre}}</div>
+          </div>
+        </div>
+        <div class="page-index">
+          <span v-for="(indicator, indicatorIndex) in 3" :key="indicatorIndex" :class="indicatorIndex === userSaleInfoIndex ? 'cur-page' : ''"></span>
+        </div>
       </div>
     </div>
     <div class="tabs-wrap sort-list-tab-wrap">
@@ -54,7 +70,7 @@
           <div class="line-first flex-r flex-b">
             <span class="user-name">{{sale.userName}}</span>
             <div class="sale-num-wrap">
-              <span>销量:</span>
+              <span>{{sale.salePre}}:</span>
               <span class="big">{{sale.saleNum}}</span>
               <span>{{sale.saleUnit}}</span>
             </div>
@@ -81,6 +97,9 @@ export default {
   name: 'SaleList',
   data () {
     return {
+      userSelfCurPage: 0,
+      userSelfTouchStartX: -1,
+      userSelfMoveDistance: 0,
       curTabType: 'newcar',
       curDateTabType: 'week',
       curOrderWay: 8, // 8 集团 、9 公司
@@ -125,27 +144,58 @@ export default {
           txt: '年排行'
         }
       ],
-      userSaleInfo: {
-        ranking: 0,
-        userHead: '',
-        userName: '',
-        saleNum: '~',
-        saleUnit: '~',
-        factory: '~',
-        duty: '~',
-        up: 0
-      },
-      userInfoOpt: {},
+      userSaleInfos: [
+        {
+          userHead: '',
+          'company-ranking': 0,
+          'group-ranking': 0,
+          'company-up': 0,
+          'group-up': 0,
+          userName: '~',
+          saleNum: '~',
+          salePre: '~',
+          saleUnit: '~',
+          dateType: '周'
+        },
+        {
+          userHead: '',
+          'company-ranking': 0,
+          'group-ranking': 0,
+          'company-up': 0,
+          'group-up': 0,
+          userName: '~',
+          saleNum: '~',
+          salePre: '~',
+          saleUnit: '~',
+          dateType: '月'
+        },
+        {
+          userHead: '',
+          'company-ranking': 0,
+          'group-ranking': 0,
+          'company-up': 0,
+          'group-up': 0,
+          userName: '~',
+          saleNum: '~',
+          salePre: '~',
+          saleUnit: '~',
+          dateType: '年'
+        }
+      ],
       saleList: []
     }
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
     this.defaultUserHead = this.$moment.defaultHead
-    if (this.$moment.userInfo.user.args) {
-      this.$set(this.userSaleInfo, 'userHead', this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}`)
-      this.userInfoOpt = this.$moment.userInfo.user.args
+    if (this.$moment.userInfo.user.photo !== null) {
+      this.$set(this.userSaleInfos[0], 'userHead', this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}`)
+      this.$set(this.userSaleInfos[1], 'userHead', this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}`)
+      this.$set(this.userSaleInfos[2], 'userHead', this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}`)
     }
+    this.getUserSelfOrder('week')
+    this.getUserSelfOrder('month')
+    this.getUserSelfOrder('year')
     this.getOrderList()
   },
   methods: {
@@ -154,6 +204,9 @@ export default {
       event.target.classList.add('cur')
       if (type === 'tabType') {
         this.curTabType = val
+        this.getUserSelfOrder('week')
+        this.getUserSelfOrder('month')
+        this.getUserSelfOrder('year')
       } else if (type === 'orderType') {
         this.curDateTabType = val
       } else if (type === 'way') {
@@ -161,12 +214,157 @@ export default {
       }
       this.getOrderList()
     },
+    userSelfTouchStart () {
+      this.$refs['user-self-order-wrap'].style['transition-duration'] = '0s'
+      this.userSelfTouchStartX = event.touches[0].pageX
+      var userSelfPages = this.$refs['user-self-order']
+      for (let p = 0; p < userSelfPages.length; p++) {
+        if (userSelfPages[p].classList.contains('cur-page-for-user-self')) {
+          let pageItemId = userSelfPages[p].id
+          this.userSelfCurPage = Number(pageItemId.split('_')[1])
+        }
+      }
+    },
+    userSelfTouchMove () {
+      if (this.userSelfTouchStartX < 0) {
+        this.userSelfTouchStartX = event.touches[0].pageX
+      }
+      this.userSelfMoveDistance = event.touches[0].pageX - this.userSelfTouchStartX
+      if (!((this.userSelfMoveDistance > 0 && this.userSelfCurPage === 0) || (this.userSelfMoveDistance < 0 && this.userSelfCurPage === 2) || Math.abs(this.userSelfMoveDistance) > document.body.clientWidth)) {
+        var transTo = `translateX(calc(${-this.userSelfCurPage} * 100vw + ${this.userSelfMoveDistance}px))`
+        this.$refs['user-self-order-wrap'].style.transform = transTo
+      }
+    },
+    userSelfTouchEnd () {
+      this.$refs['user-self-order-wrap'].style['transition-duration'] = '0.4s'
+      if (Math.abs(this.userSelfMoveDistance) > 80) {
+        if (this.userSelfMoveDistance > 0) {
+          // 下一页
+          if (this.userSelfCurPage > 0) {
+            this.userSelfCurPage--
+          }
+        } else if (this.userSelfMoveDistance < 0) {
+          // 上一页
+          if (this.userSelfCurPage < 2) {
+            this.userSelfCurPage++
+          }
+        }
+      }
+      var userSelfPages = this.$refs['user-self-order']
+      for (let p = 0; p < userSelfPages.length; p++) {
+        if (userSelfPages[p].classList.contains('cur-page-for-user-self')) {
+          userSelfPages[p].classList.remove('cur-page-for-user-self')
+          if (p === this.userSelfCurPage) {
+            userSelfPages[p].classList.add('cur-page-for-user-self')
+          }
+        }
+      }
+      let transTo = `translateX(calc(${-this.userSelfCurPage} * 100vw))`
+      this.$refs['user-self-order-wrap'].style.transform = transTo
+      this.userSelfTouchStartX = -1
+      this.userSelfMoveDistance = 0
+    },
+    getUserSelfOrder (dateType) {
+      var startDate = ''
+      var endDate = ''
+      var startOldDate = ''
+      var endOldDate = ''
+      var datePre = '周'
+      if (dateType === 'week') {
+        datePre = '周'
+        var curWeek = this.$comfun.getWeekStartEnd()
+        var beforeWeek = this.$comfun.getWeekStartEnd(-1)
+        startDate = this.$comfun.formatDate(curWeek[0], 'yyyy-MM-dd')
+        endDate = this.$comfun.formatDate(curWeek[1], 'yyyy-MM-dd')
+        startOldDate = this.$comfun.formatDate(beforeWeek[0], 'yyyy-MM-dd')
+        endOldDate = this.$comfun.formatDate(beforeWeek[1], 'yyyy-MM-dd')
+      } else if (dateType === 'month') {
+        datePre = '月'
+        var curMonth = this.$comfun.getMonthStartEnd()
+        var beforeMonth = this.$comfun.getMonthStartEnd(-1)
+        startDate = this.$comfun.formatDate(curMonth[0], 'yyyy-MM-dd')
+        endDate = this.$comfun.formatDate(curMonth[1], 'yyyy-MM-dd')
+        startOldDate = this.$comfun.formatDate(beforeMonth[0], 'yyyy-MM-dd')
+        endOldDate = this.$comfun.formatDate(beforeMonth[1], 'yyyy-MM-dd')
+      } else if (dateType === 'year') {
+        datePre = '年'
+        startDate = new Date().getFullYear() + '-01-01'
+        endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+        startOldDate = (new Date().getFullYear() - 1) + '-01-01'
+        endOldDate = this.$comfun.formatDate(this.$comfun.getLastDay(new Date().getFullYear() - 1, 12), 'yyyy-MM-dd')
+      }
+      var preDes = ''
+      var unit = ''
+      if (this.curTabType === 'newcar') {
+        preDes = datePre + '销量'
+        unit = '台'
+      } else if (this.curTabType === 'accessory') {
+        preDes = datePre + '销售额'
+        unit = '元'
+      } else if (this.curTabType === 'finance') {
+        preDes = datePre + '信贷量'
+        unit = '台'
+      } else if (this.curTabType === 'insurance') {
+        preDes = datePre + '投保量'
+        unit = '单'
+      } else if (this.curTabType === 'oldcar') {
+        preDes = datePre + '置换量'
+        unit = '台'
+      } else if (this.curTabType === 'accessory') {
+        preDes = datePre + ''
+        unit = '元'
+      }
+      this.$comfun.http_post(this, this.curTabType + `/order/my/${this.$moment.userInfo.user.id}`, {
+        startDate: startDate,
+        endDate: endDate,
+        startOldDate: startOldDate,
+        endOldDate: endOldDate
+      }).then((response) => {
+        if (response.body.success === '1') {
+          if (dateType === 'week') {
+            this.$set(this.userSaleInfos[0], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}` : '')
+            this.$set(this.userSaleInfos[0], 'company-ranking', response.body.company.rank)
+            this.$set(this.userSaleInfos[0], 'group-ranking', response.body.group.rank)
+            this.$set(this.userSaleInfos[0], 'company-up', !response.body.company.oldRank || response.body.company.oldRank === 0 ? 0 : response.body.company.oldRank - response.body.company.rank)
+            this.$set(this.userSaleInfos[0], 'group-up', !response.body.group.oldRank || response.body.group.oldRank === 0 ? 0 : response.body.group.oldRank - response.body.group.rank)
+            this.$set(this.userSaleInfos[0], 'userName', this.$moment.userInfo.user.name)
+            this.$set(this.userSaleInfos[0], 'saleNum', response.body.company.num)
+            this.$set(this.userSaleInfos[0], 'salePre', preDes)
+            this.$set(this.userSaleInfos[0], 'saleUnit', unit)
+          }
+          if (dateType === 'month') {
+            this.$set(this.userSaleInfos[1], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}` : '')
+            this.$set(this.userSaleInfos[1], 'company-ranking', response.body.company.rank)
+            this.$set(this.userSaleInfos[1], 'group-ranking', response.body.group.rank)
+            this.$set(this.userSaleInfos[1], 'company-up', !response.body.company.oldRank || response.body.company.oldRank === 0 ? 0 : response.body.company.oldRank - response.body.company.rank)
+            this.$set(this.userSaleInfos[1], 'group-up', !response.body.group.oldRank || response.body.group.oldRank === 0 ? 0 : response.body.group.oldRank - response.body.group.rank)
+            this.$set(this.userSaleInfos[1], 'userName', this.$moment.userInfo.user.name)
+            this.$set(this.userSaleInfos[1], 'saleNum', response.body.company.num)
+            this.$set(this.userSaleInfos[1], 'salePre', preDes)
+            this.$set(this.userSaleInfos[1], 'saleUnit', unit)
+          }
+          if (dateType === 'year') {
+            this.$set(this.userSaleInfos[2], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}` : '')
+            this.$set(this.userSaleInfos[2], 'company-ranking', response.body.company.rank)
+            this.$set(this.userSaleInfos[2], 'group-ranking', response.body.group.rank)
+            this.$set(this.userSaleInfos[2], 'company-up', !response.body.company.oldRank || response.body.company.oldRank === 0 ? 0 : response.body.company.oldRank - response.body.company.rank)
+            this.$set(this.userSaleInfos[2], 'group-up', !response.body.group.oldRank || response.body.group.oldRank === 0 ? 0 : response.body.group.oldRank - response.body.group.rank)
+            this.$set(this.userSaleInfos[2], 'userName', this.$moment.userInfo.user.name)
+            this.$set(this.userSaleInfos[2], 'saleNum', response.body.company.num)
+            this.$set(this.userSaleInfos[2], 'salePre', preDes)
+            this.$set(this.userSaleInfos[2], 'saleUnit', unit)
+          }
+        }
+      })
+    },
     getOrderList () {
       var startDate = ''
       var endDate = ''
       var startOldDate = ''
       var endOldDate = ''
+      var datePre = '周'
       if (this.curDateTabType === 'week') {
+        datePre = '周'
         var curWeek = this.$comfun.getWeekStartEnd()
         var beforeWeek = this.$comfun.getWeekStartEnd(-1)
         startDate = this.$comfun.formatDate(curWeek[0], 'yyyy-MM-dd')
@@ -174,6 +372,7 @@ export default {
         startOldDate = this.$comfun.formatDate(beforeWeek[0], 'yyyy-MM-dd')
         endOldDate = this.$comfun.formatDate(beforeWeek[1], 'yyyy-MM-dd')
       } else if (this.curDateTabType === 'month') {
+        datePre = '月'
         var curMonth = this.$comfun.getMonthStartEnd()
         var beforeMonth = this.$comfun.getMonthStartEnd(-1)
         startDate = this.$comfun.formatDate(curMonth[0], 'yyyy-MM-dd')
@@ -181,24 +380,32 @@ export default {
         startOldDate = this.$comfun.formatDate(beforeMonth[0], 'yyyy-MM-dd')
         endOldDate = this.$comfun.formatDate(beforeMonth[1], 'yyyy-MM-dd')
       } else if (this.curDateTabType === 'year') {
+        datePre = '年'
         startDate = new Date().getFullYear() + '-01-01'
         endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
         startOldDate = (new Date().getFullYear() - 1) + '-01-01'
         endOldDate = this.$comfun.formatDate(this.$comfun.getLastDay(new Date().getFullYear() - 1, 12), 'yyyy-MM-dd')
       }
+      var preDes = ''
       var unit = ''
       if (this.curTabType === 'newcar') {
+        preDes = datePre + '销量'
         unit = '台'
       } else if (this.curTabType === 'accessory') {
+        preDes = datePre + '销售额'
         unit = '元'
       } else if (this.curTabType === 'finance') {
-        unit = '单'
+        preDes = datePre + '信贷量'
+        unit = '台'
       } else if (this.curTabType === 'insurance') {
+        preDes = datePre + '投保量'
         unit = '单'
       } else if (this.curTabType === 'oldcar') {
+        preDes = datePre + '置换量'
         unit = '台'
       } else if (this.curTabType === 'accessory') {
-        unit = '台'
+        preDes = datePre + ''
+        unit = '元'
       }
       this.$comfun.http_post(this, this.curTabType + `/order/${this.$moment.userInfo.user.id}`, {
         type: this.curOrderWay,
@@ -210,22 +417,13 @@ export default {
         limit: 20
       }).then((response) => {
         if (response.body.success === '1') {
-          if (response.body.user) {
-            this.$set(this.userSaleInfo, 'ranking', response.body.user.rank)
-            this.$set(this.userSaleInfo, 'userName', response.body.user.name)
-            this.$set(this.userSaleInfo, 'saleNum', response.body.user.num)
-            this.$set(this.userSaleInfo, 'saleUnit', unit)
-            this.$set(this.userSaleInfo, 'factory', response.body.user.companyName)
-            this.$set(this.userSaleInfo, 'duty', response.body.user.dutyName)
-            this.$set(this.userSaleInfo, 'up', !response.body.user.oldRank || response.body.user.oldRank === 0 ? 0 : response.body.user.oldRank - response.body.user.rank)
-          }
-
           this.saleList = []
           for (let s = 0; s < response.body[this.curTabType].length; s++) {
             this.saleList.push({
-              userHead: '',
+              userHead: response.body[this.curTabType][s].photo ? this.$moment.HttpAddress + `showFile/${response.body[this.curTabType][s].photo}` : '',
               userName: response.body[this.curTabType][s].name,
               saleNum: response.body[this.curTabType][s].num,
+              salePre: preDes,
               saleUnit: unit,
               factory: response.body[this.curTabType][s].companyName,
               duty: response.body[this.curTabType][s].dutyName,
@@ -284,6 +482,15 @@ export default {
     bottom: 0;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
   }
+  .user-self-order-wrap {
+    position: relative;
+    white-space: nowrap;
+    width: 300vw;
+    transition: all 0.4s ease 0s;
+    transform: translateX(0vw);
+    font-size: 0px;
+    margin-top: 0.6rem;
+  }
   .sort-type-wrap {
     position: relative;
     background-color: #ffffff;
@@ -300,8 +507,137 @@ export default {
       color: #ffffff;
     }
   }
-  .user-self {
-    margin-top: 0.6rem;
+  .user-self-order {
+    position: relative;
+    display: inline-block;
+    width: 100vw;
+    background-color: #ffffff;
+    height: 7.2rem;
+    .user-head-name-wrap {
+      position: relative;
+      display: inline-block;
+      width: 6rem;
+      height: 100%;
+      left: 0.2rem;
+      .user-head {
+        position: absolute;
+        display: inline-block;
+        top: 0.9rem;
+        width: 3rem;
+        height: 3rem;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        border-radius: 50%;
+        border: 2px solid #e2e2e2;
+        background-color: #383838;
+        z-index: 2;
+        overflow: hidden;
+        i {
+          position: relative;
+          top: -5%;
+          left: -5%;
+          display: inline-block;
+          width: 110%;
+          height: 110%;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: 100% auto;
+          z-index: 1;
+        }
+      }
+      .has-head {
+        i {
+          position: relative;
+          top: 0;
+          left: 0;
+          display: inline-block;
+          width: 200%;
+          height: 200%;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: 100% auto;
+        }
+      }
+      .user-name {
+        position: absolute;
+        bottom: 1.6rem;
+        font-size: 0.9rem;
+        width: 100%;
+        text-align: center;
+        color: #0f4e97;
+      }
+    }
+    .user-info-wrap {
+      position: absolute;
+      top: 0;
+      left: 6.8rem;
+      display: inline-block;
+      width: calc(100% - 6.9rem);
+      height: 100%;
+      font-size: 0px;
+      div.order-item {
+        position: relative;
+        display: inline-block;
+        width: calc(100% / 3);
+        height: 100%;
+        font-size: 0.7rem;
+        color: #333333;
+        .ranking-wrap {
+          position: relative;
+          margin-top: 2rem;
+          .rank {
+            font-size: 1rem;
+            color: #ff721f;
+            font-weight: bold;
+          }
+          span.up-dowm {
+            position: relative;
+            i {
+              position: relative;
+              display: inline-block;
+              width: 0;
+              height: 0;
+              margin-right: 0.7rem;
+              top: 0.08rem;
+              font-size: 0.96rem;
+            }
+            i.up {
+              color: #22ac38;
+            }
+            i.down {
+              color: #f44452;
+            }
+            span {
+              color: #9b9b9b;
+              font-size: 0.6rem;
+            }
+          }
+        }
+        .ranking-des {
+          margin-top: 0.6rem;
+        }
+      }
+    }
+    .page-index {
+      position: absolute;
+      width: 100%;
+      height: 1.2rem;
+      bottom: 0;
+      text-align: center;
+      span {
+        position: relative;
+        display: inline-block;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        background-color: #cddbed;
+        margin: 0 0.3rem;
+      }
+      .cur-page {
+        background-color: #73a7e3;
+      }
+    }
   }
   .sale-item-wrap {
     position: relative;
@@ -329,27 +665,29 @@ export default {
       margin-left: 3.4rem;
       border: 2px solid #e2e2e2;
       background-color: #383838;
+      z-index: 2;
       overflow: hidden;
       i {
         position: relative;
-        top: -0.2rem;
-        left: -0.2rem;
+        top: -5%;
+        left: -5%;
         display: inline-block;
         width: 110%;
         height: 110%;
         background-repeat: no-repeat;
         background-position: center;
         background-size: 100% auto;
+        z-index: 1;
       }
     }
     .has-head {
       i {
         position: relative;
-        top: 1.72rem;
-        left: -0.18rem;
+        top: 0;
+        left: 0;
         display: inline-block;
-        width: 110%;
-        height: 110%;
+        width: 200%;
+        height: 200%;
         background-repeat: no-repeat;
         background-position: center;
         background-size: 100% auto;
@@ -418,14 +756,9 @@ export default {
           }
           span {
             color: #9b9b9b;
+            font-size: 0.6rem;
           }
         }
-      }
-      div.no-sale-data {
-        position: relative;
-        color: #9b9b9b;
-        font-size: 0.8rem;
-        top: 0.8rem;
       }
     }
   }
@@ -556,6 +889,69 @@ export default {
     }
     .user-info-wrap {
       top: 2.1rem;
+    }
+  }
+  .user-self-ranking-1 {
+    .user-head {
+      top: 1.2rem !important;
+    }
+    .user-head-wrap {
+      position: absolute;
+      display: inline-block;
+      top: 0.46rem;
+      left: 0.86rem;
+      width: 4.4rem;
+      height: 4.4rem;
+      background-image: url('./../assets/gold-head.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 100% auto;
+      z-index: 10;
+    }
+    .user-name {
+      bottom: 1.1rem !important;
+    }
+  }
+  .user-self-ranking-2 {
+    .user-head {
+      top: 1.2rem !important;
+    }
+    .user-head-wrap {
+      position: absolute;
+      display: inline-block;
+      top: 0.46rem;
+      left: 0.86rem;
+      width: 4.4rem;
+      height: 4.4rem;
+      background-image: url('./../assets/gold-head.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 100% auto;
+      z-index: 10;
+    }
+    .user-name {
+      bottom: 1.1rem !important;
+    }
+  }
+  .user-self-ranking-3 {
+    .user-head {
+      top: 1.2rem !important;
+    }
+    .user-head-wrap {
+      position: absolute;
+      display: inline-block;
+      top: 0.46rem;
+      left: 0.86rem;
+      width: 4.4rem;
+      height: 4.4rem;
+      background-image: url('./../assets/gold-head.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 100% auto;
+      z-index: 10;
+    }
+    .user-name {
+      bottom: 1.1rem !important;
     }
   }
   .sort-list-tab-wrap {

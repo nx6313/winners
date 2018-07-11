@@ -2,7 +2,7 @@
   <div id="page-home" class="page-home" @scroll="scrollPage">
     <div class="page-header-wrap">
       <span :class="['user-head', userHead !== '' ? 'has-head' : '']">
-        <i :style="[userHead !== '' ? { 'background-image': `url(${userHead})` } : { 'background-image': `url(${defaultUserHead})` }, userInfoOpt.scale !== undefined ? { 'transform': `scale(${userInfoOpt.scale}, ${userInfoOpt.scale}) translate(${userInfoOpt.trans[0]}px, ${userInfoOpt.trans[1]}px)` } : {}]"></i>
+        <i :style="userHead !== '' ? { 'background-image': `url(${userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
       </span>
       <div class="user-name-wrap">
         <span class="user-name">{{userName}}</span>
@@ -42,7 +42,7 @@
           </div>
           <div class="progress-des-wrap" v-for="(summarizingDes, summarizingDesIndex) in summarizings" :key="'des-' + summarizingDesIndex" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})`, 'left': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} * ${summarizingDesIndex} + ${summarizingDesIndex} * 2 * 0.2rem)` }">
             <span class="title">{{summarizingDes.title}}</span>
-            <span class="num" :ref="'des-num-' + summarizingDesIndex" v-num-scroll:opt="{ number: summarizingDes.num, precision: 0 }">0</span>
+            <span class="num" :ref="'des-num-' + summarizingDesIndex">{{summarizingDes.num}}</span>
             <span class="des">{{summarizingDes.des}}</span>
           </div>
         </div>
@@ -97,7 +97,6 @@ export default {
     return {
       defaultUserHead: '',
       userHead: '',
-      userInfoOpt: {},
       starCount: 5,
       userLevel: 3,
       headerIsLoading: true,
@@ -153,7 +152,7 @@ export default {
           progress: 0,
           title: '金融',
           num: 0,
-          des: '信贷量（单）'
+          des: '信贷量（台）'
         },
         {
           progress: 0,
@@ -172,7 +171,7 @@ export default {
         title: {
           text: '{money|0}\t\t{unit|元}\n综合毛利',
           left: 'center',
-          top: '52%',
+          top: '38%',
           textStyle: {
             color: '#4D4D4D',
             fontSize: 13,
@@ -206,7 +205,7 @@ export default {
           {
             name: '毛利占比率',
             type: 'pie',
-            center: ['50%', '60%'],
+            center: ['50%', '46%'],
             radius: ['44%', '30%'],
             label: {
               normal: {
@@ -249,7 +248,7 @@ export default {
             data: [
               {
                 value: 0,
-                name: '整车'
+                name: '裸车毛利'
               },
               {
                 value: 0,
@@ -377,7 +376,7 @@ export default {
       },
       zcChartOpt: {
         title: {
-          text: '整车',
+          text: '整车 / 台',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -398,7 +397,8 @@ export default {
           data: []
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
+          minInterval: 1
         },
         series: [
           {
@@ -430,7 +430,7 @@ export default {
       },
       qcypChartOpt: {
         title: {
-          text: '汽车用品',
+          text: '汽车用品 / 元',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -483,7 +483,7 @@ export default {
       },
       jrChartOpt: {
         title: {
-          text: '金融',
+          text: '金融 / 台',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -504,7 +504,8 @@ export default {
           data: []
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
+          minInterval: 1
         },
         series: [
           {
@@ -536,7 +537,7 @@ export default {
       },
       bxChartOpt: {
         title: {
-          text: '保险',
+          text: '保险 / 单',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -557,7 +558,8 @@ export default {
           data: []
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
+          minInterval: 1
         },
         series: [
           {
@@ -589,7 +591,7 @@ export default {
       },
       escChartOpt: {
         title: {
-          text: '二手车',
+          text: '二手车 / 台',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -610,7 +612,8 @@ export default {
           data: []
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
+          minInterval: 1
         },
         series: [
           {
@@ -645,9 +648,8 @@ export default {
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
     this.defaultUserHead = this.$moment.defaultHead
-    if (this.$moment.userInfo.user.args) {
+    if (this.$moment.userInfo.user.photo !== null) {
       this.userHead = this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}`
-      this.userInfoOpt = this.$moment.userInfo.user.args
     }
     this.resetDateEvery(this.dateTabs[0].id)
 
@@ -897,7 +899,6 @@ export default {
           }
         }
         if (type === 'week') {
-          console.log(hasWeek)
           for (let key in hasWeek) {
             this.dateEvery.push(hasWeek[key])
           }
@@ -1120,8 +1121,8 @@ export default {
           this.summarizings[0].progress = !response.body.contrast.personNewcarNum || !response.body.contrast.maxNewcarNum ? 0 : Math.floor(response.body.contrast.personNewcarNum / response.body.contrast.maxNewcarNum * 100)
           this.summarizings[0].num = response.body.contrast.personNewcarNum || 0
           this.summarizings[1].progress = !response.body.contrast.personAccessorySum || !response.body.contrast.maxAccessorySum ? 0 : Math.floor(response.body.contrast.personAccessorySum / response.body.contrast.maxAccessorySum * 100)
-          this.summarizings[1].num = (response.body.contrast.personAccessorySum || 0) > 10000 ? Math.floor((response.body.contrast.personAccessorySum || 0) / 10000) : (response.body.contrast.personAccessorySum || 0)
-          this.summarizings[1].des = (response.body.contrast.personAccessorySum || 0) > 10000 ? '销售额（万元）' : '销售额（元）'
+          this.summarizings[1].num = (response.body.contrast.personAccessorySum || 0) >= 10000 ? Math.floor((response.body.contrast.personAccessorySum || 0) / 10000) : (response.body.contrast.personAccessorySum || 0)
+          this.summarizings[1].des = (response.body.contrast.personAccessorySum || 0) >= 10000 ? '销售额（万元）' : '销售额（元）'
           this.summarizings[2].progress = !response.body.contrast.personFinanceNum || !response.body.contrast.maxFinanceNum ? 0 : Math.floor(response.body.contrast.personFinanceNum / response.body.contrast.maxFinanceNum * 100)
           this.summarizings[2].num = response.body.contrast.personFinanceNum || 0
           this.summarizings[3].progress = !response.body.contrast.personInsuranceNum || !response.body.contrast.maxInsuranceNum ? 0 : Math.floor(response.body.contrast.personInsuranceNum / response.body.contrast.maxInsuranceNum * 100)
@@ -1438,8 +1439,8 @@ export default {
     overflow: hidden;
     i {
       position: relative;
-      top: -0.18rem;
-      left: -0.18rem;
+      top: -5%;
+      left: -5%;
       display: inline-block;
       width: 110%;
       height: 110%;
@@ -1451,11 +1452,11 @@ export default {
   .has-head {
     i {
       position: relative;
-      top: 1.72rem;
-      left: -0.18rem;
+      top: 0;
+      left: 0;
       display: inline-block;
-      width: 110%;
-      height: 110%;
+      width: 200%;
+      height: 200%;
       background-repeat: no-repeat;
       background-position: center;
       background-size: 100% auto;

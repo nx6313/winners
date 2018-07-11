@@ -3,7 +3,7 @@
     <div class="user-header-wrap">
       <span class="user-head" @click="selectPic">
         <span :class="userInfo.userHead ? 'has-head' : ''">
-          <i :style="[userInfo.userHead ? { 'background-image': `url(${userInfo.userHead})` } : { 'background-image': `url(${defaultUserHead})` }, userInfoOpt.scale !== undefined ? { 'transform': `scale(${userInfoOpt.scale}, ${userInfoOpt.scale}) translate(${userInfoOpt.trans[0]}px, ${userInfoOpt.trans[1] * 0.00001}px)` } : {}]"></i>
+          <i :style="userInfo.userHead ? { 'background-image': `url(${userInfo.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
         </span>
       </span>
       <span class="user-name">{{userInfo.userName}}</span>
@@ -32,7 +32,6 @@ export default {
       starCount: 5,
       defaultUserHead: '',
       userInfo: {},
-      userInfoOpt: {},
       userLevel: 3,
       userInfos: []
     }
@@ -40,9 +39,8 @@ export default {
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
     this.defaultUserHead = this.$moment.defaultHead
-    if (this.$moment.userInfo.user.args) {
+    if (this.$moment.userInfo.user.photo !== null) {
       this.$set(this.userInfo, 'userHead', this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}`)
-      this.userInfoOpt = this.$moment.userInfo.user.args
     }
     this.$set(this.userInfo, 'userName', this.$moment.userInfo.user.name)
     this.userInfos = [
@@ -63,15 +61,12 @@ export default {
   methods: {
     selectPic () {
       this.$dialog_pic({
-        callBack: (file, scale, trans) => {
+        callBack: (file) => {
           this.$dialog_loading({
             tip: '头像正在上传中...',
             progress: true
           })
-          this.$comfun.http_file(this, `consultant/upload/${this.$moment.userInfo.user.id}`, 'file', file, {
-            scale: scale,
-            trans: trans
-          }, (progress) => {
+          this.$comfun.http_file(this, `consultant/upload/${this.$moment.userInfo.user.id}`, 'file', file, null, (progress) => {
             this.$dialog_loading_progress_update(progress)
           }).then((response) => {
             if (response.body.success === '1') {
@@ -79,7 +74,6 @@ export default {
                 msg: '图像设置成功'
               })
               this.$set(this.userInfo, 'userHead', this.$moment.HttpAddress + `showFile/${response.body.fid}`)
-              this.userInfoOpt = JSON.parse(response.body.args)
               this.$moment.localforage.getItem('userLoginInfo').then((userInfo) => {
                 userInfo.user.args = JSON.parse(response.body.args)
                 userInfo.user.photo = response.body.fid
@@ -130,9 +124,9 @@ export default {
       border-radius: 50%;
       i {
         position: relative;
-        top: -0.24rem;
-        left: -0.24rem;
         display: inline-block;
+        top: -5%;
+        left: -5%;
         width: 110%;
         height: 110%;
         background-repeat: no-repeat;
@@ -143,11 +137,11 @@ export default {
     span.has-head {
       i {
         position: relative;
-        top: -0.14rem;
-        left: -0.24rem;
         display: inline-block;
-        width: 110%;
-        height: 110%;
+        top: 0;
+        left: 0;
+        width: 200%;
+        height: 200%;
         background-repeat: no-repeat;
         background-position: center;
         background-size: 100% auto;

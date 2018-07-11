@@ -17,8 +17,12 @@
     </div>
     <div class="pic-crop-wrap close animated" ref="pic-crop-wrap" @touchmove.prevent>
       <div class="crop-content-wrap">
-        <div class="crop-target-img" :style="{ 'background-image': `url(${cropImg})` }" v-if="cropImg !== ''" @touchstart.prevent="cropTargetTouchStart" @touchmove.prevent="cropTargetTouchMove" @touchend.prevent="cropTargetTouchEnd"></div>
-        <div class="crop-area"></div>
+        <img class="crop-target" ref="crop-target" :src="fileBase64" v-if="cropImg !== ''" @touchstart.prevent="cropTargetTouchStart" @touchmove.prevent="cropTargetTouchMove" @touchend.prevent="cropTargetTouchEnd">
+        <!-- <div class="crop-target-img" ref="crop-target-img" :style="{ 'background-image': `url(${cropImg})` }"></div> -->
+        <div class="crop-area" ref="crop-area"></div>
+      </div>
+      <div class="preview-wrap" ref="preview-wrap">
+        <canvas ref="preview-cvs"></canvas>
       </div>
       <div class="btn-wrap flex-r flex-b">
         <span :style="{ 'width': 'calc((100% - 0.6rem) / 2)', 'background-color': '#6A6A6A' }" @click="closePic">取消</span>
@@ -54,10 +58,12 @@ export default {
       cropTouchMoveDistance: [],
       cropTouchMoveTo: [0, 0],
       cropTouchMoveInitTrans: [0, 0],
-      cropTouchScaleCur: 1,
+      cropTouchScaleCur: 0.4,
       cropScaleStart: null,
       cropScale: null,
       file: null,
+      fileBase64: null,
+      cropFile: null,
       callBack: () => {}
     }
   },
@@ -96,39 +102,56 @@ export default {
     },
     getPic (way) {
       this[`clearShow${way}`] = false
-      this[`clearShow${way}`] = true
       if (way === 'camera') {
         this.file = event.target.files[0]
         let reader = new FileReader()
         reader.readAsDataURL(this.file)
         reader.onload = (e) => {
+          this.fileBase64 = e.target.result
           this.cropImg = e.target.result
-        }
-        this.$refs['pic-content'].classList.remove('slideInUp')
-        this.$refs['pic-content'].classList.add('slideOutDown')
 
-        this.$refs['pic-crop-wrap'].style.display = 'block'
-        this.$refs['pic-crop-wrap'].classList.add('bounceInLeft')
-        this.$refs['pic-crop-wrap'].classList.remove('close')
-        this.$refs['pic-crop-wrap'].classList.add('open')
+          this.$nextTick(() => {
+            this[`clearShow${way}`] = true
+
+            this.$refs['pic-content'].classList.remove('slideInUp')
+            this.$refs['pic-content'].classList.add('slideOutDown')
+
+            this.$refs['pic-crop-wrap'].style.display = 'block'
+            this.$refs['pic-crop-wrap'].classList.add('bounceInLeft')
+            this.$refs['pic-crop-wrap'].classList.remove('close')
+            this.$refs['pic-crop-wrap'].classList.add('open')
+            setTimeout(() => {
+              this.loadCropImg()
+            }, 100)
+          })
+        }
       } else if (way === 'photos') {
         this.file = event.target.files[0]
         let reader = new FileReader()
         reader.readAsDataURL(this.file)
         reader.onload = (e) => {
+          this.fileBase64 = e.target.result
           this.cropImg = e.target.result
-        }
-        this.$refs['pic-content'].classList.remove('slideInUp')
-        this.$refs['pic-content'].classList.add('slideOutDown')
 
-        this.$refs['pic-crop-wrap'].style.display = 'block'
-        this.$refs['pic-crop-wrap'].classList.add('bounceInLeft')
-        this.$refs['pic-crop-wrap'].classList.remove('close')
-        this.$refs['pic-crop-wrap'].classList.add('open')
+          this.$nextTick(() => {
+            this[`clearShow${way}`] = true
+
+            this.$refs['pic-content'].classList.remove('slideInUp')
+            this.$refs['pic-content'].classList.add('slideOutDown')
+
+            this.$refs['pic-crop-wrap'].style.display = 'block'
+            this.$refs['pic-crop-wrap'].classList.add('bounceInLeft')
+            this.$refs['pic-crop-wrap'].classList.remove('close')
+            this.$refs['pic-crop-wrap'].classList.add('open')
+            setTimeout(() => {
+              this.loadCropImg()
+            }, 100)
+          })
+        }
       }
     },
     cropSure () {
-      this.callBack(this.file, this.cropTouchScaleCur, this.cropTouchMoveTo)
+      this.callBack(this.cropFile)
       this.closePic()
     },
     cropTargetTouchStart () {
@@ -164,6 +187,7 @@ export default {
         event.target.style['transition-duration'] = '0s'
         event.target.style.transform = `translate(${this.cropTouchMoveTo[0]}px, ${this.cropTouchMoveTo[1]}px) scale(${scaleTo}, ${scaleTo})`
       }
+      this.loadCropImg()
     },
     cropTargetTouchEnd () {
       this.cropTouchMoveStart = []
@@ -175,10 +199,42 @@ export default {
       }
       this.cropScale = null
       if (this.cropTouchScaleCur < 0.4) {
-        this.cropTouchScaleCur = 1
+        this.cropTouchScaleCur = 0.4
         event.target.style['transition-duration'] = '0.4s'
         event.target.style.transform = `scale(${this.cropTouchScaleCur}, ${this.cropTouchScaleCur}) translate(${this.cropTouchMoveTo[0]}px, ${this.cropTouchMoveTo[1]}px)`
       }
+    },
+    loadCropImg () {
+      var targetImg = new Image()
+      targetImg.src = this.fileBase64
+      var cropLeft = this.$refs['crop-area'].offsetLeft
+      var cropTop = this.$refs['crop-area'].offsetTop
+      var targetWidth = targetImg.naturalWidth
+      // var targetHeight = targetImg.naturalHeight
+      var cropWidth = this.$refs['crop-area'].clientWidth
+      var cropHeight = this.$refs['crop-area'].clientHeight
+      var _oX = (targetWidth * 0.9 / cropWidth) * this.cropTouchMoveTo[0] * this.cropTouchScaleCur + cropLeft
+      // var _oY = parseInt(-cropTop + this.cropTouchMoveTo[1]) * (targetHeight * 0.9 / cropHeight * 0.28) * this.cropTouchScaleCur
+      var _oY = (targetWidth * 0.9 / cropWidth) * this.cropTouchMoveTo[1] * this.cropTouchScaleCur + cropTop
+      var _oWidth = cropWidth / this.cropTouchScaleCur
+      var _oHeight = cropHeight / this.cropTouchScaleCur
+
+      this.$refs['preview-wrap'].style.width = cropWidth * 0.5 + 'px'
+      this.$refs['preview-wrap'].style.height = cropHeight * 0.5 + 'px'
+      var outPutCvs = this.$refs['preview-cvs']
+      outPutCvs.width = cropWidth
+      outPutCvs.height = cropHeight
+      var outPutCtx = outPutCvs.getContext('2d')
+      outPutCtx.scale(0.5, 0.5)
+      outPutCtx.drawImage(targetImg, -_oX, -_oY, _oWidth, _oHeight, 0, 0, cropWidth, cropHeight)
+      var outPutData = outPutCvs.toDataURL()
+      var cropImgBase64Data = window.atob(outPutData.split(',')[1])
+      var ia = new Uint8Array(cropImgBase64Data.length)
+      for (let i = 0; i < cropImgBase64Data.length; i++) {
+        ia[i] = cropImgBase64Data.charCodeAt(i)
+      }
+      var blob = new Blob([ia], { type: 'image/png' })
+      this.cropFile = blob
     }
   }
 }
@@ -247,7 +303,7 @@ export default {
 .pic-crop-wrap {
   position: fixed;
   left: 5vw;
-  top: calc((100vh - 40vh - 12rem) / 2);
+  top: calc((100vh - 40vh - 12rem - 9.4rem) / 2);
   width: 90vw;
   background-color: #2c2c2c;
   z-index: 999999;
@@ -261,15 +317,11 @@ export default {
     height: 60vh;
     margin: 0.4rem;
     overflow: hidden;
-    .crop-target-img {
+    .crop-target {
       position: relative;
-      height: 100%;
-      left: 1px;
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: 100% auto;
       transition: all 0.4s ease 0s;
-      transform: translate(0px, 0px);
+      transform: scale(0.4, 0.4) translate(0px, 0px);
+      transform-origin: 0% 0%;
     }
     .crop-area {
       position: absolute;
@@ -282,6 +334,11 @@ export default {
       box-shadow: 0 0 0px 10rem rgba(0, 0, 0, 0.4);
       pointer-events: none;
     }
+  }
+  .preview-wrap {
+    position: relative;
+    border: 1px solid #696969;
+    margin: 0 0 0.4rem 0.4rem;
   }
   .btn-wrap {
     position: relative;
