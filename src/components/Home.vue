@@ -1440,6 +1440,7 @@ export default {
     background-position: center;
     background-size: 100% auto;
     overflow: hidden;
+    z-index: 2;
     i {
       position: relative;
       top: -5%;
@@ -1450,6 +1451,7 @@ export default {
       background-repeat: no-repeat;
       background-position: center;
       background-size: 100% auto;
+      z-index: 1;
     }
   }
   .has-head {
