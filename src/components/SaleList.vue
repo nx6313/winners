@@ -631,11 +631,11 @@ export default {
         width: 0.5rem;
         height: 0.5rem;
         border-radius: 50%;
-        background-color: #cddbed;
+        background-color: #dddddd;
         margin: 0 0.3rem;
       }
       .cur-page {
-        background-color: #73a7e3;
+        background-color: rgb(238, 95, 5);
       }
     }
   }
