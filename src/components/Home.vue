@@ -453,6 +453,9 @@ export default {
         yAxis: {
           type: 'value'
         },
+        grid: {
+          left: '60'
+        },
         series: [
           {
             data: [],

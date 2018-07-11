@@ -320,36 +320,36 @@ export default {
         startOldDate: startOldDate,
         endOldDate: endOldDate
       }).then((response) => {
+        this.$set(this.userSaleInfos[0], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}` : '')
+        this.$set(this.userSaleInfos[0], 'userName', this.$moment.userInfo.user.name)
+        this.$set(this.userSaleInfos[1], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}` : '')
+        this.$set(this.userSaleInfos[1], 'userName', this.$moment.userInfo.user.name)
+        this.$set(this.userSaleInfos[2], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}` : '')
+        this.$set(this.userSaleInfos[2], 'userName', this.$moment.userInfo.user.name)
         if (response.body.success === '1') {
           if (dateType === 'week') {
-            this.$set(this.userSaleInfos[0], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}` : '')
             this.$set(this.userSaleInfos[0], 'company-ranking', response.body.company.rank)
             this.$set(this.userSaleInfos[0], 'group-ranking', response.body.group.rank)
             this.$set(this.userSaleInfos[0], 'company-up', !response.body.company.oldRank || response.body.company.oldRank === 0 ? 0 : response.body.company.oldRank - response.body.company.rank)
             this.$set(this.userSaleInfos[0], 'group-up', !response.body.group.oldRank || response.body.group.oldRank === 0 ? 0 : response.body.group.oldRank - response.body.group.rank)
-            this.$set(this.userSaleInfos[0], 'userName', this.$moment.userInfo.user.name)
             this.$set(this.userSaleInfos[0], 'saleNum', response.body.company.num)
             this.$set(this.userSaleInfos[0], 'salePre', preDes)
             this.$set(this.userSaleInfos[0], 'saleUnit', unit)
           }
           if (dateType === 'month') {
-            this.$set(this.userSaleInfos[1], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}` : '')
             this.$set(this.userSaleInfos[1], 'company-ranking', response.body.company.rank)
             this.$set(this.userSaleInfos[1], 'group-ranking', response.body.group.rank)
             this.$set(this.userSaleInfos[1], 'company-up', !response.body.company.oldRank || response.body.company.oldRank === 0 ? 0 : response.body.company.oldRank - response.body.company.rank)
             this.$set(this.userSaleInfos[1], 'group-up', !response.body.group.oldRank || response.body.group.oldRank === 0 ? 0 : response.body.group.oldRank - response.body.group.rank)
-            this.$set(this.userSaleInfos[1], 'userName', this.$moment.userInfo.user.name)
             this.$set(this.userSaleInfos[1], 'saleNum', response.body.company.num)
             this.$set(this.userSaleInfos[1], 'salePre', preDes)
             this.$set(this.userSaleInfos[1], 'saleUnit', unit)
           }
           if (dateType === 'year') {
-            this.$set(this.userSaleInfos[2], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}` : '')
             this.$set(this.userSaleInfos[2], 'company-ranking', response.body.company.rank)
             this.$set(this.userSaleInfos[2], 'group-ranking', response.body.group.rank)
             this.$set(this.userSaleInfos[2], 'company-up', !response.body.company.oldRank || response.body.company.oldRank === 0 ? 0 : response.body.company.oldRank - response.body.company.rank)
             this.$set(this.userSaleInfos[2], 'group-up', !response.body.group.oldRank || response.body.group.oldRank === 0 ? 0 : response.body.group.oldRank - response.body.group.rank)
-            this.$set(this.userSaleInfos[2], 'userName', this.$moment.userInfo.user.name)
             this.$set(this.userSaleInfos[2], 'saleNum', response.body.company.num)
             this.$set(this.userSaleInfos[2], 'salePre', preDes)
             this.$set(this.userSaleInfos[2], 'saleUnit', unit)
