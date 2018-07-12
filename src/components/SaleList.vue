@@ -2,7 +2,7 @@
   <div class="page-sale-list">
     <div class="tabs-wrap">
       <div class="tabs-rail-wrap">
-        <span v-for="(tab, tabIndex) in tabs" :key="tabIndex" :class="tabIndex === 0 ? 'cur' : ''" :style="{ 'width': `calc(100vw / 5)` }" @click="refOrder('tabType', tab.id)">{{tab.txt}}</span>
+        <span v-for="(tab, tabIndex) in tabs" :key="tabIndex" :class="tabIndex === 0 ? 'cur' : ''" :style="{ 'width': `calc(100vw / 6)` }" @click="refOrder('tabType', tab.id)">{{tab.txt}}</span>
       </div>
     </div>
     <div class="user-self-order-wrap" ref="user-self-order-wrap" @touchstart="userSelfTouchStart" @touchmove="userSelfTouchMove" @touchend="userSelfTouchEnd">
@@ -126,7 +126,7 @@ export default {
           txt: '二手车'
         },
         {
-          id: 'newcar',
+          id: 'profit',
           txt: '综合毛利'
         }
       ],
@@ -310,8 +310,8 @@ export default {
       } else if (this.curTabType === 'oldcar') {
         preDes = datePre + '置换量'
         unit = '台'
-      } else if (this.curTabType === 'accessory') {
-        preDes = datePre + ''
+      } else if (this.curTabType === 'profit') {
+        preDes = datePre + '销售额'
         unit = '元'
       }
       this.$comfun.http_post(this, 'data/public/' + this.curTabType + `/order/my/${this.$moment.userInfo.user.id}`, {
@@ -403,8 +403,8 @@ export default {
       } else if (this.curTabType === 'oldcar') {
         preDes = datePre + '置换量'
         unit = '台'
-      } else if (this.curTabType === 'accessory') {
-        preDes = datePre + ''
+      } else if (this.curTabType === 'profit') {
+        preDes = datePre + '销售额'
         unit = '元'
       }
       this.$comfun.http_post(this, 'data/public/' + this.curTabType + `/order/${this.$moment.userInfo.user.id}`, {
@@ -456,7 +456,7 @@ export default {
         position: relative;
         display: inline-block;
         color: #808080;
-        font-size: 0.8rem;
+        font-size: 0.7rem;
         height: 3rem;
         line-height: 3rem;
         text-align: center;

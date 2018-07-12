@@ -132,6 +132,7 @@ export default {
       sellTabWrapHeight: 3.9 * 16 + 'px',
       userName: '',
       userTabs: [],
+      curDateTab: null,
       dateTabs: [
         {
           id: 'day',
@@ -670,6 +671,7 @@ export default {
     this.userName = this.$moment.userInfo.user.name
     this.userTabTransXPageWidth = document.body.clientWidth - 1.6 * 16 - 3.2 * 16
     this.userTabTransXCeilWidth = (document.body.clientWidth - 1.6 * 16 - 3.2 * 16) / 6
+    this.curDateTab = this.dateTabs[1]
 
     this.$comfun.http_post(this, `data/public/query/consultant/${this.$moment.userInfo.user.companyId}`).then((response) => {
       if (response.body.success === '1') {
@@ -1113,10 +1115,12 @@ export default {
       event.target.classList.add('cur')
       this.seeingUser = userTab
       this.searchHeaderData()
+      this.changeDate(this.curDateTab)
     },
     changeDate (dateTab, dateIndex) {
       event.target.parentNode.getElementsByClassName('cur')[0].classList.remove('cur')
       event.target.classList.add('cur')
+      this.curDateTab = dateTab
 
       var type = 2
       var startDate = ''

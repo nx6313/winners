@@ -126,6 +126,7 @@ export default {
       sellTabWrapHeight: 3.9 * 16 + 'px',
       userName: '集团各厂销售业绩',
       userTabs: [],
+      curDateTab: null,
       dateTabs: [
         {
           id: 'day',
@@ -560,6 +561,7 @@ export default {
     this.defaultUserHead = this.$moment.defaultHead
     this.userTabTransXPageWidth = document.body.clientWidth - 1.6 * 16 - 3.2 * 16
     this.userTabTransXCeilWidth = (document.body.clientWidth - 1.6 * 16 - 3.2 * 16) / 6
+    this.curDateTab = this.dateTabs[1]
 
     this.$comfun.http_post(this, `data/public/query/company`).then((response) => {
       if (response.body.success === '1') {
@@ -920,25 +922,25 @@ export default {
         startDate = this.curHeaderSearchDate.val[0]
         endDate = this.curHeaderSearchDate.val[1]
       }
-      this.$comfun.http_post(this, `data/manage/contrast/${this.seeingUser.userId}`, {
+      this.$comfun.http_post(this, `data/senior/contrast/${this.seeingUser.userId}`, {
         type: type,
         startDate: startDate,
         endDate: endDate
       }).then((response) => {
         if (response.body.success === '1') {
-          this.summarizings[0].progress = !response.body.contrast.personNewcarNum || !response.body.contrast.maxNewcarNum ? 0 : Math.floor(response.body.contrast.personNewcarNum / response.body.contrast.maxNewcarNum * 100)
-          this.summarizings[0].num = response.body.contrast.personNewcarNum || 0
-          this.summarizings[1].progress = !response.body.contrast.personAccessorySum || !response.body.contrast.maxAccessorySum ? 0 : Math.floor(response.body.contrast.personAccessorySum / response.body.contrast.maxAccessorySum * 100)
-          this.summarizings[1].num = (response.body.contrast.personAccessorySum || 0) >= 10000 ? Math.floor((response.body.contrast.personAccessorySum || 0) / 10000) : (response.body.contrast.personAccessorySum || 0)
-          this.summarizings[1].des = (response.body.contrast.personAccessorySum || 0) >= 10000 ? '销售额（万元）' : '销售额（元）'
-          this.summarizings[2].progress = !response.body.contrast.personFinanceNum || !response.body.contrast.maxFinanceNum ? 0 : Math.floor(response.body.contrast.personFinanceNum / response.body.contrast.maxFinanceNum * 100)
-          this.summarizings[2].num = response.body.contrast.personFinanceNum || 0
-          this.summarizings[3].progress = !response.body.contrast.personInsuranceNum || !response.body.contrast.maxInsuranceNum ? 0 : Math.floor(response.body.contrast.personInsuranceNum / response.body.contrast.maxInsuranceNum * 100)
-          this.summarizings[3].num = response.body.contrast.personInsuranceNum || 0
-          this.summarizings[4].progress = !response.body.contrast.personOldcarNum || !response.body.contrast.maxOldcarNum ? 0 : Math.floor(response.body.contrast.personOldcarNum / response.body.contrast.maxOldcarNum * 100)
-          this.summarizings[4].num = response.body.contrast.personOldcarNum || 0
+          this.summarizings[0].progress = !response.body.result.companyNewcarNum || !response.body.result.maxNewcarNum ? 0 : Math.floor(response.body.result.companyNewcarNum / response.body.result.maxNewcarNum * 100)
+          this.summarizings[0].num = response.body.result.companyNewcarNum || 0
+          this.summarizings[1].progress = !response.body.result.companyAccessorySum || !response.body.result.maxAccessorySum ? 0 : Math.floor(response.body.result.companyAccessorySum / response.body.result.maxAccessorySum * 100)
+          this.summarizings[1].num = (response.body.result.companyAccessorySum || 0) >= 10000 ? Math.floor((response.body.result.companyAccessorySum || 0) / 10000) : (response.body.result.companyAccessorySum || 0)
+          this.summarizings[1].des = (response.body.result.companyAccessorySum || 0) >= 10000 ? '销售额（万元）' : '销售额（元）'
+          this.summarizings[2].progress = !response.body.result.companyFinanceNum || !response.body.result.maxFinanceNum ? 0 : Math.floor(response.body.result.companyFinanceNum / response.body.result.maxFinanceNum * 100)
+          this.summarizings[2].num = response.body.result.companyFinanceNum || 0
+          this.summarizings[3].progress = !response.body.result.companyInsuranceNum || !response.body.result.maxInsuranceNum ? 0 : Math.floor(response.body.result.companyInsuranceNum / response.body.result.maxInsuranceNum * 100)
+          this.summarizings[3].num = response.body.result.companyInsuranceNum || 0
+          this.summarizings[4].progress = !response.body.result.companyOldcarNum || !response.body.result.maxOldcarNum ? 0 : Math.floor(response.body.result.companyOldcarNum / response.body.result.maxOldcarNum * 100)
+          this.summarizings[4].num = response.body.result.companyOldcarNum || 0
         }
-        this.$comfun.http_post(this, `data/manage/profit/${this.seeingUser.userId}`, {
+        this.$comfun.http_post(this, `data/senior/profit/synthesis/${this.seeingUser.userId}`, {
           startDate: startDate,
           endDate: endDate
         }).then((response) => {
@@ -989,10 +991,12 @@ export default {
       event.target.classList.add('cur')
       this.seeingUser = userTab
       this.searchHeaderData()
+      this.changeDate(this.curDateTab)
     },
     changeDate (dateTab, dateIndex) {
       event.target.parentNode.getElementsByClassName('cur')[0].classList.remove('cur')
       event.target.classList.add('cur')
+      this.curDateTab = dateTab
 
       var type = 2
       var startDate = ''
@@ -1012,7 +1016,7 @@ export default {
     getLineChartData (type, startDate, endDate) {
       var chartLimitDate = ''
       // 整车
-      this.$comfun.http_post(this, `data/manage/curve/newcar/${this.seeingUser.userId}`, {
+      this.$comfun.http_post(this, `data/senior/curve/newcar/${this.seeingUser.userId}`, {
         type: type,
         startDate: startDate,
         endDate: endDate
@@ -1053,7 +1057,7 @@ export default {
         }
       })
       // 二手车
-      this.$comfun.http_post(this, `data/manage/curve/oldcar/${this.seeingUser.userId}`, {
+      this.$comfun.http_post(this, `data/senior/curve/oldcar/${this.seeingUser.userId}`, {
         type: type,
         startDate: startDate,
         endDate: endDate
@@ -1094,7 +1098,7 @@ export default {
         }
       })
       // 保险
-      this.$comfun.http_post(this, `data/manage/curve/insurance/${this.seeingUser.userId}`, {
+      this.$comfun.http_post(this, `data/senior/curve/insurance/${this.seeingUser.userId}`, {
         type: type,
         startDate: startDate,
         endDate: endDate
@@ -1135,7 +1139,7 @@ export default {
         }
       })
       // 汽车用品
-      this.$comfun.http_post(this, `data/manage/curve/accessory/${this.seeingUser.userId}`, {
+      this.$comfun.http_post(this, `data/senior/curve/accessory/${this.seeingUser.userId}`, {
         type: type,
         startDate: startDate,
         endDate: endDate
@@ -1176,7 +1180,7 @@ export default {
         }
       })
       // 金融
-      this.$comfun.http_post(this, `data/manage/curve/finance/${this.seeingUser.userId}`, {
+      this.$comfun.http_post(this, `data/senior/curve/finance/${this.seeingUser.userId}`, {
         type: type,
         startDate: startDate,
         endDate: endDate

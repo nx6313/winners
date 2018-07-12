@@ -1,7 +1,7 @@
 var HttpIp = ''
 var HttpPort = ''
-var HttpAddress = 'http://172.18.168.222:8080/'
-// var HttpAddress = 'http://wx.dcsc520.cn/lhp/'
+// var HttpAddress = 'http://172.18.168.222:8080/'
+var HttpAddress = 'http://wx.dcsc520.cn/lhp/'
 var localforage = require('localforage')
 
 var defaultHead = require('@/assets/default-head.png')
