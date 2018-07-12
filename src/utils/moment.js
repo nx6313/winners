@@ -1,7 +1,7 @@
 var HttpIp = ''
 var HttpPort = ''
-// var HttpAddress = 'http://172.18.168.222:8080/data/public/'
-var HttpAddress = 'http://wx.dcsc520.cn/lhp/data/public/'
+// var HttpAddress = 'http://172.18.168.222:8080/'
+var HttpAddress = 'http://wx.dcsc520.cn/lhp/'
 var localforage = require('localforage')
 
 var defaultHead = require('@/assets/default-head.png')
@@ -11,10 +11,20 @@ export default {
     var Moment = {
       // 服务器地址
       // eslint-disable-next-line
-      server: HttpAddress ? HttpAddress : 'http://' + HttpIp + ':' + HttpPort + '/',
+      server: () => {
+        var returnServer = ''
+        if (HttpAddress) {
+          returnServer = HttpAddress
+        } else {
+          returnServer = 'http://' + HttpIp + ':' + HttpPort + '/'
+        }
+        return returnServer
+      },
       // 是否开启调试模式
       debug: true,
-      HttpAddress: HttpAddress,
+      HttpAddress_1: HttpAddress + 'data/public/',
+      HttpAddress_2: HttpAddress + 'data/manage/',
+      HttpAddress_3: HttpAddress + 'data/senior/',
       // localForage
       localforage: localforage,
       userInfo: {},

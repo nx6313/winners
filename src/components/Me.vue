@@ -40,7 +40,7 @@ export default {
     document.querySelector('#app-footer').style.display = 'flex'
     this.defaultUserHead = this.$moment.defaultHead
     if (this.$moment.userInfo.user.photo !== null) {
-      this.$set(this.userInfo, 'userHead', this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}`)
+      this.$set(this.userInfo, 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)
     }
     this.$set(this.userInfo, 'userName', this.$moment.userInfo.user.name)
     this.userInfos = [
@@ -66,14 +66,14 @@ export default {
             tip: '头像正在上传中...',
             progress: true
           })
-          this.$comfun.http_file(this, `consultant/upload/${this.$moment.userInfo.user.id}`, 'file', file, null, (progress) => {
+          this.$comfun.http_file(this, `data/public/consultant/upload/${this.$moment.userInfo.user.id}`, 'file', file, null, (progress) => {
             this.$dialog_loading_progress_update(progress)
           }).then((response) => {
             if (response.body.success === '1') {
               this.$dialog_msg({
                 msg: '图像设置成功'
               })
-              this.$set(this.userInfo, 'userHead', this.$moment.HttpAddress + `showFile/${response.body.fid}`)
+              this.$set(this.userInfo, 'userHead', this.$moment.HttpAddress_1 + `showFile/${response.body.fid}`)
               this.$moment.localforage.getItem('userLoginInfo').then((userInfo) => {
                 userInfo.user.args = JSON.parse(response.body.args)
                 userInfo.user.photo = response.body.fid

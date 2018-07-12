@@ -1,7 +1,9 @@
 <template>
   <div id="page-home-manager" class="page-home-manager" @scroll="scrollPage">
     <div class="page-header-wrap">
-      <span class="user-head" :style="{ 'background-image': `url(${defaultUserHead})` }"></span>
+      <span :class="['user-head', userHead !== '' ? 'has-head' : '']">
+        <i :style="userHead !== '' ? { 'background-image': `url(${userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
+      </span>
       <div class="user-name-wrap flex-r flex-b">
         <span class="user-name">{{userName}}</span>
         <div class="online-count-wrap">
@@ -62,7 +64,7 @@
     <div class="sell-chart-wrap">
       <div class="sell-tab-wrap" ref="sell-tab-wrap" :style="isFixed ? { 'position': 'fixed', 'top': '0px', 'left': '0px', 'background': 'rgba(255, 255, 255, 1)' } : {}">
         <div class="date-tab-rail">
-          <span v-for="(dateTab, dateTabIndex) in dateTabs" :key="dateTabIndex" v-if="dateTabIndex > 0" :class="dateTabIndex === 1 ? 'cur' : ''" :style="{ 'width': `calc(100% / ${dateTabs.length - 1})` }">{{dateTab.txt}}</span>
+          <span v-for="(dateTab, dateTabIndex) in dateTabs" :key="dateTabIndex" v-if="dateTabIndex > 0" :class="dateTabIndex === 1 ? 'cur' : ''" :style="{ 'width': `calc(100% / ${dateTabs.length - 1})` }" @click="changeDate(dateTab, dateTabIndex)">{{dateTab.txt}}</span>
         </div>
       </div>
       <div class="sell-tab-wrap-replace" ref="sell-tab-wrap-replace" :style="{ 'height': sellTabWrapHeight }" v-show="isFixed"></div>
@@ -80,7 +82,10 @@ export default {
   name: 'HomeManager',
   data () {
     return {
+      userHead: '',
       defaultUserHead: '',
+      curHeaderTab: '',
+      curHeaderSum: 0,
       headerIsLoading: true,
       curHeaderDateTabType: null,
       headerDateTabTransXMax: 0,
@@ -119,29 +124,34 @@ export default {
       dateEvery: [],
       summarizings: [
         {
+          id: 'newcar',
           title: '整车销售',
           unit: '台'
         },
         {
+          id: 'accessory',
           title: '汽车用品',
-          des: '万元'
+          unit: '元'
         },
         {
+          id: 'finance',
           title: '金融',
-          des: '单'
+          unit: '台'
         },
         {
+          id: 'insurance',
           title: '保险',
-          des: '单'
+          unit: '单'
         },
         {
+          id: 'oldcar',
           title: '二手车',
-          des: '台'
+          unit: '台'
         }
       ],
       policyChartOpt: {
         title: {
-          text: '{money|1230}\t\t{unit|台}\n整车销售',
+          text: '{money|0}\t\t{unit|台}\n整车销售',
           left: 'center',
           top: '34%',
           textStyle: {
@@ -170,7 +180,7 @@ export default {
         },
         tooltip: {
           trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} 万元 ({d}%)',
+          formatter: '{a} <br/>{b}: {c} 元 ({d}%)',
           backgroundColor: 'rgba(80, 30, 30, .8)'
         },
         series: [
@@ -180,75 +190,34 @@ export default {
             radius: ['100%', '72%'],
             label: {
               normal: {
-                show: false,
+                show: true,
                 position: 'outside',
                 formatter: [
-                  '{rate|{d}}\t\t{rateTip|%}',
-                  '{c} 万元',
+                  '{c}',
                   '{b}'
                 ].join('\n'),
                 lineHeight: 10,
                 fontSize: 10,
-                color: '#4D4D4D',
-                fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
-                rich: {
-                  rate: {
-                    fontSize: 16,
-                    color: '#003B8D',
-                    fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
-                    verticalAlign: 'bottom',
-                    fontWeight: 'bold'
-                  },
-                  rateTip: {
-                    fontSize: 12,
-                    color: '#003B8D',
-                    fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
-                    verticalAlign: 'bottom'
-                  }
-                }
+                color: '#F5F5F5',
+                fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
               }
             },
             labelLine: {
               normal: {
                 show: true,
-                length: 40,
+                length: 10,
                 length2: 20,
                 smooth: true
               }
             },
-            data: [
-              {
-                value: 335,
-                name: '整车销售'
-              },
-              {
-                value: 20,
-                name: '整车'
-              },
-              {
-                value: 60,
-                name: '保险'
-              },
-              {
-                value: 335,
-                name: '二手车'
-              },
-              {
-                value: 335,
-                name: '金融'
-              },
-              {
-                value: 335,
-                name: '汽车用品'
-              }
-            ]
+            data: []
           }
         ],
         animationDuration: 2000
       },
       zcChartOpt: {
         title: {
-          text: '整车销售',
+          text: '整车 / 台',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -259,24 +228,50 @@ export default {
           trigger: 'item',
           formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
+        dataZoom: [
+          {
+            type: 'inside'
+          }
+        ],
         xAxis: {
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          data: []
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
+          minInterval: 1
         },
         series: [
           {
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
-            type: 'line'
+            data: [],
+            type: 'line',
+            smooth: true,
+            lineStyle: {
+              color: '#ED8D1B'
+            },
+            areaStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [{
+                  offset: 0, color: '#E6B940'
+                }, {
+                  offset: 0.5, color: '#408AE6'
+                }, {
+                  offset: 1, color: '#2FE321'
+                }]
+              }
+            }
           }
         ],
         animationDuration: 2000
       },
       qcypChartOpt: {
         title: {
-          text: '汽车用品',
+          text: '汽车用品 / 元',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -287,24 +282,52 @@ export default {
           trigger: 'item',
           formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
+        dataZoom: [
+          {
+            type: 'inside'
+          }
+        ],
         xAxis: {
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          data: []
         },
         yAxis: {
           type: 'value'
         },
+        grid: {
+          left: '60'
+        },
         series: [
           {
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
-            type: 'line'
+            data: [],
+            type: 'line',
+            smooth: true,
+            lineStyle: {
+              color: '#ED8D1B'
+            },
+            areaStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [{
+                  offset: 0, color: '#E6B940'
+                }, {
+                  offset: 0.5, color: '#408AE6'
+                }, {
+                  offset: 1, color: '#2FE321'
+                }]
+              }
+            }
           }
         ],
         animationDuration: 2000
       },
       jrChartOpt: {
         title: {
-          text: '金融',
+          text: '金融 / 台',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -315,24 +338,50 @@ export default {
           trigger: 'item',
           formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
+        dataZoom: [
+          {
+            type: 'inside'
+          }
+        ],
         xAxis: {
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          data: []
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
+          minInterval: 1
         },
         series: [
           {
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
-            type: 'line'
+            data: [],
+            type: 'line',
+            smooth: true,
+            lineStyle: {
+              color: '#ED8D1B'
+            },
+            areaStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [{
+                  offset: 0, color: '#E6B940'
+                }, {
+                  offset: 0.5, color: '#408AE6'
+                }, {
+                  offset: 1, color: '#2FE321'
+                }]
+              }
+            }
           }
         ],
         animationDuration: 2000
       },
       bxChartOpt: {
         title: {
-          text: '保险',
+          text: '保险 / 单',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -343,24 +392,50 @@ export default {
           trigger: 'item',
           formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
+        dataZoom: [
+          {
+            type: 'inside'
+          }
+        ],
         xAxis: {
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          data: []
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
+          minInterval: 1
         },
         series: [
           {
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
-            type: 'line'
+            data: [],
+            type: 'line',
+            smooth: true,
+            lineStyle: {
+              color: '#ED8D1B'
+            },
+            areaStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [{
+                  offset: 0, color: '#E6B940'
+                }, {
+                  offset: 0.5, color: '#408AE6'
+                }, {
+                  offset: 1, color: '#2FE321'
+                }]
+              }
+            }
           }
         ],
         animationDuration: 2000
       },
       escChartOpt: {
         title: {
-          text: '二手车',
+          text: '二手车 / 台',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -371,31 +446,62 @@ export default {
           trigger: 'item',
           formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
+        dataZoom: [
+          {
+            type: 'inside'
+          }
+        ],
         xAxis: {
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          data: []
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
+          minInterval: 1
         },
         series: [
           {
-            data: [820, 932, 901, 934, 1290, 1330, 1320],
-            type: 'line'
+            data: [],
+            type: 'line',
+            smooth: true,
+            lineStyle: {
+              color: '#ED8D1B'
+            },
+            areaStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [{
+                  offset: 0, color: '#E6B940'
+                }, {
+                  offset: 0.5, color: '#408AE6'
+                }, {
+                  offset: 1, color: '#2FE321'
+                }]
+              }
+            }
           }
         ],
         animationDuration: 2000
       }
     }
   },
-  beforeCreate () {
-    this.$comfun.http_post(this, 'contrast/8')
-  },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
     this.defaultUserHead = this.$moment.defaultHead
     this.userName = this.$moment.userInfo.user.name
+    this.curHeaderTab = this.summarizings[this.curHeaderTypeIndex].id
+    this.policyChartOpt.title.text = `{money|${this.curHeaderSum}}\t\t{unit|${this.summarizings[this.curHeaderTypeIndex].unit}}\n${this.summarizings[this.curHeaderTypeIndex].title}`
     this.resetDateEvery(this.dateTabs[0].id)
+
+    setTimeout(() => {
+      var startDate = this.$comfun.formatDate(this.$comfun.getTargetDate(-7), 'yyyy-MM-dd')
+      var endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      this.getLineChartData(2, startDate, endDate)
+    }, 400)
   },
   methods: {
     scrollPage () {
@@ -420,23 +526,33 @@ export default {
       this.dateEvery.splice(0, this.dateEvery.length)
       switch (curDateType) {
         case 'day':
-          this.getDateSection('2017/01/01', curDateType, 'M/d')
+          this.getDateSection(curDateType, 'M/d').then(() => {
+            this.loadHeaderAfterDateSection()
+          })
           break
         case 'week':
-          this.getDateSection('2017/01/01', curDateType, 'M/d')
+          this.getDateSection(curDateType, 'M/d').then(() => {
+            this.loadHeaderAfterDateSection()
+          })
           break
         case 'month':
-          this.getDateSection('2017/01/01', curDateType, 'M')
+          this.getDateSection(curDateType, 'M').then(() => {
+            this.loadHeaderAfterDateSection()
+          })
           break
         case 'year':
-          this.getDateSection('2017/01/01', curDateType, 'yyyy')
+          this.getDateSection(curDateType, 'yyyy').then(() => {
+            this.loadHeaderAfterDateSection()
+          })
           break
       }
-      this.curHeaderSearchDate = this.dateEvery[this.dateEvery.length - 1]
-      this.searchHeaderData()
+    },
+    loadHeaderAfterDateSection () {
       this.dateEveryRailTrans = -document.body.clientWidth
       this.$nextTick().then(() => {
         setTimeout(() => {
+          this.curHeaderSearchDate = this.dateEvery[this.dateEvery.length - 1]
+          this.searchHeaderData()
           var dateEveryRail = this.$refs['date-every-rail']
           if (dateEveryRail) {
             this.dateEveryRailTrans = ((document.body.clientWidth - 1.6 * 16 - 1.2 * 16) / 5) * 3 - dateEveryRail.clientWidth
@@ -448,177 +564,85 @@ export default {
         }, 1000)
       })
     },
-    getDateSection (min, type, format) {
-      var startTime = new Date(min)
-      var endTime = new Date()
-      var hasWeek = {}
-      var hasMonth = {}
-      var hasYear = {}
-      var dateIndex = 0
-      while ((endTime.getTime() - startTime.getTime()) >= 0) {
-        var year = startTime.getFullYear()
-        var month_ = startTime.getMonth() + 1
-        var month = (startTime.getMonth() + 1).toString().length === 1 ? '0' + (startTime.getMonth() + 1) : (startTime.getMonth() + 1)
-        var day_ = startTime.getDate()
-        var day = startTime.getDate().toString().length === 1 ? '0' + startTime.getDate() : startTime.getDate()
-        var week = startTime.getDay()
-        var thisDate = new Date(year + '/' + month + '/' + day)
-        startTime.setDate(startTime.getDate() + 1)
-        var curValData = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
-        var curDisplayData = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), format)
+    getDateSection (type, format) {
+      var dateSectionPromise = new Promise((resolve, reject) => {
         let dateObj = {}
         if (type === 'day') {
-          if (thisDate.getTime() === new Date(this.$comfun.formatDate(new Date(), 'yyyy/MM/dd')).getTime()) {
-            dateObj.display = '今日'
-            dateObj.val = curValData
-          } else {
-            dateObj.display = curDisplayData
-            dateObj.val = curValData
-            if (Number(month) === 1 && Number(day) === 1) {
-              dateObj.year = year
-            }
-          }
-          this.dateEvery.push(dateObj)
-        } else if (type === 'week') {
-          if (week === 0) {
-            if (hasWeek['week-' + dateIndex]) {
-              dateObj = hasWeek['week-' + dateIndex]
+          for (let d = 6; d >= 0; d--) {
+            dateObj = {}
+            let _date = this.$comfun.getTargetDate(-d)
+            let _year = _date.getFullYear()
+            let _month = _date.getMonth()
+            let _day = _date.getDate()
+            dateObj.val = this.$comfun.formatDate(_date, 'yyyy-MM-dd')
+            if (d === 0) {
+              dateObj.display = '今日'
             } else {
-              if (dateObj.val === undefined) {
-                dateObj.val = []
-              }
+              dateObj.display = this.$comfun.formatDate(_date, format)
             }
-            dateObj.val[0] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
-            if (endTime.getTime() - startTime.getTime() < 0) {
+            if (Number(_month) === 1 && Number(_day) === 1) {
+              dateObj.year = _year
+            }
+            this.dateEvery.push(dateObj)
+          }
+        } else if (type === 'week') {
+          for (let w = 2; w >= 0; w--) {
+            dateObj = {}
+            let _dateStart = this.$comfun.getWeekStartEnd(-w)[0]
+            let _dateEnd = this.$comfun.getWeekStartEnd(-w)[1]
+            let _yearStart = _dateStart.getFullYear()
+            let _yearEnd = _dateEnd.getFullYear()
+            dateObj.val = [this.$comfun.formatDate(_dateStart, 'yyyy-MM-dd'), this.$comfun.formatDate(_dateEnd, 'yyyy-MM-dd')]
+            if (w === 0) {
               dateObj.display = '本周'
             } else {
-              dateObj.display = curDisplayData
+              dateObj.display = this.$comfun.formatDate(_dateStart, format) + '-' + this.$comfun.formatDate(_dateEnd, format)
             }
-            if (year !== this.$comfun.getTargetDate(7, new Date(year + '/' + month + '/' + day)).getFullYear()) {
-              dateObj.year = year
+            if (Number(_yearStart) !== Number(_yearEnd)) {
+              dateObj.year = _yearEnd
             }
-            if (hasWeek['week-' + dateIndex] === undefined) {
-              hasWeek['week-' + dateIndex] = dateObj
-            }
-          } else {
-            if (hasWeek['week-' + dateIndex]) {
-              dateObj = hasWeek['week-' + dateIndex]
-            } else {
-              if (dateObj.val === undefined) {
-                dateObj.val = []
-              }
-            }
-            if (week === 6 || endTime.getTime() - startTime.getTime() < 0) {
-              dateObj.val[1] = curValData
-              if (endTime.getTime() - startTime.getTime() < 0) {
-                dateObj.display = '本周'
-              } else {
-                dateObj.display += '-' + curDisplayData
-              }
-            }
-            if (hasWeek['week-' + dateIndex] === undefined) {
-              hasWeek['week-' + dateIndex] = dateObj
-            }
-            if (week === 6 || endTime.getTime() - startTime.getTime() < 0) {
-              dateIndex += 1
-            }
+            this.dateEvery.push(dateObj)
           }
         } else if (type === 'month') {
-          if (day_ === 1) {
-            if (hasMonth['month-' + dateIndex]) {
-              dateObj = hasMonth['month-' + dateIndex]
-            } else {
-              if (dateObj.val === undefined) {
-                dateObj.val = []
-              }
-            }
-            dateObj.val[0] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
-            if (endTime.getTime() - startTime.getTime() < 0) {
+          for (let m = 2; m >= 0; m--) {
+            dateObj = {}
+            let _dateStart = this.$comfun.getMonthStartEnd(-m)[0]
+            let _dateEnd = this.$comfun.getMonthStartEnd(-m)[1]
+            let _yearStart = _dateStart.getFullYear()
+            let _yearEnd = _dateEnd.getFullYear()
+            dateObj.val = [this.$comfun.formatDate(_dateStart, 'yyyy-MM-dd'), this.$comfun.formatDate(_dateEnd, 'yyyy-MM-dd')]
+            if (m === 0) {
               dateObj.display = '本月'
             } else {
-              dateObj.display = curDisplayData
+              dateObj.display = this.$comfun.formatDate(_dateStart, format)
             }
-            if (month_ === 12) {
-              dateObj.year = year
+            if (Number(_yearStart) !== Number(_yearEnd)) {
+              dateObj.year = _yearEnd
             }
-            if (hasMonth['month-' + dateIndex] === undefined) {
-              hasMonth['month-' + dateIndex] = dateObj
-            }
-          } else {
-            if (hasMonth['month-' + dateIndex]) {
-              dateObj = hasMonth['month-' + dateIndex]
-            } else {
-              if (dateObj.val === undefined) {
-                dateObj.val = []
-              }
-            }
-            if (this.$comfun.getLastDay(year, month_).getDate() === day_ || endTime.getTime() - startTime.getTime() < 0) {
-              dateObj.val[1] = curValData
-              if (endTime.getTime() - startTime.getTime() < 0) {
-                dateObj.display = '本月'
-              }
-            }
-            if (hasMonth['month-' + dateIndex] === undefined) {
-              hasMonth['month-' + dateIndex] = dateObj
-            }
-            if (this.$comfun.getLastDay(year, month_).getDate() === day_ || endTime.getTime() - startTime.getTime() < 0) {
-              dateIndex += 1
-            }
+            this.dateEvery.push(dateObj)
           }
         } else if (type === 'year') {
-          if (month_ === 1 && day_ === 1) {
-            if (hasYear['year-' + dateIndex]) {
-              dateObj = hasYear['year-' + dateIndex]
-            } else {
-              if (dateObj.val === undefined) {
-                dateObj.val = []
-              }
-            }
-            dateObj.val[0] = this.$comfun.formatDate(new Date(year + '/' + month + '/' + day), 'yyyy-MM-dd')
-            if (endTime.getTime() - startTime.getTime() < 0) {
+          for (let y = 2; y >= 0; y--) {
+            dateObj = {}
+            let _dateStart = this.$comfun.getYearStartEnd(-y)[0]
+            let _dateEnd = this.$comfun.getYearStartEnd(-y)[1]
+            let _yearStart = _dateStart.getFullYear()
+            let _yearEnd = _dateEnd.getFullYear()
+            dateObj.val = [this.$comfun.formatDate(_dateStart, 'yyyy-MM-dd'), this.$comfun.formatDate(_dateEnd, 'yyyy-MM-dd')]
+            if (y === 0) {
               dateObj.display = '本年'
             } else {
-              dateObj.display = curDisplayData
+              dateObj.display = this.$comfun.formatDate(_dateStart, format)
             }
-            if (hasYear['year-' + dateIndex] === undefined) {
-              hasYear['year-' + dateIndex] = dateObj
+            if (Number(_yearStart) !== Number(_yearEnd)) {
+              dateObj.year = _yearEnd
             }
-          } else {
-            if (hasYear['year-' + dateIndex]) {
-              dateObj = hasYear['year-' + dateIndex]
-            } else {
-              if (dateObj.val === undefined) {
-                dateObj.val = []
-              }
-            }
-            if ((month_ === 12 && this.$comfun.getLastDay(year, month_).getDate() === day_) || endTime.getTime() - startTime.getTime() < 0) {
-              dateObj.val[1] = curValData
-              if (endTime.getTime() - startTime.getTime() < 0) {
-                dateObj.display = '本年'
-              }
-            }
-            if (hasYear['year-' + dateIndex] === undefined) {
-              hasYear['year-' + dateIndex] = dateObj
-            }
-            if ((month_ === 12 && this.$comfun.getLastDay(year, month_).getDate() === day_) || endTime.getTime() - startTime.getTime() < 0) {
-              dateIndex += 1
-            }
+            this.dateEvery.push(dateObj)
           }
         }
-      }
-      if (type === 'week') {
-        for (let key in hasWeek) {
-          this.dateEvery.push(hasWeek[key])
-        }
-      } else if (type === 'month') {
-        for (let key in hasMonth) {
-          this.dateEvery.push(hasMonth[key])
-        }
-      } else if (type === 'year') {
-        for (let key in hasYear) {
-          this.dateEvery.push(hasYear[key])
-        }
-      }
+        resolve('')
+      })
+      return dateSectionPromise
     },
     circleProgressVal (progress) {
       return `<span style="font-size: 1.2rem;">${progress}</span><span style="font-size: 0.8rem; margin-left: 0.2rem;">%</span>`
@@ -737,7 +761,7 @@ export default {
               }
               document.querySelector('.' + this.curHeaderDateTabType + '-' + moveToIndex).classList.add('cur')
               this.curHeaderSearchDate = this.dateEvery[moveToIndex]
-              this.searchHeaderData()
+              this.searchHeaderData(true)
             } else {
               let moveToIndex = Number(curDateEvery.classList[0].split('-')[1])
               if (moveOverItemNum >= 1) {
@@ -753,7 +777,7 @@ export default {
               }
               this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
               this.curHeaderSearchDate = this.dateEvery[moveToIndex]
-              this.searchHeaderData()
+              this.searchHeaderData(true)
             }
           }
         } else {
@@ -768,7 +792,7 @@ export default {
               }
               document.querySelector('.' + this.curHeaderDateTabType + '-' + moveToIndex).classList.add('cur')
               this.curHeaderSearchDate = this.dateEvery[moveToIndex]
-              this.searchHeaderData()
+              this.searchHeaderData(true)
             } else {
               let moveToIndex = Number(curDateEvery.classList[0].split('-')[1])
               if (Math.abs(moveOverItemNum) >= 1) {
@@ -784,7 +808,7 @@ export default {
               }
               this.$refs['date-every-rail'].style.transform = `translateX(${this.headerDateMoveToTansX}px)`
               this.curHeaderSearchDate = this.dateEvery[moveToIndex]
-              this.searchHeaderData()
+              this.searchHeaderData(true)
             }
           }
         }
@@ -793,13 +817,285 @@ export default {
       this.headerDateMoveToTansX = -1
       this.headerTabToggle = 0
     },
-    searchHeaderData () {
-      // this.curHeaderSearchDate
+    searchHeaderData (isChange) {
+      if (isChange === true) {
+        // this.dateChangeLoading = true
+      }
+      var type = 1
+      var startDate = ''
+      var endDate = ''
+      if (this.curHeaderDateTabType === 'day') {
+        type = 1
+        startDate = this.curHeaderSearchDate.val
+        endDate = this.curHeaderSearchDate.val
+      } else if (this.curHeaderDateTabType === 'week') {
+        type = 2
+        startDate = this.curHeaderSearchDate.val[0]
+        endDate = this.curHeaderSearchDate.val[1]
+      } else if (this.curHeaderDateTabType === 'month') {
+        type = 3
+        startDate = this.curHeaderSearchDate.val[0]
+        endDate = this.curHeaderSearchDate.val[1]
+      } else if (this.curHeaderDateTabType === 'year') {
+        type = 4
+        startDate = this.curHeaderSearchDate.val[0]
+        endDate = this.curHeaderSearchDate.val[1]
+      }
+      this.policyChartOpt.series[0].data = []
+      this.curHeaderSum = 0
+      this.$comfun.http_post(this, `data/manage/per/${this.curHeaderTab}/${this.$moment.userInfo.user.id}`, {
+        type: type,
+        startDate: startDate,
+        endDate: endDate
+      }).then((response) => {
+        if (response.body.success === '1') {
+          if (response.body.result.length > 0) {
+            for (let i = 0; i < response.body.result.length; i++) {
+              this.curHeaderSum += response.body.result[i].num ? Number(response.body.result[i].num) : 0
+              this.policyChartOpt.series[0].data.push({
+                value: response.body.result[i].num || 0,
+                name: response.body.result[i].name
+              })
+            }
+            this.policyChartOpt.title.text = `{money|${this.curHeaderSum}}\t\t{unit|${this.summarizings[this.curHeaderTypeIndex].unit}}\n${this.summarizings[this.curHeaderTypeIndex].title}`
+          }
+        }
+      })
     },
     arrowHeader (direction, flag) {
       if (flag) {
         this.curHeaderTypeIndex += direction
+        this.curHeaderTab = this.summarizings[this.curHeaderTypeIndex].id
+        this.policyChartOpt.title.text = `{money|${this.curHeaderSum}}\t\t{unit|${this.summarizings[this.curHeaderTypeIndex].unit}}\n${this.summarizings[this.curHeaderTypeIndex].title}`
+        this.searchHeaderData()
       }
+    },
+    changeDate (dateTab, dateIndex) {
+      event.target.parentNode.getElementsByClassName('cur')[0].classList.remove('cur')
+      event.target.classList.add('cur')
+
+      var type = 2
+      var startDate = ''
+      var endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      if (dateTab.id === 'week') {
+        startDate = this.$comfun.formatDate(this.$comfun.getTargetDate(-7), 'yyyy-MM-dd')
+        type = 2
+      } else if (dateTab.id === 'month') {
+        startDate = this.$comfun.formatDate(this.$comfun.getTargetDate(-30), 'yyyy-MM-dd')
+        type = 3
+      } else if (dateTab.id === 'year') {
+        startDate = this.$comfun.formatDate(this.$comfun.getYearStartEnd(0)[0], 'yyyy-MM-dd')
+        type = 4
+      }
+      this.getLineChartData(type, startDate, endDate)
+    },
+    getLineChartData (type, startDate, endDate) {
+      var chartLimitDate = ''
+      // 整车
+      this.$comfun.http_post(this, `data/manage/curve/newcar/${this.$moment.userInfo.user.id}`, {
+        type: type,
+        startDate: startDate,
+        endDate: endDate
+      }).then((response) => {
+        if (response.body.success === '1') {
+          var xAxisData = []
+          var seriesData = []
+          for (let i = 0; i < response.body.result.length; i++) {
+            let startDate = new Date(response.body.result[i].date.replace(/-/g, '/'))
+            let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d')
+            if (type === 4) {
+              xAxis = this.$comfun.formatDate(startDate, 'yy/M')
+            }
+            xAxisData.push(xAxis)
+            seriesData.push({
+              value: response.body.result[i].num ? response.body.result[i].num : 0,
+              itemStyle: {
+                color: '#ED8D1B',
+                borderColor: '#ED8D1B'
+              }
+            })
+          }
+          if (xAxisData.length > 7) {
+            chartLimitDate = xAxisData[xAxisData.length - 7]
+          } else {
+            chartLimitDate = xAxisData[0]
+          }
+          this.zcChartOpt.xAxis.data = xAxisData
+          this.zcChartOpt.series[0].data = seriesData
+          this.zcChartOpt.dataZoom = [
+            {
+              startValue: chartLimitDate
+            },
+            {
+              type: 'inside'
+            }
+          ]
+        }
+      })
+      // 二手车
+      this.$comfun.http_post(this, `data/manage/curve/oldcar/${this.$moment.userInfo.user.id}`, {
+        type: type,
+        startDate: startDate,
+        endDate: endDate
+      }).then((response) => {
+        if (response.body.success === '1') {
+          var xAxisData = []
+          var seriesData = []
+          for (let i = 0; i < response.body.result.length; i++) {
+            let startDate = new Date(response.body.result[i].date.replace(/-/g, '/'))
+            let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d')
+            if (type === 4) {
+              xAxis = this.$comfun.formatDate(startDate, 'yy/M')
+            }
+            xAxisData.push(xAxis)
+            seriesData.push({
+              value: response.body.result[i].num ? response.body.result[i].num : 0,
+              itemStyle: {
+                color: '#ED8D1B',
+                borderColor: '#ED8D1B'
+              }
+            })
+          }
+          if (xAxisData.length > 7) {
+            chartLimitDate = xAxisData[xAxisData.length - 7]
+          } else {
+            chartLimitDate = xAxisData[0]
+          }
+          this.escChartOpt.xAxis.data = xAxisData
+          this.escChartOpt.series[0].data = seriesData
+          this.escChartOpt.dataZoom = [
+            {
+              startValue: chartLimitDate
+            },
+            {
+              type: 'inside'
+            }
+          ]
+        }
+      })
+      // 保险
+      this.$comfun.http_post(this, `data/manage/curve/insurance/${this.$moment.userInfo.user.id}`, {
+        type: type,
+        startDate: startDate,
+        endDate: endDate
+      }).then((response) => {
+        if (response.body.success === '1') {
+          var xAxisData = []
+          var seriesData = []
+          for (let i = 0; i < response.body.result.length; i++) {
+            let startDate = new Date(response.body.result[i].date.replace(/-/g, '/'))
+            let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d')
+            if (type === 4) {
+              xAxis = this.$comfun.formatDate(startDate, 'yy/M')
+            }
+            xAxisData.push(xAxis)
+            seriesData.push({
+              value: response.body.result[i].num ? response.body.result[i].num : 0,
+              itemStyle: {
+                color: '#ED8D1B',
+                borderColor: '#ED8D1B'
+              }
+            })
+          }
+          if (xAxisData.length > 7) {
+            chartLimitDate = xAxisData[xAxisData.length - 7]
+          } else {
+            chartLimitDate = xAxisData[0]
+          }
+          this.bxChartOpt.xAxis.data = xAxisData
+          this.bxChartOpt.series[0].data = seriesData
+          this.bxChartOpt.dataZoom = [
+            {
+              startValue: chartLimitDate
+            },
+            {
+              type: 'inside'
+            }
+          ]
+        }
+      })
+      // 汽车用品
+      this.$comfun.http_post(this, `data/manage/curve/accessory/${this.$moment.userInfo.user.id}`, {
+        type: type,
+        startDate: startDate,
+        endDate: endDate
+      }).then((response) => {
+        if (response.body.success === '1') {
+          var xAxisData = []
+          var seriesData = []
+          for (let i = 0; i < response.body.result.length; i++) {
+            let startDate = new Date(response.body.result[i].date.replace(/-/g, '/'))
+            let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d')
+            if (type === 4) {
+              xAxis = this.$comfun.formatDate(startDate, 'yy/M')
+            }
+            xAxisData.push(xAxis)
+            seriesData.push({
+              value: response.body.result[i].num ? response.body.result[i].num : 0,
+              itemStyle: {
+                color: '#ED8D1B',
+                borderColor: '#ED8D1B'
+              }
+            })
+          }
+          if (xAxisData.length > 7) {
+            chartLimitDate = xAxisData[xAxisData.length - 7]
+          } else {
+            chartLimitDate = xAxisData[0]
+          }
+          this.qcypChartOpt.xAxis.data = xAxisData
+          this.qcypChartOpt.series[0].data = seriesData
+          this.qcypChartOpt.dataZoom = [
+            {
+              startValue: chartLimitDate
+            },
+            {
+              type: 'inside'
+            }
+          ]
+        }
+      })
+      // 金融
+      this.$comfun.http_post(this, `data/manage/curve/finance/${this.$moment.userInfo.user.id}`, {
+        type: type,
+        startDate: startDate,
+        endDate: endDate
+      }).then((response) => {
+        if (response.body.success === '1') {
+          var xAxisData = []
+          var seriesData = []
+          for (let i = 0; i < response.body.result.length; i++) {
+            let startDate = new Date(response.body.result[i].date.replace(/-/g, '/'))
+            let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d')
+            if (type === 4) {
+              xAxis = this.$comfun.formatDate(startDate, 'yy/M')
+            }
+            xAxisData.push(xAxis)
+            seriesData.push({
+              value: response.body.result[i].num ? response.body.result[i].num : 0,
+              itemStyle: {
+                color: '#ED8D1B',
+                borderColor: '#ED8D1B'
+              }
+            })
+          }
+          if (xAxisData.length > 7) {
+            chartLimitDate = xAxisData[xAxisData.length - 7]
+          } else {
+            chartLimitDate = xAxisData[0]
+          }
+          this.jrChartOpt.xAxis.data = xAxisData
+          this.jrChartOpt.series[0].data = seriesData
+          this.jrChartOpt.dataZoom = [
+            {
+              startValue: chartLimitDate
+            },
+            {
+              type: 'inside'
+            }
+          ]
+        }
+      })
     }
   }
 }
@@ -825,6 +1121,33 @@ export default {
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100% auto;
+    overflow: hidden;
+    z-index: 2;
+    i {
+      position: relative;
+      top: -5%;
+      left: -5%;
+      display: inline-block;
+      width: 110%;
+      height: 110%;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 100% auto;
+      z-index: 1;
+    }
+  }
+  .has-head {
+    i {
+      position: relative;
+      top: 0;
+      left: 0;
+      display: inline-block;
+      width: 200%;
+      height: 200%;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 100% auto;
+    }
   }
   .user-name-wrap {
     position: relative;

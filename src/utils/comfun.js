@@ -7,7 +7,7 @@ export default {
         }
         if (context && url) {
           var http = new Promise((resolve, reject) => {
-            var callUrl = context.$moment.server + url
+            var callUrl = context.$moment.server() + url
             if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
               callUrl = url
             }
@@ -39,7 +39,7 @@ export default {
         if (context && url) {
           var paramsData = params || {}
           var http = new Promise((resolve, reject) => {
-            var callUrl = context.$moment.server + url
+            var callUrl = context.$moment.server() + url
             if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
               callUrl = url
             }
@@ -78,7 +78,7 @@ export default {
             formData.append('args', JSON.stringify(args))
           }
           var http = new Promise((resolve, reject) => {
-            var callUrl = context.$moment.server + url
+            var callUrl = context.$moment.server() + url
             if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
               callUrl = url
             }
@@ -163,7 +163,7 @@ export default {
         }
         return fmt
       },
-      // 获取指定日期几天前或几天后的日期，为指定日期按照当前日期计算
+      // 获取指定日期几天前或几天后的日期，未指定日期按照当前日期计算
       getTargetDate (diff, date) {
         var today = new Date()
         if (date !== undefined) {
@@ -210,6 +210,26 @@ export default {
         }
         startEnd.push(currentDate)
         startEnd.push(currentMonthLastDay)
+        return startEnd
+      },
+      // 获取指定年的起止日期
+      getYearStartEnd (addYearCount) {
+        if (!addYearCount) {
+          addYearCount = 0
+        }
+        var startEnd = []
+        var currentDate = new Date()
+        currentDate.setDate(1)
+        currentDate.setFullYear(currentDate.getFullYear() + addYearCount)
+        var year = currentDate.getFullYear()
+        var currentYearLastDay = null
+        if (year === new Date().getFullYear()) {
+          currentYearLastDay = new Date()
+        } else {
+          currentYearLastDay = this.getLastDay(year, 12)
+        }
+        startEnd.push(currentDate)
+        startEnd.push(currentYearLastDay)
         return startEnd
       },
       // 获取某月最后一天日期

@@ -189,9 +189,9 @@ export default {
     document.querySelector('#app-footer').style.display = 'flex'
     this.defaultUserHead = this.$moment.defaultHead
     if (this.$moment.userInfo.user.photo !== null) {
-      this.$set(this.userSaleInfos[0], 'userHead', this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}`)
-      this.$set(this.userSaleInfos[1], 'userHead', this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}`)
-      this.$set(this.userSaleInfos[2], 'userHead', this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}`)
+      this.$set(this.userSaleInfos[0], 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)
+      this.$set(this.userSaleInfos[1], 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)
+      this.$set(this.userSaleInfos[2], 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)
     }
     this.getUserSelfOrder('week')
     this.getUserSelfOrder('month')
@@ -314,17 +314,17 @@ export default {
         preDes = datePre + ''
         unit = '元'
       }
-      this.$comfun.http_post(this, this.curTabType + `/order/my/${this.$moment.userInfo.user.id}`, {
+      this.$comfun.http_post(this, 'data/public/' + this.curTabType + `/order/my/${this.$moment.userInfo.user.id}`, {
         startDate: startDate,
         endDate: endDate,
         startOldDate: startOldDate,
         endOldDate: endOldDate
       }).then((response) => {
-        this.$set(this.userSaleInfos[0], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}` : '')
+        this.$set(this.userSaleInfos[0], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}` : '')
         this.$set(this.userSaleInfos[0], 'userName', this.$moment.userInfo.user.name)
-        this.$set(this.userSaleInfos[1], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}` : '')
+        this.$set(this.userSaleInfos[1], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}` : '')
         this.$set(this.userSaleInfos[1], 'userName', this.$moment.userInfo.user.name)
-        this.$set(this.userSaleInfos[2], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}` : '')
+        this.$set(this.userSaleInfos[2], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}` : '')
         this.$set(this.userSaleInfos[2], 'userName', this.$moment.userInfo.user.name)
         if (response.body.success === '1') {
           if (dateType === 'week') {
@@ -407,7 +407,7 @@ export default {
         preDes = datePre + ''
         unit = '元'
       }
-      this.$comfun.http_post(this, this.curTabType + `/order/${this.$moment.userInfo.user.id}`, {
+      this.$comfun.http_post(this, 'data/public/' + this.curTabType + `/order/${this.$moment.userInfo.user.id}`, {
         type: this.curOrderWay,
         startDate: startDate,
         endDate: endDate,
@@ -420,7 +420,7 @@ export default {
           this.saleList = []
           for (let s = 0; s < response.body[this.curTabType].length; s++) {
             this.saleList.push({
-              userHead: response.body[this.curTabType][s].photo ? this.$moment.HttpAddress + `showFile/${response.body[this.curTabType][s].photo}` : '',
+              userHead: response.body[this.curTabType][s].photo ? this.$moment.HttpAddress_1 + `showFile/${response.body[this.curTabType][s].photo}` : '',
               userName: response.body[this.curTabType][s].name,
               saleNum: response.body[this.curTabType][s].num,
               salePre: preDes,

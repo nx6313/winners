@@ -534,9 +534,6 @@ export default {
       }
     }
   },
-  beforeCreate () {
-    this.$comfun.http_post(this, 'contrast/8')
-  },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
     this.defaultUserHead = this.$moment.defaultHead
@@ -544,7 +541,7 @@ export default {
     this.userTabTransXCeilWidth = (document.body.clientWidth - 1.6 * 16 - 3.2 * 16) / 6
     this.resetDateEvery(this.dateTabs[0].id)
 
-    this.$comfun.http_post(this, `query/company`).then((response) => {
+    this.$comfun.http_post(this, `data/public/query/company`).then((response) => {
       if (response.body.success === '1') {
         for (let u = 0; u < response.body.result.length; u++) {
           this.userTabs.push({

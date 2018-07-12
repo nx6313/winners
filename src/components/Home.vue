@@ -652,7 +652,7 @@ export default {
     document.querySelector('#app-footer').style.display = 'flex'
     this.defaultUserHead = this.$moment.defaultHead
     if (this.$moment.userInfo.user.photo !== null) {
-      this.userHead = this.$moment.HttpAddress + `showFile/${this.$moment.userInfo.user.photo}`
+      this.userHead = this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`
     }
     this.resetDateEvery(this.dateTabs[0].id)
 
@@ -1115,7 +1115,7 @@ export default {
         startDate = this.curHeaderSearchDate.val[0]
         endDate = this.curHeaderSearchDate.val[1]
       }
-      this.$comfun.http_post(this, `contrast/${this.$moment.userInfo.user.id}`, {
+      this.$comfun.http_post(this, `data/public/contrast/${this.$moment.userInfo.user.id}`, {
         type: type,
         startDate: startDate,
         endDate: endDate
@@ -1133,7 +1133,7 @@ export default {
           this.summarizings[4].progress = !response.body.contrast.personOldcarNum || !response.body.contrast.maxOldcarNum ? 0 : Math.floor(response.body.contrast.personOldcarNum / response.body.contrast.maxOldcarNum * 100)
           this.summarizings[4].num = response.body.contrast.personOldcarNum || 0
         }
-        this.$comfun.http_post(this, `profit/${this.$moment.userInfo.user.id}`, {
+        this.$comfun.http_post(this, `data/public/profit/${this.$moment.userInfo.user.id}`, {
           startDate: startDate,
           endDate: endDate
         }).then((response) => {
@@ -1145,7 +1145,7 @@ export default {
             this.mlvChartOpt.series[0].data[3].value = response.body.profit.financeProfit || 0
             this.mlvChartOpt.series[0].data[4].value = response.body.profit.accessoryProfit || 0
           }
-          this.$comfun.http_post(this, `perf/${this.$moment.userInfo.user.id}`, {
+          this.$comfun.http_post(this, `data/public/perf/${this.$moment.userInfo.user.id}`, {
             startDate: startDate,
             endDate: endDate
           }).then((response) => {
@@ -1181,7 +1181,7 @@ export default {
     getLineChartData (type, startDate, endDate) {
       var chartLimitDate = ''
       // 整车
-      this.$comfun.http_post(this, `newcar/curve/${this.$moment.userInfo.user.id}`, {
+      this.$comfun.http_post(this, `data/public/newcar/curve/${this.$moment.userInfo.user.id}`, {
         type: type,
         startDate: startDate,
         endDate: endDate
@@ -1228,7 +1228,7 @@ export default {
         }
       })
       // 二手车
-      this.$comfun.http_post(this, `oldcar/curve/${this.$moment.userInfo.user.id}`, {
+      this.$comfun.http_post(this, `data/public/oldcar/curve/${this.$moment.userInfo.user.id}`, {
         type: type,
         startDate: startDate,
         endDate: endDate
@@ -1275,7 +1275,7 @@ export default {
         }
       })
       // 保险
-      this.$comfun.http_post(this, `insurance/curve/${this.$moment.userInfo.user.id}`, {
+      this.$comfun.http_post(this, `data/public/insurance/curve/${this.$moment.userInfo.user.id}`, {
         type: type,
         startDate: startDate,
         endDate: endDate
@@ -1322,7 +1322,7 @@ export default {
         }
       })
       // 汽车用品
-      this.$comfun.http_post(this, `accessory/curve/${this.$moment.userInfo.user.id}`, {
+      this.$comfun.http_post(this, `data/public/accessory/curve/${this.$moment.userInfo.user.id}`, {
         type: type,
         startDate: startDate,
         endDate: endDate
@@ -1369,7 +1369,7 @@ export default {
         }
       })
       // 金融
-      this.$comfun.http_post(this, `finance/curve/${this.$moment.userInfo.user.id}`, {
+      this.$comfun.http_post(this, `data/public/finance/curve/${this.$moment.userInfo.user.id}`, {
         type: type,
         startDate: startDate,
         endDate: endDate

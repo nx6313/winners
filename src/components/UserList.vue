@@ -59,10 +59,10 @@ export default {
     document.querySelector('#app-footer').style.display = 'flex'
     this.defaultUserHead = this.$moment.defaultHead
 
-    this.$comfun.http_post(this, `query/company`).then((company) => {
+    this.$comfun.http_post(this, `data/public/query/company`).then((company) => {
       if (company.body.success === '1') {
         for (let c = 0; c < company.body.result.length; c++) {
-          this.$comfun.http_post(this, `query/consultant/${company.body.result[c].id}`).then((response) => {
+          this.$comfun.http_post(this, `data/public/query/consultant/${company.body.result[c].id}`).then((response) => {
             if (response.body.success === '1') {
               let users = []
               for (let u = 0; u < response.body.result.length; u++) {

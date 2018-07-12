@@ -393,7 +393,7 @@ export default {
     }
   },
   beforeCreate () {
-    this.$comfun.http_post(this, 'contrast/8')
+    this.$comfun.http_post(this, 'data/senior/contrast/8')
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'

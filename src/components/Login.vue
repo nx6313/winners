@@ -57,7 +57,7 @@ export default {
       this.$dialog_loading({
         tip: '登陆中，请稍后...'
       })
-      this.$comfun.http_post(this, 'login', {
+      this.$comfun.http_post(this, 'data/public/login', {
         phone: this.userPhone.trim(),
         password: this.userPwd.trim()
       }).then((response) => {
