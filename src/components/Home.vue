@@ -1436,6 +1436,7 @@ export default {
     height: 2.8rem;
     border-radius: 50%;
     border: 2px solid #ffffff;
+    background-color: #ffffff;
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100% auto;
@@ -1457,7 +1458,7 @@ export default {
   .has-head {
     i {
       position: relative;
-      top: 0;
+      top: -1px;
       left: 0;
       display: inline-block;
       width: 200%;

@@ -9,10 +9,13 @@
         <div class="group-info-wrap" ref="group-info-wrap" @click="toggleItem(group, groupIndex)">
           <i class="toggle-status"></i>
           <span class="group-name">{{group.groupName}}</span>
+          <span class="group-user-size">{{group.users.length}} 人</span>
         </div>
         <div class="group-users-wrap" :style="{ 'height': `calc(4rem * ${group.users.length})` }">
           <div class="user-item" v-for="(user, userIndex) in group.users" :key="userIndex">
-            <i class="user-head" :style="user.userHead ? { 'background-image': `url(${user.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
+            <i :class="['user-head', user.userHead !== '' ? 'has-head' : '']">
+              <i :style="user.userHead ? { 'background-image': `url(${user.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
+            </i>
             <div class="user-info">
               <span class="user-name">{{user.userName}}</span>
               <span class="user-duty">{{user.userDuty}}</span>
@@ -27,7 +30,9 @@
     </div>
     <div class="search-result-wrap" v-show="showSearchPanel">
       <div class="user-item" v-for="(searchUser, searchUserIndex) in searchUserList" :key="searchUserIndex">
-        <i class="user-head" :style="searchUser.userHead ? { 'background-image': `url(${searchUser.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
+        <i :class="['user-head', searchUser.userHead !== '' ? 'has-head' : '']">
+          <i :style="searchUser.userHead ? { 'background-image': `url(${searchUser.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
+        </i>
         <div class="user-info">
           <span class="user-name">{{searchUser.userName}}</span>
           <span class="user-duty">{{searchUser.factory}}&nbsp;&nbsp;{{searchUser.userDuty}}</span>
@@ -68,7 +73,7 @@ export default {
               for (let u = 0; u < response.body.result.length; u++) {
                 users.push({
                   userId: response.body.result[u].id,
-                  userHead: '',
+                  userHead: response.body.result[u].photo ? this.$moment.HttpAddress_1 + `showFile/${response.body.result[u].photo}` : '',
                   userDuty: response.body.result[u].dutyName || '职位未设置',
                   userName: response.body.result[u].name,
                   phone: response.body.result[u].phone,
@@ -107,11 +112,11 @@ export default {
       }
     },
     scrollPage () {
-      var fixGroups = this.$refs['group-info-wrap']
-      for (let g = 0; g < fixGroups.length; g++) {
-        let groupScrollTop = fixGroups[g].offsetTop
-        console.log(groupScrollTop)
-      }
+      // var fixGroups = this.$refs['group-info-wrap']
+      // for (let g = 0; g < fixGroups.length; g++) {
+      //   let groupScrollTop = fixGroups[g].offsetTop
+      //   console.log(groupScrollTop)
+      // }
       // var pageScrollTop = document.querySelector('#page-home')
       // if (pageScrollTop > this.sellTabWrapScrollTop) {
       //   this.isFixed = true
@@ -256,6 +261,13 @@ export default {
           font-size: 0.9rem;
           pointer-events: none;
         }
+        span.group-user-size {
+          position: absolute;
+          right: 1.4rem;
+          color: #797979;
+          font-size: 0.6rem;
+          pointer-events: none;
+        }
       }
       .group-users-wrap {
         position: relative;
@@ -275,10 +287,38 @@ export default {
             vertical-align: middle;
             border-radius: 50%;
             margin-right: 0.6rem;
+            background-color: #ffffff;
             background-repeat: no-repeat;
             background-position: center;
             background-size: 100% auto;
             pointer-events: none;
+            overflow: hidden;
+            z-index: 2;
+            i {
+              position: relative;
+              top: -5%;
+              left: -5%;
+              display: inline-block;
+              width: 110%;
+              height: 110%;
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: 100% auto;
+              z-index: 1;
+            }
+          }
+          i.has-head {
+            i {
+              position: relative;
+              top: 0;
+              left: 0;
+              display: inline-block;
+              width: 200%;
+              height: 200%;
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: 100% auto;
+            }
           }
           div.user-info {
             position: relative;
@@ -388,10 +428,38 @@ export default {
         vertical-align: middle;
         border-radius: 50%;
         margin-right: 0.6rem;
+        background-color: #ffffff;
         background-repeat: no-repeat;
         background-position: center;
         background-size: 100% auto;
         pointer-events: none;
+        overflow: hidden;
+        z-index: 2;
+        i {
+          position: relative;
+          top: -5%;
+          left: -5%;
+          display: inline-block;
+          width: 110%;
+          height: 110%;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: 100% auto;
+          z-index: 1;
+        }
+      }
+      i.has-head {
+        i {
+          position: relative;
+          top: 0;
+          left: 0;
+          display: inline-block;
+          width: 200%;
+          height: 200%;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: 100% auto;
+        }
       }
       div.user-info {
         position: relative;

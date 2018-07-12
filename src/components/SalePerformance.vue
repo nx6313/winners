@@ -1,7 +1,7 @@
 <template>
   <div id="page-home-performance" class="page-home-performance" @scroll="scrollPage">
     <div class="page-header-wrap">
-      <span class="user-head">
+      <span :class="['user-head', userHead !== '' ? 'has-head' : '']">
         <i :style="userHead ? { 'background-image': `url(${userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
       </span>
       <div class="user-name-wrap">
@@ -17,7 +17,9 @@
         <div class="user-info-wrap">
           <div class="user-tab-rail" ref="user-tab-rail" :style="{ 'transform': `translateX(0px)` }">
             <span class="user-info-item" v-for="(userTab, userTabIndex) in userTabs" :key="userTabIndex" :ref="'date-tab-' + userTab.userId" :class="userTabIndex === 0 ? 'cur' : ''" :style="{ 'width': `calc(100% / 6)` }" @click="seeThisUser(userTab, userTabIndex)">
-              <i class="user-head" :style="{ 'background-image': `url(${defaultUserHead})` }"></i>
+              <i :class="['user-head', userTab.head !== '' ? 'has-head' : '']">
+                <i :style="userTab.head ? { 'background-image': `url(${userTab.head})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
+              </i>
               <span class="user-name">{{userTab.name}}</span>
             </span>
           </div>
@@ -674,7 +676,7 @@ export default {
         for (let u = 0; u < response.body.result.length; u++) {
           this.userTabs.push({
             userId: response.body.result[u].id,
-            head: '',
+            head: response.body.result[u].photo ? this.$moment.HttpAddress_1 + `showFile/${response.body.result[u].photo}` : '',
             name: response.body.result[u].name
           })
         }
@@ -1389,10 +1391,37 @@ export default {
     height: 2.8rem;
     border-radius: 50%;
     border: 2px solid #ffffff;
-    background-color: #383838;
+    background-color: #ffffff;
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100% auto;
+    overflow: hidden;
+    z-index: 2;
+    i {
+      position: relative;
+      top: -5%;
+      left: -5%;
+      display: inline-block;
+      width: 110%;
+      height: 110%;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 100% auto;
+      z-index: 1;
+    }
+  }
+  .has-head {
+    i {
+      position: relative;
+      top: 0;
+      left: 0;
+      display: inline-block;
+      width: 200%;
+      height: 200%;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 100% auto;
+    }
   }
   .user-name-wrap {
     position: relative;
@@ -1474,11 +1503,22 @@ export default {
             height: 2rem;
             border-radius: 50%;
             border: 2px solid #ffffff;
-            background-color: #383838;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: 100% auto;
+            background-color: #ffffff;
             pointer-events: none;
+            overflow: hidden;
+            z-index: 2;
+            i {
+              position: relative;
+              top: -5%;
+              left: -5%;
+              display: inline-block;
+              width: 110%;
+              height: 110%;
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: 100% auto;
+              z-index: 1;
+            }
           }
           i.user-head::after {
             content: '';
@@ -1489,8 +1529,24 @@ export default {
             right: -2px;
             border-radius: 50%;
             background-color: rgba(30, 30, 30, 0.3);
+            background-position: center;
+            background-size: 100% auto;
             pointer-events: none;
             transition: all 0.4s ease 0s;
+            z-index: 3;
+          }
+          i.has-head {
+            i {
+              position: relative;
+              top: 0;
+              left: 0;
+              display: inline-block;
+              width: 200%;
+              height: 200%;
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: 100% auto;
+            }
           }
           span.user-name {
             position: relative;

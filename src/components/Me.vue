@@ -113,7 +113,7 @@ export default {
     margin: 0 auto;
     margin-top: 2.4rem;
     border: 2px solid #f0f0f0;
-    background-color: #383838;
+    background-color: #ffffff;
     z-index: 9;
     span {
       position: relative;

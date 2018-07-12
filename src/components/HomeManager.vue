@@ -852,10 +852,12 @@ export default {
           if (response.body.result.length > 0) {
             for (let i = 0; i < response.body.result.length; i++) {
               this.curHeaderSum += response.body.result[i].num ? Number(response.body.result[i].num) : 0
-              this.policyChartOpt.series[0].data.push({
-                value: response.body.result[i].num || 0,
-                name: response.body.result[i].name
-              })
+              if (response.body.result[i].num !== null && response.body.result[i].num > 0) {
+                this.policyChartOpt.series[0].data.push({
+                  value: response.body.result[i].num || 0,
+                  name: response.body.result[i].name
+                })
+              }
             }
             this.policyChartOpt.title.text = `{money|${this.curHeaderSum}}\t\t{unit|${this.summarizings[this.curHeaderTypeIndex].unit}}\n${this.summarizings[this.curHeaderTypeIndex].title}`
           }
@@ -1117,7 +1119,7 @@ export default {
     height: 2.8rem;
     border-radius: 50%;
     border: 2px solid #ffffff;
-    background-color: #383838;
+    background-color: #ffffff;
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100% auto;
