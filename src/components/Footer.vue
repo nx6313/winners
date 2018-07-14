@@ -83,8 +83,8 @@ export default {
           {
             txt: '智能决策',
             path: '/home-boss',
-            icon_normal: 'icon-gryj1',
-            icon_select: 'icon-gryj'
+            icon_normal: 'icon-znjc1',
+            icon_select: 'icon-znjc'
           },
           {
             txt: '公司业绩',
@@ -133,6 +133,8 @@ export default {
         } else if (curRouterPath.indexOf('/sale-list') === 0) {
           this.curMenuIndex = 2
         } else if (curRouterPath.indexOf('/user-list') === 0) {
+          this.curMenuIndex = 3
+        } else if (curRouterPath.indexOf('/sell-data') === 0) {
           this.curMenuIndex = 3
         }
       }

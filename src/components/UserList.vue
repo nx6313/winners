@@ -4,26 +4,29 @@
       <i class="iconfont icon-fdj"></i>
       <input type="text" placeholder="请输入姓名查询" v-model="searchVal">
     </div>
-    <div class="users-list-wrap" @scroll="scrollPage" v-show="!showSearchPanel">
+    <div class="users-list-wrap" v-show="!showSearchPanel">
       <div class="users-group-item close" v-for="(group, groupIndex) in userList" :key="groupIndex">
         <div class="group-info-wrap" ref="group-info-wrap" @click="toggleItem(group, groupIndex)">
           <i class="toggle-status"></i>
           <span class="group-name">{{group.groupName}}</span>
-          <span class="group-user-size">{{group.users.length}} 人</span>
+          <span class="group-user-size" v-show="group.users.length > 0">{{group.users.length}} 人</span>
+          <span class="group-user-loading finish-loading"></span>
         </div>
-        <div class="group-users-wrap" :style="{ 'height': `calc(4rem * ${group.users.length})` }">
-          <div class="user-item" v-for="(user, userIndex) in group.users" :key="userIndex">
+        <div class="group-users-wrap" ref="group-users-wrap" :style="{ 'height': `calc(4rem * ${group.users.length})` }">
+          <div class="user-item" v-for="(user, userIndex) in group.users" :key="userIndex" v-if="group.show" @click="toSellPage(user)">
             <i :class="['user-head', user.userHead !== '' ? 'has-head' : '']">
-              <i :style="user.userHead ? { 'background-image': `url(${user.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
+              <i :style="user.userHead ? { 'background-image': `url(${user.userHead})` } : { 'background-image': `url(${defaultUserHead})` }">
+                <span class="user-name-for-head" v-if="!user.userHead">{{user.userName.substr(user.userName.trim().length - 2)}}</span>
+              </i>
             </i>
             <div class="user-info">
-              <span class="user-name">{{user.userName}}</span>
+              <span class="user-name">{{user.userName.trim()}}</span>
               <span class="user-duty">{{user.userDuty}}</span>
             </div>
             <div class="user-level">
               <i :class="['star', starIndex < user.level ? 'has-star' : '']" v-for="(star, starIndex) in starCount" :key="starIndex"></i>
             </div>
-            <i class="user-call iconfont icon-dianhua" @click="call(user.phone)"></i>
+            <i class="user-call iconfont icon-dianhua" @click.stop="call(user.phone)"></i>
           </div>
         </div>
       </div>
@@ -31,7 +34,9 @@
     <div class="search-result-wrap" v-show="showSearchPanel">
       <div class="user-item" v-for="(searchUser, searchUserIndex) in searchUserList" :key="searchUserIndex">
         <i :class="['user-head', searchUser.userHead !== '' ? 'has-head' : '']">
-          <i :style="searchUser.userHead ? { 'background-image': `url(${searchUser.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
+          <i :style="searchUser.userHead ? { 'background-image': `url(${searchUser.userHead})` } : { 'background-image': `url(${defaultUserHead})` }">
+            <span class="user-name-for-head" v-if="!searchUser.userHead">{{searchUser.userName.substr(searchUser.userName.trim().length - 2)}}</span>
+          </i>
         </i>
         <div class="user-info">
           <span class="user-name">{{searchUser.userName}}</span>
@@ -67,26 +72,13 @@ export default {
     this.$comfun.http_post(this, `data/public/query/company`).then((company) => {
       if (company.body.success === '1') {
         for (let c = 0; c < company.body.result.length; c++) {
-          this.$comfun.http_post(this, `data/public/query/consultant/${company.body.result[c].id}`).then((response) => {
-            if (response.body.success === '1') {
-              let users = []
-              for (let u = 0; u < response.body.result.length; u++) {
-                users.push({
-                  userId: response.body.result[u].id,
-                  userHead: response.body.result[u].photo ? this.$moment.HttpAddress_1 + `showFile/${response.body.result[u].photo}` : '',
-                  userDuty: response.body.result[u].dutyName || '职位未设置',
-                  userName: response.body.result[u].name,
-                  phone: response.body.result[u].phone,
-                  level: 3
-                })
-              }
-              this.userList.push({
-                groupId: company.body.result[c].id,
-                head: '',
-                groupName: company.body.result[c].name,
-                users: users
-              })
-            }
+          this.userList.push({
+            groupId: company.body.result[c].id,
+            head: '',
+            groupName: company.body.result[c].name,
+            users: [],
+            show: true,
+            closeTimer: null
           })
         }
       }
@@ -94,13 +86,52 @@ export default {
   },
   methods: {
     toggleItem (group, groupIndex) {
-      if (event.target.parentNode.classList.contains('open')) {
-        event.target.parentNode.classList.remove('open')
-        event.target.parentNode.classList.add('close')
+      var targetParent = event.target.parentNode
+      if (targetParent.classList.contains('open')) {
+        targetParent.classList.remove('open')
+        targetParent.classList.add('close')
+        group.closeTimer = setTimeout(() => {
+          group.show = false
+        }, 402)
       } else {
-        event.target.parentNode.classList.remove('close')
-        event.target.parentNode.classList.add('open')
+        clearTimeout(group.closeTimer)
+        group.show = true
+        this.getCompanyData(group.groupId, groupIndex, () => {
+          targetParent.classList.remove('close')
+          targetParent.classList.add('open')
+        })
       }
+    },
+    getCompanyData (groupId, groupIndex, callBack) {
+      var groupItem = this.$refs['group-info-wrap'][groupIndex]
+      var groupUserLoading = groupItem.getElementsByClassName('group-user-loading')[0]
+      groupUserLoading.classList.remove('finish-loading')
+      this.$comfun.http_post(this, `data/public/query/consultant/${groupId}`).then((response) => {
+        setTimeout(() => {
+          groupUserLoading.classList.add('finish-loading')
+        }, 300)
+        if (response.body.success === '1') {
+          let users = []
+          for (let u = 0; u < response.body.result.length; u++) {
+            users.push({
+              userId: response.body.result[u].id,
+              userHead: response.body.result[u].photo ? this.$moment.HttpAddress_1 + `showFile/${response.body.result[u].photo}` : '',
+              userDuty: response.body.result[u].dutyName || '职位未设置',
+              userName: response.body.result[u].name,
+              phone: response.body.result[u].phone,
+              level: 3
+            })
+          }
+          this.userList[groupIndex].users = users
+          if (callBack) {
+            callBack()
+          }
+        } else {
+          this.$dialog_msg({
+            msg: '该厂未录入员工数据'
+          })
+        }
+      })
     },
     call (phone) {
       if (phone) {
@@ -111,41 +142,33 @@ export default {
         })
       }
     },
-    scrollPage () {
-      // var fixGroups = this.$refs['group-info-wrap']
-      // for (let g = 0; g < fixGroups.length; g++) {
-      //   let groupScrollTop = fixGroups[g].offsetTop
-      //   console.log(groupScrollTop)
-      // }
-      // var pageScrollTop = document.querySelector('#page-home')
-      // if (pageScrollTop > this.sellTabWrapScrollTop) {
-      //   this.isFixed = true
-      // } else {
-      //   this.isFixed = false
-      // }
-    },
-    search () {
-      this.showSearchPanel = true
-      this.searchUserList = [
-        {
-          userId: '',
-          userHead: '',
-          userDuty: '销售顾问',
-          userName: '刘德华',
-          phone: '15555555555',
-          factory: '一厂',
-          level: 3
-        },
-        {
-          userId: '',
-          userHead: '',
-          userDuty: '销售顾问',
-          userName: '刘德华',
-          phone: '15555555555',
-          factory: '四厂',
-          level: 3
+    search (searchVal) {
+      this.searchUserList.splice(0, this.searchUserList.length)
+      this.$comfun.http_post(this, 'data/senior/query/consultant', {
+        name: searchVal
+      }).then((response) => {
+        if (response.body.success === '1') {
+          this.showSearchPanel = true
+          for (let u = 0; u < response.body.result.length; u++) {
+            this.searchUserList.push({
+              userId: response.body.result[u].id,
+              userHead: response.body.result[u].photo ? this.$moment.HttpAddress_1 + `showFile/${response.body.result[u].photo}` : '',
+              userDuty: response.body.result[u].dutyName,
+              userName: response.body.result[u].name,
+              phone: response.body.result[u].phone,
+              factory: response.body.result[u].companyName,
+              level: 3
+            })
+          }
+        } else {
+          this.$dialog_msg({
+            msg: '销售员查询失败'
+          })
         }
-      ]
+      })
+    },
+    toSellPage (userInfo) {
+      this.$router.push(`/sell-data/${userInfo.userId}`)
     }
   },
   watch: {
@@ -157,7 +180,7 @@ export default {
         if (newVal.trim() !== oldVal.trim()) {
           clearTimeout(this.searchTimer)
           this.searchTimer = setTimeout(() => {
-            this.search()
+            this.search(newVal.trim())
           }, 600)
         }
       }
@@ -268,6 +291,24 @@ export default {
           font-size: 0.6rem;
           pointer-events: none;
         }
+        span.group-user-loading {
+          position: absolute;
+          right: 3.2rem;
+          display: inline-block;
+          width: 1.8rem;
+          height: 1.8rem;
+          top: 0;
+          bottom: 0;
+          margin: auto 0;
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: 100% auto;
+          background-image: url('./../assets/user-loading.gif');
+          pointer-events: none;
+        }
+        span.finish-loading {
+          display: none;
+        }
       }
       .group-users-wrap {
         position: relative;
@@ -287,7 +328,7 @@ export default {
             vertical-align: middle;
             border-radius: 50%;
             margin-right: 0.6rem;
-            background-color: #ffffff;
+            background-color: #7daffa;
             background-repeat: no-repeat;
             background-position: center;
             background-size: 100% auto;
@@ -305,9 +346,27 @@ export default {
               background-position: center;
               background-size: 100% auto;
               z-index: 1;
+              span.user-name-for-head {
+                display: inline-block;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                margin: auto 0;
+                width: 100%;
+                height: 1rem;
+                line-height: normal;
+                text-align: center;
+                font-family: FZLTHJW, 'Avenir', Helvetica, Arial, sans-serif;
+                font-size: 0.7rem;
+                font-weight: bold;
+                color: #ffffff;
+                white-space: nowrap;
+                font-style: normal;
+              }
             }
           }
           i.has-head {
+            background-color: #ffffff;
             i {
               position: relative;
               top: 0;
@@ -428,7 +487,7 @@ export default {
         vertical-align: middle;
         border-radius: 50%;
         margin-right: 0.6rem;
-        background-color: #ffffff;
+        background-color: #7daffa;
         background-repeat: no-repeat;
         background-position: center;
         background-size: 100% auto;
@@ -447,8 +506,26 @@ export default {
           background-size: 100% auto;
           z-index: 1;
         }
+        span.user-name-for-head {
+          display: inline-block;
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          margin: auto 0;
+          width: 100%;
+          height: 1rem;
+          line-height: normal;
+          text-align: center;
+          font-family: FZLTHJW, 'Avenir', Helvetica, Arial, sans-serif;
+          font-size: 0.7rem;
+          font-weight: bold;
+          color: #ffffff;
+          white-space: nowrap;
+          font-style: normal;
+        }
       }
       i.has-head {
+        background-color: #ffffff;
         i {
           position: relative;
           top: 0;

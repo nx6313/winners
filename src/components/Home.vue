@@ -2,7 +2,9 @@
   <div id="page-home" class="page-home" @scroll="scrollPage">
     <div class="page-header-wrap">
       <span :class="['user-head', userHead !== '' ? 'has-head' : '']">
-        <i :style="userHead !== '' ? { 'background-image': `url(${userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
+        <i :style="userHead !== '' ? { 'background-image': `url(${userHead})` } : { 'background-image': `url(${defaultUserHead})` }">
+          <span class="user-name-for-head" v-if="!userHead">{{userName.substr(userName.trim().length - 2)}}</span>
+        </i>
       </span>
       <div class="user-name-wrap">
         <span class="user-name">{{userName}}</span>
@@ -1435,8 +1437,8 @@ export default {
     width: 2.8rem;
     height: 2.8rem;
     border-radius: 50%;
-    border: 2px solid #ffffff;
-    background-color: #ffffff;
+    border: 2px solid #dbdbdb;
+    background-color: #7daffa;
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100% auto;
@@ -1453,9 +1455,27 @@ export default {
       background-position: center;
       background-size: 100% auto;
       z-index: 1;
+      span.user-name-for-head {
+        display: inline-block;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        margin: auto 0;
+        width: 100%;
+        height: 1rem;
+        line-height: normal;
+        text-align: center;
+        font-family: FZLTHJW, 'Avenir', Helvetica, Arial, sans-serif;
+        font-size: 0.7rem;
+        font-weight: bold;
+        color: #ffffff;
+        white-space: nowrap;
+        font-style: normal;
+      }
     }
   }
   .has-head {
+    background-color: #ffffff;
     i {
       position: relative;
       top: -1px;

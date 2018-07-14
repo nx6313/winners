@@ -18,7 +18,9 @@
           <div class="user-tab-rail" ref="user-tab-rail" :style="{ 'transform': `translateX(0px)` }">
             <span class="user-info-item" v-for="(userTab, userTabIndex) in userTabs" :key="userTabIndex" :ref="'date-tab-' + userTab.userId" :class="userTabIndex === 0 ? 'cur' : ''" :style="{ 'width': `calc(100% / 6)` }" @click="seeThisUser(userTab, userTabIndex)">
               <i :class="['user-head', userTab.head !== '' ? 'has-head' : '']">
-                <i :style="userTab.head ? { 'background-image': `url(${userTab.head})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
+                <i :style="userTab.head ? { 'background-image': `url(${userTab.head})` } : { 'background-image': `` }">
+                  <span class="user-name-for-head" v-if="!userTab.head">{{userTab.name.substr(userTab.name.trim().length - 2)}}</span>
+                </i>
               </i>
               <span class="user-name">{{userTab.name}}</span>
             </span>
@@ -667,7 +669,7 @@ export default {
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
-    this.defaultUserHead = this.$moment.defaultHead
+    this.defaultUserHead = this.$moment.defaultDcHead
     this.userName = this.$moment.userInfo.user.name
     this.userTabTransXPageWidth = document.body.clientWidth - 1.6 * 16 - 3.2 * 16
     this.userTabTransXCeilWidth = (document.body.clientWidth - 1.6 * 16 - 3.2 * 16) / 6
@@ -1386,7 +1388,7 @@ export default {
   color: #ffffff;
   font-size: 0.8rem;
   padding: 0.6rem 0.8rem;
-  .user-head {
+  span.user-head {
     position: absolute;
     top: 1.2rem;
     left: 0.6rem;
@@ -1414,7 +1416,7 @@ export default {
       z-index: 1;
     }
   }
-  .has-head {
+  span.has-head {
     i {
       position: relative;
       top: 0;
@@ -1506,8 +1508,8 @@ export default {
             width: 2rem;
             height: 2rem;
             border-radius: 50%;
-            border: 2px solid #ffffff;
-            background-color: #ffffff;
+            border: 2px solid #d6d6d6;
+            background-color: #7daffa;
             pointer-events: none;
             overflow: hidden;
             z-index: 2;
@@ -1522,6 +1524,24 @@ export default {
               background-position: center;
               background-size: 100% auto;
               z-index: 1;
+              span.user-name-for-head {
+                display: inline-block;
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                margin: auto 0;
+                width: 100%;
+                height: 1rem;
+                line-height: normal;
+                text-align: center;
+                font-family: FZLTHJW, 'Avenir', Helvetica, Arial, sans-serif;
+                font-size: 0.5rem;
+                font-weight: bold;
+                color: #ffffff;
+                white-space: nowrap;
+                font-style: normal;
+              }
             }
           }
           i.user-head::after {
@@ -1540,6 +1560,7 @@ export default {
             z-index: 3;
           }
           i.has-head {
+            background-color: #ffffff;
             i {
               position: relative;
               top: 0;
@@ -1567,6 +1588,11 @@ export default {
           i.user-head {
             width: 2.5rem;
             height: 2.5rem;
+            i {
+              span.user-name-for-head {
+                font-size: 0.7rem;
+              }
+            }
           }
           i.user-head::after {
             background-color: rgba(0, 0, 0, 0);

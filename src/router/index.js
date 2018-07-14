@@ -88,6 +88,11 @@ var router = new Router({
       meta: {
         title: '通讯录'
       }
+    },
+    {
+      path: '/sell-data/:userid',
+      name: 'SellData',
+      component: resolve => require(['@/components/SellData'], resolve)
     }
   ]
 })

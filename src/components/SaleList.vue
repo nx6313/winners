@@ -5,12 +5,14 @@
         <span v-for="(tab, tabIndex) in tabs" :key="tabIndex" :class="tabIndex === 0 ? 'cur' : ''" :style="{ 'width': `calc(100vw / 6)` }" @click="refOrder('tabType', tab.id)">{{tab.txt}}</span>
       </div>
     </div>
-    <div class="user-self-order-wrap" ref="user-self-order-wrap" @touchstart="userSelfTouchStart" @touchmove="userSelfTouchMove" @touchend="userSelfTouchEnd">
+    <div class="user-self-order-wrap" ref="user-self-order-wrap" @touchstart="userSelfTouchStart" @touchmove="userSelfTouchMove" @touchend="userSelfTouchEnd" v-if="userGrade !== 3">
       <div :id="'user-self-page_' + userSaleInfoIndex" ref="user-self-order" :class="['user-self-order', userSaleInfoIndex === 0 ? 'cur-page-for-user-self' : '', (userSaleInfo.ranking >= 1 && userSaleInfo.ranking <= 3)? 'user-self-ranking-' + userSaleInfo.ranking : '']" v-for="(userSaleInfo, userSaleInfoIndex) in userSaleInfos" :key="userSaleInfoIndex">
         <div class="user-head-name-wrap">
           <i class="user-head-wrap"></i>
           <span :class="['user-head', userSaleInfo.userHead ? 'has-head' : '']">
-            <i :style="userSaleInfo.userHead ? { 'background-image': `url(${userSaleInfo.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
+            <i :style="userSaleInfo.userHead ? { 'background-image': `url(${userSaleInfo.userHead})` } : { 'background-image': `url(${defaultUserHead})` }">
+              <span class="user-name-for-head" v-if="!userSaleInfo.userHead">{{userSaleInfo.userName.substr(userSaleInfo.userName.trim().length - 2)}}</span>
+            </i>
           </span>
           <span class="user-name">{{userSaleInfo.userName}}</span>
         </div>
@@ -55,8 +57,8 @@
         <span v-for="(tab2, tab2Index) in tabs2" :key="tab2Index" :class="tab2Index === 0 ? 'cur' : ''" :style="{ 'width': `calc(100vw / ${tabs2.length})` }" @click="refOrder('orderType', tab2.id)">{{tab2.txt}}</span>
       </div>
     </div>
-    <div class="sort-type-wrap flex-r flex-a">
-      <span class="cur" @click="refOrder('way', 8)">集团</span>
+    <div class="sort-type-wrap flex-r flex-a" v-if="userGrade !== 3">
+      <span class="cur" @click="refOrder('way', 8)">集团{{userGrade}}</span>
       <span @click="refOrder('way', 9)">本厂</span>
     </div>
     <div class="all-sale-list-wrap">
@@ -64,7 +66,9 @@
         <span class="ranking"><span>{{saleIndex + 1}}</span><i></i></span>
         <i class="user-head-wrap"></i>
         <span :class="['user-head', sale.userHead ? 'has-head' : '']">
-          <i :style="sale.userHead ? { 'background-image': `url(${sale.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
+          <i :style="sale.userHead ? { 'background-image': `url(${sale.userHead})` } : { 'background-image': `url(${defaultUserHead})` }">
+            <span class="user-name-for-head" v-if="!sale.userHead">{{sale.userName.substr(sale.userName.trim().length - 2)}}</span>
+          </i>
         </span>
         <div class="user-info-wrap">
           <div class="line-first flex-r flex-b">
@@ -97,6 +101,7 @@ export default {
   name: 'SaleList',
   data () {
     return {
+      userGrade: 1,
       userSelfCurPage: 0,
       userSelfTouchStartX: -1,
       userSelfMoveDistance: 0,
@@ -187,6 +192,7 @@ export default {
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
+    this.userGrade = Number(this.$moment.userInfo.user.grade)
     this.defaultUserHead = this.$moment.defaultHead
     if (this.$moment.userInfo.user.photo !== null) {
       this.$set(this.userSaleInfos[0], 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)
@@ -530,7 +536,7 @@ export default {
         margin: 0 auto;
         border-radius: 50%;
         border: 2px solid #e2e2e2;
-        background-color: #383838;
+        background-color: #7daffa;
         z-index: 2;
         overflow: hidden;
         i {
@@ -544,9 +550,27 @@ export default {
           background-position: center;
           background-size: 100% auto;
           z-index: 1;
+          span.user-name-for-head {
+            display: inline-block;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            margin: auto 0;
+            width: 100%;
+            height: 1rem;
+            line-height: normal;
+            text-align: center;
+            font-family: FZLTHJW, 'Avenir', Helvetica, Arial, sans-serif;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #ffffff;
+            white-space: nowrap;
+            font-style: normal;
+          }
         }
       }
       .has-head {
+        background-color: #ffffff;
         i {
           position: relative;
           top: 0;
@@ -664,7 +688,7 @@ export default {
       border-radius: 50%;
       margin-left: 3.4rem;
       border: 2px solid #e2e2e2;
-      background-color: #383838;
+      background-color: #7daffa;
       z-index: 2;
       overflow: hidden;
       i {
@@ -678,9 +702,27 @@ export default {
         background-position: center;
         background-size: 100% auto;
         z-index: 1;
+        span.user-name-for-head {
+          display: inline-block;
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          margin: auto 0;
+          width: 100%;
+          height: 1rem;
+          line-height: normal;
+          text-align: center;
+          font-family: FZLTHJW, 'Avenir', Helvetica, Arial, sans-serif;
+          font-size: 0.7rem;
+          font-weight: bold;
+          color: #ffffff;
+          white-space: nowrap;
+          font-style: normal;
+        }
       }
     }
     .has-head {
+      background-color: #ffffff;
       i {
         position: relative;
         top: 0;

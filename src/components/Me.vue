@@ -3,7 +3,9 @@
     <div class="user-header-wrap">
       <span class="user-head" @click="selectPic">
         <span :class="userInfo.userHead ? 'has-head' : ''">
-          <i :style="userInfo.userHead ? { 'background-image': `url(${userInfo.userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
+          <i :style="userInfo.userHead ? { 'background-image': `url(${userInfo.userHead})` } : { 'background-image': `url(${defaultUserHead})` }">
+            <span class="user-name-for-head" v-if="!userInfo.userHead && userInfo.userName">{{userInfo.userName.substr(userInfo.userName.trim().length - 2)}}</span>
+          </i>
         </span>
       </span>
       <span class="user-name">{{userInfo.userName}}</span>
@@ -113,7 +115,7 @@ export default {
     margin: 0 auto;
     margin-top: 2.4rem;
     border: 2px solid #f0f0f0;
-    background-color: #ffffff;
+    background-color: #7daffa;
     z-index: 9;
     span {
       position: relative;
@@ -132,6 +134,23 @@ export default {
         background-repeat: no-repeat;
         background-position: center;
         background-size: 100% auto;
+        span.user-name-for-head {
+          display: inline-block;
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          margin: auto 0;
+          width: 100%;
+          height: 1.4rem;
+          line-height: normal;
+          text-align: center;
+          font-family: FZLTHJW, 'Avenir', Helvetica, Arial, sans-serif;
+          font-size: 1.2rem;
+          font-weight: bold;
+          color: #ffffff;
+          white-space: nowrap;
+          font-style: normal;
+        }
       }
     }
     span.has-head {

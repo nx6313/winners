@@ -15,7 +15,7 @@
         <div class="user-info-wrap">
           <div class="user-tab-rail" ref="user-tab-rail" :style="{ 'transform': `translateX(0px)` }">
             <span class="user-info-item" v-for="(userTab, userTabIndex) in userTabs" :key="userTabIndex" :ref="'date-tab-' + userTab.userId" :class="userTabIndex === 0 ? 'cur' : ''" :style="{ 'width': `calc(100% / 6)` }" @click="seeThisUser(userTab, userTabIndex)">
-              <i class="user-head" :style="{ 'background-image': `url(${defaultUserHead})` }"></i>
+              <i class="user-head" :style="userTab.head ? { 'background-image': `url(${userTab.head})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
               <span class="user-name">{{userTab.name}}</span>
             </span>
           </div>
@@ -558,7 +558,7 @@ export default {
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
-    this.defaultUserHead = this.$moment.defaultHead
+    this.defaultUserHead = this.$moment.defaultDcHead
     this.userTabTransXPageWidth = document.body.clientWidth - 1.6 * 16 - 3.2 * 16
     this.userTabTransXCeilWidth = (document.body.clientWidth - 1.6 * 16 - 3.2 * 16) / 6
     this.curDateTab = this.dateTabs[1]
@@ -568,7 +568,7 @@ export default {
         for (let u = 0; u < response.body.result.length; u++) {
           this.userTabs.push({
             userId: response.body.result[u].id,
-            head: '',
+            head: response.body.result[u].id ? this.$moment.HttpAddress_root + 'image/' + response.body.result[u].id + '.png' : '',
             name: response.body.result[u].name
           })
         }
@@ -945,12 +945,12 @@ export default {
           endDate: endDate
         }).then((response) => {
           if (response.body.success === '1') {
-            this.mlvChartOpt.title.text = `{money|${response.body.profit.profitSum || 0}}\t\t{unit|元}\n综合毛利`
-            this.mlvChartOpt.series[0].data[0].value = response.body.profit.newcarProfit || 0
-            this.mlvChartOpt.series[0].data[1].value = response.body.profit.insuranceProfit || 0
-            this.mlvChartOpt.series[0].data[2].value = response.body.profit.oldcarProfit || 0
-            this.mlvChartOpt.series[0].data[3].value = response.body.profit.financeProfit || 0
-            this.mlvChartOpt.series[0].data[4].value = response.body.profit.accessoryProfit || 0
+            this.mlvChartOpt.title.text = `{money|${response.body.result.sumProfit || 0}}\t\t{unit|元}\n综合毛利`
+            this.mlvChartOpt.series[0].data[0].value = response.body.result.newcarProfit || 0
+            // this.mlvChartOpt.series[0].data[1].value = response.body.result.insuranceProfit || 0
+            // this.mlvChartOpt.series[0].data[2].value = response.body.result.oldcarProfit || 0
+            this.mlvChartOpt.series[0].data[3].value = response.body.result.financeProfit || 0
+            this.mlvChartOpt.series[0].data[4].value = response.body.result.accessoryProfit || 0
           }
         })
       })

@@ -2,9 +2,11 @@ var HttpIp = ''
 var HttpPort = ''
 // var HttpAddress = 'http://172.18.168.222:8080/'
 var HttpAddress = 'http://wx.dcsc520.cn/lhp/'
+var HttpAddressRoot = 'http://wx.dcsc520.cn/'
 var localforage = require('localforage')
 
-var defaultHead = require('@/assets/default-head.png')
+var defaultDcHead = require('@/assets/default-head.png')
+var defaultHead = ''
 
 export default {
   install: function (Vue, options) {
@@ -22,12 +24,14 @@ export default {
       },
       // 是否开启调试模式
       debug: true,
+      HttpAddress_root: HttpAddressRoot,
       HttpAddress_1: HttpAddress + 'data/public/',
       HttpAddress_2: HttpAddress + 'data/manage/',
       HttpAddress_3: HttpAddress + 'data/senior/',
       // localForage
       localforage: localforage,
       userInfo: {},
+      defaultDcHead: defaultDcHead,
       defaultHead: defaultHead
     }
 
