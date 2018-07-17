@@ -492,7 +492,7 @@ export default {
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
-    this.defaultUserHead = this.$moment.defaultDcHead
+    this.defaultUserHead = this.$moment.defaultDcLogo
     this.curHeaderTab = this.summarizings[this.curHeaderTypeIndex].id
     this.policyChartOpt.title.text = `{money|${this.curHeaderSum}}\t\t{unit|${this.summarizings[this.curHeaderTypeIndex].unit}}\n${this.summarizings[this.curHeaderTypeIndex].title}`
     this.resetDateEvery(this.dateTabs[0].id)

@@ -659,7 +659,8 @@ export default {
       if (response.body.success === '1') {
         this.userInfoData = {
           basedate: response.body.basedate ? new Date(response.body.basedate) : new Date(),
-          user: response.body.user
+          user: response.body.user,
+          type: response.body.type
         }
 
         if (this.userInfoData.user.photo !== null) {

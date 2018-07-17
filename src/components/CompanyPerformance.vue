@@ -558,7 +558,7 @@ export default {
   },
   mounted () {
     document.querySelector('#app-footer').style.display = 'flex'
-    this.defaultUserHead = this.$moment.defaultDcHead
+    this.defaultUserHead = this.$moment.defaultDcLogo
     this.userTabTransXPageWidth = document.body.clientWidth - 1.6 * 16 - 3.2 * 16
     this.userTabTransXCeilWidth = (document.body.clientWidth - 1.6 * 16 - 3.2 * 16) / 6
     this.curDateTab = this.dateTabs[1]
