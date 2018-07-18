@@ -2,7 +2,7 @@
   <div class="page-sale-list">
     <div class="tabs-wrap">
       <div class="tabs-rail-wrap">
-        <span v-for="(tab, tabIndex) in tabs" :key="tabIndex" :class="tabIndex === 0 ? 'cur' : ''" :style="{ 'width': `calc(100vw / 6)` }" @click="refOrder('tabType', tab.id)">{{tab.txt}}</span>
+        <span v-for="(tab, tabIndex) in tabs" :key="tabIndex" :class="tabIndex === 0 ? 'cur' : ''" :style="{ 'width': `calc(100vw / ${tabShowCount})` }" @click="refOrder('tabType', tab.id, tabIndex)">{{tab.txt}}</span>
       </div>
     </div>
     <div class="user-self-order-wrap" ref="user-self-order-wrap" @touchstart="userSelfTouchStart" @touchmove="userSelfTouchMove" @touchend="userSelfTouchEnd" v-if="userGrade !== 3">
@@ -58,7 +58,7 @@
       </div>
     </div>
     <div class="sort-type-wrap flex-r flex-a" v-if="userGrade !== 3">
-      <span class="cur" @click="refOrder('way', 8)">集团{{userGrade}}</span>
+      <span class="cur" @click="refOrder('way', 8)">集团</span>
       <span @click="refOrder('way', 9)">本厂</span>
     </div>
     <div class="all-sale-list-wrap">
@@ -109,6 +109,7 @@ export default {
       curDateTabType: 'week',
       curOrderWay: 8, // 8 集团 、9 公司
       defaultUserHead: '',
+      tabShowCount: 6,
       tabs: [
         {
           id: 'newcar',
@@ -194,6 +195,7 @@ export default {
     document.querySelector('#app-footer').style.display = 'flex'
     this.userGrade = Number(this.$moment.userInfo.user.grade)
     this.defaultUserHead = this.$moment.defaultHead
+    this.initPageByScope()
     if (this.$moment.userInfo.user.photo !== null) {
       this.$set(this.userSaleInfos[0], 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)
       this.$set(this.userSaleInfos[1], 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)
@@ -205,9 +207,102 @@ export default {
     this.getOrderList()
   },
   methods: {
-    refOrder (type, val) {
+    initPageByScope () {
+      if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+        this.tabs = [
+          {
+            id: 'num',
+            txt: '接车台次'
+          },
+          {
+            id: 'oneprofit',
+            txt: '单车产值'
+          },
+          {
+            id: 'sumprofits',
+            txt: '总产值'
+          },
+          {
+            id: 'profit',
+            txt: '毛利'
+          },
+          {
+            id: 'derive',
+            txt: '衍生产值'
+          },
+          {
+            id: 'maintain',
+            txt: '保养套餐'
+          },
+          {
+            id: 'newmember',
+            txt: '新入会员'
+          },
+          {
+            id: 'renewal',
+            txt: '续保'
+          }
+        ]
+      } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+        this.tabs = [
+          {
+            id: 'num',
+            txt: '维修台次'
+          },
+          {
+            id: 'sumprofits',
+            txt: '产值'
+          },
+          {
+            id: 'cost',
+            txt: '工时费'
+          },
+          {
+            id: 'profit',
+            txt: '毛利'
+          },
+          {
+            id: 'profitrate',
+            txt: '毛利率'
+          },
+          {
+            id: 'maintain',
+            txt: '保险套餐'
+          }
+        ]
+      } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+        this.tabs = [
+          {
+            id: 'num',
+            txt: '接车台次'
+          },
+          {
+            id: 'sumprofits',
+            txt: '总产值'
+          },
+          {
+            id: 'profit',
+            txt: '毛利'
+          },
+          {
+            id: 'renewal',
+            txt: '续保'
+          }
+        ]
+      }
+      this.curTabType = this.tabs[0].id
+      if (this.tabs.length < this.tabShowCount) {
+        this.tabShowCount = this.tabs.length
+      }
+    },
+    refOrder (type, val, index) {
       event.target.parentNode.getElementsByClassName('cur')[0].classList.remove('cur')
       event.target.classList.add('cur')
+      if (index % this.tabShowCount === this.tabShowCount - 1) {
+        event.target.parentNode.style.transform = `translateX(calc(((-100vw / ${this.tabShowCount}) * ${this.tabs.length - this.tabShowCount})))`
+      } else if (index === this.tabs.length - this.tabShowCount) {
+        event.target.parentNode.style.transform = `translateX(0)`
+      }
       if (type === 'tabType') {
         this.curTabType = val
         this.getUserSelfOrder('week')
@@ -270,6 +365,95 @@ export default {
       this.userSelfTouchStartX = -1
       this.userSelfMoveDistance = 0
     },
+    getDesAndUnit (datePre) {
+      var preDes = ''
+      var unit = ''
+      if (this.$moment.userInfo.user.scope === 'A') {
+        if (this.curTabType === 'newcar') {
+          preDes = datePre + '销量'
+          unit = '台'
+        } else if (this.curTabType === 'accessory') {
+          preDes = datePre + '销售额'
+          unit = '元'
+        } else if (this.curTabType === 'finance') {
+          preDes = datePre + '信贷量'
+          unit = '台'
+        } else if (this.curTabType === 'insurance') {
+          preDes = datePre + '投保量'
+          unit = '单'
+        } else if (this.curTabType === 'oldcar') {
+          preDes = datePre + '置换量'
+          unit = '台'
+        } else if (this.curTabType === 'profit') {
+          preDes = datePre + '销售额'
+          unit = '元'
+        }
+      } else if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+        if (this.curTabType === 'num') {
+          preDes = datePre + '接车台次'
+          unit = '台'
+        } else if (this.curTabType === 'oneprofit') {
+          preDes = datePre + '单车产值'
+          unit = '元'
+        } else if (this.curTabType === 'sumprofits') {
+          preDes = datePre + '总产值'
+          unit = '元'
+        } else if (this.curTabType === 'profit') {
+          preDes = datePre + '毛利'
+          unit = '元'
+        } else if (this.curTabType === 'derive') {
+          preDes = datePre + '衍生产值'
+          unit = '元'
+        } else if (this.curTabType === 'maintain') {
+          preDes = datePre + '保养套餐'
+          unit = '套'
+        } else if (this.curTabType === 'newmember') {
+          preDes = datePre + '新入会员'
+          unit = '个'
+        } else if (this.curTabType === 'renewal') {
+          preDes = datePre + '续保'
+          unit = '元'
+        }
+      } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+        if (this.curTabType === 'num') {
+          preDes = datePre + '维修台次'
+          unit = '台次'
+        } else if (this.curTabType === 'sumprofits') {
+          preDes = datePre + '产值'
+          unit = '元'
+        } else if (this.curTabType === 'cost') {
+          preDes = datePre + '工时费'
+          unit = '元'
+        } else if (this.curTabType === 'profit') {
+          preDes = datePre + '毛利'
+          unit = '元'
+        } else if (this.curTabType === 'profitrate') {
+          preDes = datePre + '毛利率'
+          unit = '%'
+        } else if (this.curTabType === 'maintain') {
+          preDes = datePre + '保险套餐'
+          unit = '套'
+        }
+      } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+        if (this.curTabType === 'num') {
+          preDes = datePre + '接车台次'
+          unit = '台次'
+        } else if (this.curTabType === 'sumprofits') {
+          preDes = datePre + '总产值'
+          unit = '元'
+        } else if (this.curTabType === 'profit') {
+          preDes = datePre + '毛利'
+          unit = '元'
+        } else if (this.curTabType === 'renewal') {
+          preDes = datePre + '续保'
+          unit = '元'
+        }
+      }
+      return {
+        preDes: preDes,
+        unit: unit
+      }
+    },
     getUserSelfOrder (dateType) {
       var startDate = ''
       var endDate = ''
@@ -299,28 +483,17 @@ export default {
         startOldDate = (new Date().getFullYear() - 1) + '-01-01'
         endOldDate = this.$comfun.formatDate(this.$comfun.getLastDay(new Date().getFullYear() - 1, 12), 'yyyy-MM-dd')
       }
-      var preDes = ''
-      var unit = ''
-      if (this.curTabType === 'newcar') {
-        preDes = datePre + '销量'
-        unit = '台'
-      } else if (this.curTabType === 'accessory') {
-        preDes = datePre + '销售额'
-        unit = '元'
-      } else if (this.curTabType === 'finance') {
-        preDes = datePre + '信贷量'
-        unit = '台'
-      } else if (this.curTabType === 'insurance') {
-        preDes = datePre + '投保量'
-        unit = '单'
-      } else if (this.curTabType === 'oldcar') {
-        preDes = datePre + '置换量'
-        unit = '台'
-      } else if (this.curTabType === 'profit') {
-        preDes = datePre + '销售额'
-        unit = '元'
+      var preDes = this.getDesAndUnit(datePre).preDes
+      var unit = this.getDesAndUnit(datePre).unit
+      var orderSelfUri = 'data/public/' + this.curTabType + `/order/my/${this.$moment.userInfo.user.id}`
+      if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+        orderSelfUri = `after/public/serve/order/${this.curTabType}/my/${this.$moment.userInfo.user.id}`
+      } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+        orderSelfUri = `after/public/group/order/${this.curTabType}/my/${this.$moment.userInfo.user.id}`
+      } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+        orderSelfUri = `after/public/accident/order/${this.curTabType}/my/${this.$moment.userInfo.user.id}`
       }
-      this.$comfun.http_post(this, 'data/public/' + this.curTabType + `/order/my/${this.$moment.userInfo.user.id}`, {
+      this.$comfun.http_post(this, orderSelfUri, {
         startDate: startDate,
         endDate: endDate,
         startOldDate: startOldDate,
@@ -392,28 +565,17 @@ export default {
         startOldDate = (new Date().getFullYear() - 1) + '-01-01'
         endOldDate = this.$comfun.formatDate(this.$comfun.getLastDay(new Date().getFullYear() - 1, 12), 'yyyy-MM-dd')
       }
-      var preDes = ''
-      var unit = ''
-      if (this.curTabType === 'newcar') {
-        preDes = datePre + '销量'
-        unit = '台'
-      } else if (this.curTabType === 'accessory') {
-        preDes = datePre + '销售额'
-        unit = '元'
-      } else if (this.curTabType === 'finance') {
-        preDes = datePre + '信贷量'
-        unit = '台'
-      } else if (this.curTabType === 'insurance') {
-        preDes = datePre + '投保量'
-        unit = '单'
-      } else if (this.curTabType === 'oldcar') {
-        preDes = datePre + '置换量'
-        unit = '台'
-      } else if (this.curTabType === 'profit') {
-        preDes = datePre + '销售额'
-        unit = '元'
+      var preDes = this.getDesAndUnit(datePre).preDes
+      var unit = this.getDesAndUnit(datePre).unit
+      var orderDataUri = 'data/public/' + this.curTabType + `/order/${this.$moment.userInfo.user.id}`
+      if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+        orderDataUri = `after/public/serve/order/${this.curTabType}/${this.$moment.userInfo.user.id}`
+      } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+        orderDataUri = `after/public/group/order/${this.curTabType}/${this.$moment.userInfo.user.id}`
+      } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+        orderDataUri = `after/public/accident/order/${this.curTabType}/${this.$moment.userInfo.user.id}`
       }
-      this.$comfun.http_post(this, 'data/public/' + this.curTabType + `/order/${this.$moment.userInfo.user.id}`, {
+      this.$comfun.http_post(this, orderDataUri, {
         type: this.curOrderWay,
         startDate: startDate,
         endDate: endDate,

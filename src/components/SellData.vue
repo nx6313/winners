@@ -658,7 +658,7 @@ export default {
     this.$comfun.http_post(this, `data/senior/consultant/${userId}`).then((response) => {
       if (response.body.success === '1') {
         this.userInfoData = {
-          basedate: response.body.basedate ? new Date(response.body.basedate) : new Date(),
+          basedate: response.body.user.createDate ? new Date(response.body.user.createDate) : new Date(),
           user: response.body.user,
           type: response.body.type
         }

@@ -64,7 +64,7 @@ export default {
         if (response.body.success === '1') {
           var loginUserInfo = {
             loginDate: new Date(),
-            basedate: response.body.basedate ? new Date(response.body.basedate) : new Date(),
+            basedate: response.body.user.createDate ? new Date(response.body.user.createDate) : new Date(),
             user: response.body.user,
             type: response.body.type
           }

@@ -29,27 +29,45 @@
             </div>
           </div>
         </div>
-        <div class="summarizing-wrap" v-show="!dateChangeLoading">
-          <div class="progress-wrap" v-for="(summarizing, summarizingIndex) in summarizings" :key="summarizingIndex" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})`, 'left': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} * ${summarizingIndex} + ${summarizingIndex} * 2 * 0.2rem)` }">
-            <div class="wrapper right" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} / 2)`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})` }">
-              <div class="circle-progress rightcircle" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} - 6px)`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} - 6px)`, 'transform': progressRotate('right', summarizing.progress) }"></div>
+        <div class="summarizing-wrap" v-show="!dateChangeLoading" :style="summarizings.length > 5 ? { 'height': `${Math.ceil(summarizings.length / 2) * 2.3}rem` } : {}">
+          <template v-if="summarizings.length <= 5">
+            <div class="progress-wrap" v-for="(summarizing, summarizingIndex) in summarizings" :key="summarizingIndex" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length})`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length})`, 'left': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length} * ${summarizingIndex} + ${summarizingIndex} * ${progressBallSpace}rem)` }">
+              <div class="wrapper right" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length} / 2)`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length})` }">
+                <div class="circle-progress rightcircle" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length} - 6px)`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length} - 6px)`, 'transform': progressRotate('right', summarizing.progress) }"></div>
+              </div>
+              <div class="wrapper left" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length} / 2)`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length})` }">
+                <div class="circle-progress leftcircle" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length} - 6px)`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length} - 6px)`, 'transform': progressRotate('left', summarizing.progress) }"></div>
+              </div>
+              <div class="progress-val" :style="{ 'line-height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length})` }" v-html="circleProgressVal(summarizing.progress)"></div>
+              <div class="water-wrap">
+                <div class="water-wave" :style="{ 'bottom': getWaterHeight(summarizing.progress) }"></div>
+              </div>
             </div>
-            <div class="wrapper left" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} / 2)`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})` }">
-              <div class="circle-progress leftcircle" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} - 6px)`, 'height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} - 6px)`, 'transform': progressRotate('left', summarizing.progress) }"></div>
+            <div class="progress-des-wrap" v-for="(summarizingDes, summarizingDesIndex) in summarizings" :key="'des-' + summarizingDesIndex" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length})`, 'left': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length} * ${summarizingDesIndex} + ${summarizingDesIndex} * ${progressBallSpace}rem)` }">
+              <span class="title">{{summarizingDes.title}}</span>
+              <span class="num" :ref="'des-num-' + summarizingDesIndex">{{summarizingDes.num}}</span>
+              <span class="des">{{summarizingDes.des}}</span>
             </div>
-            <div class="progress-val" :style="{ 'line-height': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})` }" v-html="circleProgressVal(summarizing.progress)"></div>
-            <div class="water-wrap">
-              <div class="water-wave" :style="{ 'bottom': getWaterHeight(summarizing.progress) }"></div>
+          </template>
+          <template v-if="summarizings.length > 5">
+            <div :class="['progress-strip-wrap', summarizingIndex % 2 == 1 ? 'line-last' : '']" v-for="(summarizing, summarizingIndex) in summarizings" :key="summarizingIndex">
+              <div class="des-wrap">
+                <span class="title">{{summarizing.title}}</span>
+                <div class="num-wrap">
+                  <span class="num">{{summarizing.num}}</span>
+                  <span class="des">{{summarizing.des}}</span>
+                </div>
+              </div>
+              <div class="progress-rail">
+                <div class="progress-cur" :style="{ 'width': `${summarizing.progress}%` }"></div>
+                <div class="progress-animate"></div>
+              </div>
+              <span class="progress-percent-val" :style="summarizing.progress < 80 ? { 'margin-left': `calc(0.2rem + ${summarizing.progress}%)` } : { 'margin-left': `64%` }">{{summarizing.progress}}%</span>
             </div>
-          </div>
-          <div class="progress-des-wrap" v-for="(summarizingDes, summarizingDesIndex) in summarizings" :key="'des-' + summarizingDesIndex" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length})`, 'left': `calc((100vw - 1.6rem - ${summarizings.length - 1} * 0.4rem) / ${summarizings.length} * ${summarizingDesIndex} + ${summarizingDesIndex} * 2 * 0.2rem)` }">
-            <span class="title">{{summarizingDes.title}}</span>
-            <span class="num" :ref="'des-num-' + summarizingDesIndex">{{summarizingDes.num}}</span>
-            <span class="des">{{summarizingDes.des}}</span>
-          </div>
+          </template>
         </div>
       </div>
-      <div class="header-data-is-loading" v-show="(headerIsLoading || dateChangeLoading)" :style="(!headerIsLoading && dateChangeLoading) ? { 'height': '8.8rem' } : {}">
+      <div class="header-data-is-loading" v-show="(headerIsLoading || dateChangeLoading)" :style="(!headerIsLoading && dateChangeLoading) ? (summarizings.length > 5 ? { 'height': `${Math.ceil(summarizings.length / 2) * 2.3}rem` } : { 'height': '8.8rem' }) : {}">
         <div class="loadster" :style="{ 'transform': 'scale(0.2, 0.2)' }">
           <div class="loadster__body">
             <div class="body__gum"></div>
@@ -73,7 +91,7 @@
       </div>
     </div>
     <div class="header-date-data-des" :style="(headerIsLoading || dateChangeLoading) ? { 'max-height': '0' } : {}">
-      <chart class="mlv-chart" :options="mlvChartOpt" :auto-resize="true"></chart>
+      <chart class="mlv-chart" :options="mlvChartOpt" :auto-resize="true" v-if="userScrope === 'A'"></chart>
       <chart class="gejx-chart" :options="grjxChartOpt" :auto-resize="true"></chart>
     </div>
     <div class="sell-chart-wrap">
@@ -83,11 +101,16 @@
         </div>
       </div>
       <div class="sell-tab-wrap-replace" ref="sell-tab-wrap-replace" :style="{ 'height': sellTabWrapHeight }" v-show="isFixed"></div>
-      <chart class="zc-chart" :options="zcChartOpt" :auto-resize="true"></chart>
-      <chart class="qcyp-chart" :options="qcypChartOpt" :auto-resize="true"></chart>
-      <chart class="jr-chart" :options="jrChartOpt" :auto-resize="true"></chart>
-      <chart class="bx-chart" :options="bxChartOpt" :auto-resize="true"></chart>
-      <chart class="esc-chart" :options="escChartOpt" :auto-resize="true"></chart>
+      <template v-if="userScrope === 'A'">
+        <chart class="zc-chart" :options="zcChartOpt" :auto-resize="true"></chart>
+        <chart class="qcyp-chart" :options="qcypChartOpt" :auto-resize="true"></chart>
+        <chart class="jr-chart" :options="jrChartOpt" :auto-resize="true"></chart>
+        <chart class="bx-chart" :options="bxChartOpt" :auto-resize="true"></chart>
+        <chart class="esc-chart" :options="escChartOpt" :auto-resize="true"></chart>
+      </template>
+      <template v-if="userScrope !== 'A'">
+        <chart class="curve-chart" :options="curveChart" :auto-resize="true" v-for="(curveChart, curveChartIndex) in curveChartOpts" :key="curveChartIndex"></chart>
+      </template>
     </div>
   </div>
 </template>
@@ -99,8 +122,10 @@ export default {
     return {
       defaultUserHead: '',
       userHead: '',
+      userScrope: 'A',
       starCount: 5,
       userLevel: 3,
+      progressBallSpace: 0.4,
       headerIsLoading: true,
       dateChangeLoading: false,
       curHeaderDateTabType: null,
@@ -277,7 +302,7 @@ export default {
         title: {
           text: '{money|0}\t\t{unit|元}\n个人绩效',
           left: 'center',
-          top: '42%',
+          top: '48%',
           textStyle: {
             color: '#4D4D4D',
             fontSize: 13,
@@ -311,6 +336,7 @@ export default {
           {
             name: '个人绩效',
             type: 'pie',
+            center: ['50%', '56%'],
             radius: ['44%', '30%'],
             label: {
               normal: {
@@ -376,6 +402,7 @@ export default {
         ],
         animationDuration: 2000
       },
+      curveChartOpts: [],
       zcChartOpt: {
         title: {
           text: '整车 / 台',
@@ -384,10 +411,6 @@ export default {
             fontSize: 14,
             fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
           }
-        },
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
         dataZoom: [
           {
@@ -438,10 +461,6 @@ export default {
             fontSize: 14,
             fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
           }
-        },
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
         dataZoom: [
           {
@@ -495,10 +514,6 @@ export default {
             fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
           }
         },
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} ({d}%)'
-        },
         dataZoom: [
           {
             type: 'inside'
@@ -548,10 +563,6 @@ export default {
             fontSize: 14,
             fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
           }
-        },
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} ({d}%)'
         },
         dataZoom: [
           {
@@ -603,10 +614,6 @@ export default {
             fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
           }
         },
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} ({d}%)'
-        },
         dataZoom: [
           {
             type: 'inside'
@@ -656,6 +663,11 @@ export default {
     if (this.$moment.userInfo.user.photo !== null) {
       this.userHead = this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`
     }
+    this.userScrope = this.$moment.userInfo.user.scope
+    this.initPageByScope()
+    if (this.userScrope !== 'A') {
+      this.sellTabWrapScrollTop = 26.6 * 16 + Math.ceil(this.summarizings.length / 2) * 2.3 * 16
+    }
     this.resetDateEvery(this.dateTabs[0].id)
 
     this.userName = this.$moment.userInfo.user.name
@@ -666,6 +678,377 @@ export default {
     }, 400)
   },
   methods: {
+    initPageByScope () {
+      if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+        this.summarizings = [
+          {
+            progress: 0,
+            title: '接车台次',
+            num: 0,
+            des: '台次'
+          },
+          {
+            progress: 0,
+            title: '单车产值',
+            num: 0,
+            des: '元'
+          },
+          {
+            progress: 0,
+            title: '总产值',
+            num: 0,
+            des: '元'
+          },
+          {
+            progress: 0,
+            title: '毛利',
+            num: 0,
+            des: '元'
+          },
+          {
+            progress: 0,
+            title: '衍生产值',
+            num: 0,
+            des: '元'
+          },
+          {
+            progress: 0,
+            title: '保养套餐',
+            num: 0,
+            des: '套'
+          },
+          {
+            progress: 0,
+            title: '新入会员',
+            num: 0,
+            des: '个'
+          },
+          {
+            progress: 0,
+            title: '续保',
+            num: 0,
+            des: '元'
+          }
+        ]
+        this.grjxChartOpt.series[0].data = [
+          {
+            value: 0,
+            name: '工龄工资'
+          },
+          {
+            value: 0,
+            name: '岗位津贴'
+          },
+          {
+            value: 0,
+            name: '接车台次'
+          },
+          {
+            value: 0,
+            name: '产值'
+          },
+          {
+            value: 0,
+            name: '衍生产品'
+          },
+          {
+            value: 0,
+            name: '续保'
+          },
+          {
+            value: 0,
+            name: '其他政策提成'
+          }
+        ]
+        this.initCurveChartOpts([
+          {
+            title: '接车台次 / 台',
+            needInteger: true,
+            needRetract: false
+          },
+          {
+            title: '单车产值 / 元',
+            needInteger: false,
+            needRetract: true
+          },
+          {
+            title: '总产值 / 元',
+            needInteger: false,
+            needRetract: true
+          },
+          {
+            title: '毛利 / 元',
+            needInteger: false,
+            needRetract: true
+          },
+          {
+            title: '衍生产值 / 元',
+            needInteger: false,
+            needRetract: true
+          },
+          {
+            title: '保养套餐 / 套',
+            needInteger: true,
+            needRetract: false
+          },
+          {
+            title: '新入会员 / 个',
+            needInteger: true,
+            needRetract: false
+          },
+          {
+            title: '续保 / 元',
+            needInteger: false,
+            needRetract: true
+          }
+        ])
+      } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+        this.summarizings = [
+          {
+            progress: 0,
+            title: '维修台次',
+            num: 0,
+            des: '台次'
+          },
+          {
+            progress: 0,
+            title: '产值',
+            num: 0,
+            des: '元'
+          },
+          {
+            progress: 0,
+            title: '工时费',
+            num: 0,
+            des: '元'
+          },
+          {
+            progress: 0,
+            title: '毛利',
+            num: 0,
+            des: '元'
+          },
+          {
+            progress: 0,
+            title: '毛利率',
+            num: 0,
+            des: '%'
+          },
+          {
+            progress: 0,
+            title: '保养套餐',
+            num: 0,
+            des: '套'
+          }
+        ]
+        this.grjxChartOpt.series[0].data = [
+          {
+            value: 0,
+            name: '维修台次'
+          },
+          {
+            value: 0,
+            name: '产值'
+          },
+          {
+            value: 0,
+            name: '工时'
+          },
+          {
+            value: 0,
+            name: '追加产值'
+          },
+          {
+            value: 0,
+            name: '衍生产品'
+          },
+          {
+            value: 0,
+            name: '续保业务'
+          },
+          {
+            value: 0,
+            name: '其他政策提成'
+          }
+        ]
+        this.initCurveChartOpts([
+          {
+            title: '维修台次 / 台次',
+            needInteger: true,
+            needRetract: false
+          },
+          {
+            title: '产值 / 元',
+            needInteger: false,
+            needRetract: true
+          },
+          {
+            title: '工时费 / 元',
+            needInteger: false,
+            needRetract: true
+          },
+          {
+            title: '毛利 / 元',
+            needInteger: false,
+            needRetract: true
+          },
+          {
+            title: '毛利率 / %',
+            needInteger: false,
+            needRetract: false
+          },
+          {
+            title: '保养套餐 / 套',
+            needInteger: true,
+            needRetract: false
+          }
+        ])
+      } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+        this.summarizings = [
+          {
+            progress: 0,
+            title: '接车台次',
+            num: 0,
+            des: '台次'
+          },
+          {
+            progress: 0,
+            title: '总产值',
+            num: 0,
+            des: '元'
+          },
+          {
+            progress: 0,
+            title: '毛利',
+            num: 0,
+            des: '元'
+          },
+          {
+            progress: 0,
+            title: '续保',
+            num: 0,
+            des: '元'
+          }
+        ]
+        this.grjxChartOpt.series[0].data = [
+          {
+            value: 0,
+            name: '工龄工资'
+          },
+          {
+            value: 0,
+            name: '岗位津贴'
+          },
+          {
+            value: 0,
+            name: '台次'
+          },
+          {
+            value: 0,
+            name: '产值'
+          },
+          {
+            value: 0,
+            name: '衍生产品'
+          },
+          {
+            value: 0,
+            name: '续保'
+          },
+          {
+            value: 0,
+            name: '其他政策提成'
+          }
+        ]
+        this.initCurveChartOpts([
+          {
+            title: '接车台次 / 台次',
+            needInteger: true,
+            needRetract: false
+          },
+          {
+            title: '总产值 / 元',
+            needInteger: false,
+            needRetract: true
+          },
+          {
+            title: '毛利 / 元',
+            needInteger: false,
+            needRetract: true
+          },
+          {
+            title: '续保 / 元',
+            needInteger: false,
+            needRetract: true
+          }
+        ])
+      }
+      if (this.summarizings.length < 5) {
+        this.progressBallSpace = 1.4
+      }
+    },
+    initCurveChartOpts (optItems) {
+      for (let optIndex in optItems) {
+        var curveChartOpt = {
+          title: {
+            text: optItems[optIndex].title,
+            textStyle: {
+              color: '#3A3A3A',
+              fontSize: 14,
+              fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
+            }
+          },
+          dataZoom: [
+            {
+              type: 'inside'
+            }
+          ],
+          xAxis: {
+            type: 'category',
+            data: []
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: [
+            {
+              data: [],
+              type: 'line',
+              smooth: true,
+              lineStyle: {
+                color: '#ED8D1B'
+              },
+              areaStyle: {
+                color: {
+                  type: 'linear',
+                  x: 0,
+                  y: 0,
+                  x2: 0,
+                  y2: 1,
+                  colorStops: [{
+                    offset: 0, color: '#E6B940'
+                  }, {
+                    offset: 0.5, color: '#408AE6'
+                  }, {
+                    offset: 1, color: '#2FE321'
+                  }]
+                }
+              }
+            }
+          ],
+          animationDuration: 2000
+        }
+        if (optItems[optIndex].needInteger) {
+          curveChartOpt.yAxis.minInterval = 1
+        }
+        if (optItems[optIndex].needRetract) {
+          curveChartOpt.grid = {
+            left: '60'
+          }
+        }
+        this.curveChartOpts.push(curveChartOpt)
+      }
+    },
     scrollPage () {
       var pageScrollTop = document.querySelector('#page-home').scrollTop
       if (pageScrollTop > this.sellTabWrapScrollTop) {
@@ -1117,50 +1500,149 @@ export default {
         startDate = this.curHeaderSearchDate.val[0]
         endDate = this.curHeaderSearchDate.val[1]
       }
-      this.$comfun.http_post(this, `data/public/contrast/${this.$moment.userInfo.user.id}`, {
+      var headerUri = `data/public/contrast/${this.$moment.userInfo.user.id}`
+      if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+        headerUri = `after/public/contrast/serve/${this.$moment.userInfo.user.id}`
+      } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+        headerUri = `after/public/contrast/group/${this.$moment.userInfo.user.id}`
+      } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+        headerUri = `after/public/contrast/accident/${this.$moment.userInfo.user.id}`
+      }
+      this.$comfun.http_post(this, headerUri, {
         type: type,
         startDate: startDate,
         endDate: endDate
       }).then((response) => {
         if (response.body.success === '1') {
-          this.summarizings[0].progress = !response.body.contrast.personNewcarNum || !response.body.contrast.maxNewcarNum ? 0 : Math.floor(response.body.contrast.personNewcarNum / response.body.contrast.maxNewcarNum * 100)
-          this.summarizings[0].num = response.body.contrast.personNewcarNum || 0
-          this.summarizings[1].progress = !response.body.contrast.personAccessorySum || !response.body.contrast.maxAccessorySum ? 0 : Math.floor(response.body.contrast.personAccessorySum / response.body.contrast.maxAccessorySum * 100)
-          this.summarizings[1].num = (response.body.contrast.personAccessorySum || 0) >= 10000 ? Math.floor((response.body.contrast.personAccessorySum || 0) / 10000) : (response.body.contrast.personAccessorySum || 0)
-          this.summarizings[1].des = (response.body.contrast.personAccessorySum || 0) >= 10000 ? '销售额（万元）' : '销售额（元）'
-          this.summarizings[2].progress = !response.body.contrast.personFinanceNum || !response.body.contrast.maxFinanceNum ? 0 : Math.floor(response.body.contrast.personFinanceNum / response.body.contrast.maxFinanceNum * 100)
-          this.summarizings[2].num = response.body.contrast.personFinanceNum || 0
-          this.summarizings[3].progress = !response.body.contrast.personInsuranceNum || !response.body.contrast.maxInsuranceNum ? 0 : Math.floor(response.body.contrast.personInsuranceNum / response.body.contrast.maxInsuranceNum * 100)
-          this.summarizings[3].num = response.body.contrast.personInsuranceNum || 0
-          this.summarizings[4].progress = !response.body.contrast.personOldcarNum || !response.body.contrast.maxOldcarNum ? 0 : Math.floor(response.body.contrast.personOldcarNum / response.body.contrast.maxOldcarNum * 100)
-          this.summarizings[4].num = response.body.contrast.personOldcarNum || 0
-        }
-        this.$comfun.http_post(this, `data/public/profit/${this.$moment.userInfo.user.id}`, {
-          startDate: startDate,
-          endDate: endDate
-        }).then((response) => {
-          if (response.body.success === '1') {
-            this.mlvChartOpt.title.text = `{money|${response.body.profit.profitSum || 0}}\t\t{unit|元}\n综合毛利`
-            this.mlvChartOpt.series[0].data[0].value = response.body.profit.newcarProfit || 0
-            this.mlvChartOpt.series[0].data[1].value = response.body.profit.insuranceProfit || 0
-            this.mlvChartOpt.series[0].data[2].value = response.body.profit.oldcarProfit || 0
-            this.mlvChartOpt.series[0].data[3].value = response.body.profit.financeProfit || 0
-            this.mlvChartOpt.series[0].data[4].value = response.body.profit.accessoryProfit || 0
+          if (this.$moment.userInfo.user.scope === 'A') { // A 为售前 B:机电服务顾问 C:机电班组 D:事故服务顾问
+            this.summarizings[0].progress = !response.body.contrast.personNewcarNum || !response.body.contrast.maxNewcarNum ? 0 : Math.floor(response.body.contrast.personNewcarNum / response.body.contrast.maxNewcarNum * 100)
+            this.summarizings[0].num = response.body.contrast.personNewcarNum || 0
+            this.summarizings[1].progress = !response.body.contrast.personAccessorySum || !response.body.contrast.maxAccessorySum ? 0 : Math.floor(response.body.contrast.personAccessorySum / response.body.contrast.maxAccessorySum * 100)
+            this.summarizings[1].num = (response.body.contrast.personAccessorySum || 0) >= 10000 ? Math.floor((response.body.contrast.personAccessorySum || 0) / 10000) : (response.body.contrast.personAccessorySum || 0)
+            this.summarizings[1].des = (response.body.contrast.personAccessorySum || 0) >= 10000 ? '销售额（万元）' : '销售额（元）'
+            this.summarizings[2].progress = !response.body.contrast.personFinanceNum || !response.body.contrast.maxFinanceNum ? 0 : Math.floor(response.body.contrast.personFinanceNum / response.body.contrast.maxFinanceNum * 100)
+            this.summarizings[2].num = response.body.contrast.personFinanceNum || 0
+            this.summarizings[3].progress = !response.body.contrast.personInsuranceNum || !response.body.contrast.maxInsuranceNum ? 0 : Math.floor(response.body.contrast.personInsuranceNum / response.body.contrast.maxInsuranceNum * 100)
+            this.summarizings[3].num = response.body.contrast.personInsuranceNum || 0
+            this.summarizings[4].progress = !response.body.contrast.personOldcarNum || !response.body.contrast.maxOldcarNum ? 0 : Math.floor(response.body.contrast.personOldcarNum / response.body.contrast.maxOldcarNum * 100)
+            this.summarizings[4].num = response.body.contrast.personOldcarNum || 0
+          } else if (this.$moment.userInfo.user.scope === 'B') {
+            this.summarizings[0].progress = !response.body.result.personNumNum || !response.body.result.maxNumNum ? 0 : Math.floor(response.body.result.personNumNum / response.body.result.maxNumNum * 100)
+            this.summarizings[0].num = response.body.result.personNumNum || 0
+            this.summarizings[1].progress = !response.body.result.personOneprofitNum || !response.body.result.maxOneprofitNum ? 0 : Math.floor(response.body.result.personOneprofitNum / response.body.result.maxOneprofitNum * 100)
+            this.summarizings[1].num = (response.body.result.personOneprofitNum || 0) >= 10000 ? Math.floor((response.body.result.personOneprofitNum || 0) / 10000) : (response.body.result.personOneprofitNum || 0)
+            this.summarizings[1].des = (response.body.result.personOneprofitNum || 0) >= 10000 ? '万元' : '元'
+            this.summarizings[2].progress = !response.body.result.personSumprofitsNum || !response.body.result.maxSumprofitsNum ? 0 : Math.floor(response.body.result.personSumprofitsNum / response.body.result.maxSumprofitsNum * 100)
+            this.summarizings[2].num = (response.body.result.personSumprofitsNum || 0) >= 10000 ? Math.floor((response.body.result.personSumprofitsNum || 0) / 10000) : (response.body.result.personSumprofitsNum || 0)
+            this.summarizings[2].des = (response.body.result.personSumprofitsNum || 0) >= 10000 ? '万元' : '元'
+            this.summarizings[3].progress = !response.body.result.personProfitNum || !response.body.result.maxProfitNum ? 0 : Math.floor(response.body.result.personProfitNum / response.body.result.maxProfitNum * 100)
+            this.summarizings[3].num = (response.body.result.personProfitNum || 0) >= 10000 ? Math.floor((response.body.result.personProfitNum || 0) / 10000) : (response.body.result.personProfitNum || 0)
+            this.summarizings[3].des = (response.body.result.personProfitNum || 0) >= 10000 ? '万元' : '元'
+            this.summarizings[4].progress = !response.body.result.personDeriveNum || !response.body.result.maxDeriveNum ? 0 : Math.floor(response.body.result.personDeriveNum / response.body.result.maxDeriveNum * 100)
+            this.summarizings[4].num = (response.body.result.personDeriveNum || 0) >= 10000 ? Math.floor((response.body.result.personDeriveNum || 0) / 10000) : (response.body.result.personDeriveNum || 0)
+            this.summarizings[4].des = (response.body.result.personDeriveNum || 0) >= 10000 ? '万元' : '元'
+            this.summarizings[5].progress = !response.body.result.personMaintainNum || !response.body.result.maxMaintainNum ? 0 : Math.floor(response.body.result.personMaintainNum / response.body.result.maxMaintainNum * 100)
+            this.summarizings[5].num = response.body.result.personMaintainNum || 0
+            this.summarizings[6].progress = !response.body.result.personNewmemberNum || !response.body.result.maxNewmemberNum ? 0 : Math.floor(response.body.result.personNewmemberNum / response.body.result.maxNewmemberNum * 100)
+            this.summarizings[6].num = response.body.result.personNewmemberNum || 0
+            this.summarizings[7].progress = !response.body.result.personRenewalNum || !response.body.result.maxRenewalNum ? 0 : Math.floor(response.body.result.personRenewalNum / response.body.result.maxRenewalNum * 100)
+            this.summarizings[7].num = (response.body.result.personRenewalNum || 0) >= 10000 ? Math.floor((response.body.result.personRenewalNum || 0) / 10000) : (response.body.result.personRenewalNum || 0)
+            this.summarizings[7].des = (response.body.result.personRenewalNum || 0) >= 10000 ? '万元' : '元'
+          } else if (this.$moment.userInfo.user.scope === 'C') {
+            this.summarizings[0].progress = !response.body.result.personNumNum || !response.body.result.maxNumNum ? 0 : Math.floor(response.body.result.personNumNum / response.body.result.maxNumNum * 100)
+            this.summarizings[0].num = response.body.result.personNumNum || 0
+            this.summarizings[1].progress = !response.body.result.personSumprofitsNum || !response.body.result.maxSumprofitsNum ? 0 : Math.floor(response.body.result.personSumprofitsNum / response.body.result.maxSumprofitsNum * 100)
+            this.summarizings[1].num = (response.body.result.personSumprofitsNum || 0) >= 10000 ? Math.floor((response.body.result.personSumprofitsNum || 0) / 10000) : (response.body.result.personSumprofitsNum || 0)
+            this.summarizings[1].des = (response.body.result.personSumprofitsNum || 0) >= 10000 ? '万元' : '元'
+            this.summarizings[2].progress = !response.body.result.personCostNum || !response.body.result.maxCostNum ? 0 : Math.floor(response.body.result.personCostNum / response.body.result.maxCostNum * 100)
+            this.summarizings[2].num = (response.body.result.personCostNum || 0) >= 10000 ? Math.floor((response.body.result.personCostNum || 0) / 10000) : (response.body.result.personCostNum || 0)
+            this.summarizings[2].des = (response.body.result.personCostNum || 0) >= 10000 ? '万元' : '元'
+            this.summarizings[3].progress = !response.body.result.personProfitNum || !response.body.result.maxProfitNum ? 0 : Math.floor(response.body.result.personProfitNum / response.body.result.maxProfitNum * 100)
+            this.summarizings[3].num = (response.body.result.personProfitNum || 0) >= 10000 ? Math.floor((response.body.result.personProfitNum || 0) / 10000) : (response.body.result.personProfitNum || 0)
+            this.summarizings[3].des = (response.body.result.personProfitNum || 0) >= 10000 ? '万元' : '元'
+            this.summarizings[4].progress = !response.body.result.personProfitrateNum || !response.body.result.maxDeriveNum ? 0 : Math.floor(response.body.result.personProfitrateNum / response.body.result.maxDeriveNum * 100)
+            this.summarizings[4].num = response.body.result.personProfitrateNum || 0
+            this.summarizings[5].progress = !response.body.result.personMaintainNum || !response.body.result.maxMaintainNum ? 0 : Math.floor(response.body.result.personMaintainNum / response.body.result.maxMaintainNum * 100)
+            this.summarizings[5].num = response.body.result.personMaintainNum || 0
+          } else if (this.$moment.userInfo.user.scope === 'D') {
+            this.summarizings[0].progress = !response.body.result.personNumNum || !response.body.result.maxNumNum ? 0 : Math.floor(response.body.result.personNumNum / response.body.result.maxNumNum * 100)
+            this.summarizings[0].num = response.body.result.personNumNum || 0
+            this.summarizings[1].progress = !response.body.result.personSumprofitsNum || !response.body.result.maxSumprofitsNum ? 0 : Math.floor(response.body.result.personSumprofitsNum / response.body.result.maxSumprofitsNum * 100)
+            this.summarizings[1].num = (response.body.result.personSumprofitsNum || 0) >= 10000 ? Math.floor((response.body.result.personSumprofitsNum || 0) / 10000) : (response.body.result.personSumprofitsNum || 0)
+            this.summarizings[1].des = (response.body.result.personSumprofitsNum || 0) >= 10000 ? '万元' : '元'
+            this.summarizings[2].progress = !response.body.result.personProfitNum || !response.body.result.maxProfitNum ? 0 : Math.floor(response.body.result.personProfitNum / response.body.result.maxProfitNum * 100)
+            this.summarizings[2].num = (response.body.result.personProfitNum || 0) >= 10000 ? Math.floor((response.body.result.personProfitNum || 0) / 10000) : (response.body.result.personProfitNum || 0)
+            this.summarizings[2].des = (response.body.result.personProfitNum || 0) >= 10000 ? '万元' : '元'
+            this.summarizings[3].progress = !response.body.result.personRenewalNum || !response.body.result.maxRenewalNum ? 0 : Math.floor(response.body.result.personRenewalNum / response.body.result.maxRenewalNum * 100)
+            this.summarizings[3].num = (response.body.result.personRenewalNum || 0) >= 10000 ? Math.floor((response.body.result.personRenewalNum || 0) / 10000) : (response.body.result.personRenewalNum || 0)
+            this.summarizings[3].des = (response.body.result.personRenewalNum || 0) >= 10000 ? '万元' : '元'
           }
-          this.$comfun.http_post(this, `data/public/perf/${this.$moment.userInfo.user.id}`, {
+        }
+        if (this.$moment.userInfo.user.scope === 'A') {
+          this.$comfun.http_post(this, `data/public/profit/${this.$moment.userInfo.user.id}`, {
             startDate: startDate,
             endDate: endDate
           }).then((response) => {
-            this.dateChangeLoading = false
             if (response.body.success === '1') {
+              this.mlvChartOpt.title.text = `{money|${response.body.profit.profitSum || 0}}\t\t{unit|元}\n综合毛利`
+              this.mlvChartOpt.series[0].data[0].value = response.body.profit.newcarProfit || 0
+              this.mlvChartOpt.series[0].data[1].value = response.body.profit.insuranceProfit || 0
+              this.mlvChartOpt.series[0].data[2].value = response.body.profit.oldcarProfit || 0
+              this.mlvChartOpt.series[0].data[3].value = response.body.profit.financeProfit || 0
+              this.mlvChartOpt.series[0].data[4].value = response.body.profit.accessoryProfit || 0
+            }
+          })
+        }
+        var grjxUri = `data/public/perf/${this.$moment.userInfo.user.id}`
+        if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+          grjxUri = `after/public/perf/serve/${this.$moment.userInfo.user.id}`
+        } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+          grjxUri = `after/public/perf/group/${this.$moment.userInfo.user.id}`
+        } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+          grjxUri = `after/public/perf/accident/${this.$moment.userInfo.user.id}`
+        }
+        this.$comfun.http_post(this, grjxUri, {
+          startDate: startDate,
+          endDate: endDate
+        }).then((response) => {
+          this.dateChangeLoading = false
+          if (response.body.success === '1') {
+            if (this.$moment.userInfo.user.scope === 'A') {
               this.grjxChartOpt.title.text = `{money|${response.body.perf.profitSum || 0}}\t\t{unit|元}\n个人绩效`
               this.grjxChartOpt.series[0].data[0].value = response.body.perf.newcarPerf || 0
               this.grjxChartOpt.series[0].data[1].value = response.body.perf.insurancePerf || 0
               this.grjxChartOpt.series[0].data[2].value = response.body.perf.oldcarPerf || 0
               this.grjxChartOpt.series[0].data[3].value = response.body.perf.financePerf || 0
               this.grjxChartOpt.series[0].data[4].value = response.body.perf.accessoryPerf || 0
+            } else if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+              this.grjxChartOpt.title.text = `{money|${response.body.result.sumAll || 0}}\t\t{unit|元}\n个人绩效`
+              this.grjxChartOpt.series[0].data[0].value = response.body.result.hrSenioritypay || 0
+              this.grjxChartOpt.series[0].data[1].value = response.body.result.hrAllowance || 0
+              this.grjxChartOpt.series[0].data[2].value = response.body.result.hrNum || 0
+              this.grjxChartOpt.series[0].data[3].value = response.body.result.hrProfit || 0
+              this.grjxChartOpt.series[0].data[4].value = response.body.result.hrDerive || 0
+              this.grjxChartOpt.series[0].data[5].value = response.body.result.hrRenewal || 0
+              this.grjxChartOpt.series[0].data[6].value = response.body.result.hrOtherroyalty || 0
+            } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+              this.grjxChartOpt.title.text = `{money|${response.body.result.sumAll || 0}}\t\t{unit|元}\n个人绩效`
+              this.grjxChartOpt.series[0].data[0].value = response.body.result.hrNum || 0
+              this.grjxChartOpt.series[0].data[1].value = response.body.result.hrProfit || 0
+              this.grjxChartOpt.series[0].data[2].value = response.body.result.hrManhour || 0
+              this.grjxChartOpt.series[0].data[3].value = response.body.result.hrAdditional || 0
+              this.grjxChartOpt.series[0].data[4].value = response.body.result.hrDerive || 0
+              this.grjxChartOpt.series[0].data[5].value = response.body.result.hrRenewal || 0
+              this.grjxChartOpt.series[0].data[6].value = response.body.result.hrOtherroyalty || 0
+            } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+              this.grjxChartOpt.title.text = `{money|${response.body.result.sumAll || 0}}\t\t{unit|元}\n个人绩效`
+              this.grjxChartOpt.series[0].data[0].value = response.body.result.hrSenioritypay || 0
+              this.grjxChartOpt.series[0].data[1].value = response.body.result.hrAllowance || 0
+              this.grjxChartOpt.series[0].data[2].value = response.body.result.hrNum || 0
+              this.grjxChartOpt.series[0].data[3].value = response.body.result.hrProfit || 0
+              this.grjxChartOpt.series[0].data[4].value = response.body.result.hrDerive || 0
+              this.grjxChartOpt.series[0].data[5].value = response.body.result.hrRenewal || 0
+              this.grjxChartOpt.series[0].data[6].value = response.body.result.hrOtherroyalty || 0
             }
-          })
+          }
         })
       })
     },
@@ -1182,241 +1664,312 @@ export default {
     },
     getLineChartData (type, startDate, endDate) {
       var chartLimitDate = ''
-      // 整车
-      this.$comfun.http_post(this, `data/public/newcar/curve/${this.$moment.userInfo.user.id}`, {
-        type: type,
-        startDate: startDate,
-        endDate: endDate
-      }).then((response) => {
-        if (response.body.success === '1') {
-          var xAxisData = []
-          var seriesData = []
-          for (let i = 0; i < response.body.newcar.length; i++) {
-            let startDate = null
-            let endDate = null
-            if (type === 2) {
-              startDate = new Date(response.body.newcar[i].startDate.replace(/-/g, '/'))
-              endDate = new Date(response.body.newcar[i].endDate.replace(/-/g, '/'))
-              let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
-              xAxisData.push(xAxis)
-            } else if (type === 3) {
-              xAxisData.push(String(response.body.newcar[i].yearnum).substr(2, 2) + '-' + response.body.newcar[i].monthnum)
-            } else if (type === 4) {
-              xAxisData.push(String(response.body.newcar[i].yearnum))
-            }
-            seriesData.push({
-              value: response.body.newcar[i].num ? response.body.newcar[i].num : 0,
-              itemStyle: {
-                color: '#ED8D1B',
-                borderColor: '#ED8D1B'
+      if (this.$moment.userInfo.user.scope === 'A') {
+        // 整车
+        this.$comfun.http_post(this, `data/public/newcar/curve/${this.$moment.userInfo.user.id}`, {
+          type: type,
+          startDate: startDate,
+          endDate: endDate
+        }).then((response) => {
+          if (response.body.success === '1') {
+            var xAxisData = []
+            var seriesData = []
+            for (let i = 0; i < response.body.newcar.length; i++) {
+              let startDate = null
+              let endDate = null
+              if (type === 2) {
+                startDate = new Date(response.body.newcar[i].startDate.replace(/-/g, '/'))
+                endDate = new Date(response.body.newcar[i].endDate.replace(/-/g, '/'))
+                let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
+                xAxisData.push(xAxis)
+              } else if (type === 3) {
+                xAxisData.push(String(response.body.newcar[i].yearnum).substr(2, 2) + '-' + response.body.newcar[i].monthnum)
+              } else if (type === 4) {
+                xAxisData.push(String(response.body.newcar[i].yearnum))
               }
-            })
-          }
-          if (xAxisData.length > 7) {
-            chartLimitDate = xAxisData[xAxisData.length - 7]
-          } else {
-            chartLimitDate = xAxisData[0]
-          }
-          this.zcChartOpt.xAxis.data = xAxisData
-          this.zcChartOpt.series[0].data = seriesData
-          this.zcChartOpt.dataZoom = [
-            {
-              startValue: chartLimitDate
-            },
-            {
-              type: 'inside'
+              seriesData.push({
+                value: response.body.newcar[i].num ? response.body.newcar[i].num : 0,
+                itemStyle: {
+                  color: '#ED8D1B',
+                  borderColor: '#ED8D1B'
+                }
+              })
             }
+            if (xAxisData.length > 7) {
+              chartLimitDate = xAxisData[xAxisData.length - 7]
+            } else {
+              chartLimitDate = xAxisData[0]
+            }
+            this.zcChartOpt.xAxis.data = xAxisData
+            this.zcChartOpt.series[0].data = seriesData
+            this.zcChartOpt.dataZoom = [
+              {
+                startValue: chartLimitDate
+              },
+              {
+                type: 'inside'
+              }
+            ]
+          }
+        })
+        // 二手车
+        this.$comfun.http_post(this, `data/public/oldcar/curve/${this.$moment.userInfo.user.id}`, {
+          type: type,
+          startDate: startDate,
+          endDate: endDate
+        }).then((response) => {
+          if (response.body.success === '1') {
+            var xAxisData = []
+            var seriesData = []
+            for (let i = 0; i < response.body.oldcar.length; i++) {
+              let startDate = null
+              let endDate = null
+              if (type === 2) {
+                startDate = new Date(response.body.oldcar[i].startDate.replace(/-/g, '/'))
+                endDate = new Date(response.body.oldcar[i].endDate.replace(/-/g, '/'))
+                let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
+                xAxisData.push(xAxis)
+              } else if (type === 3) {
+                xAxisData.push(String(response.body.oldcar[i].yearnum).substr(2, 2) + '-' + response.body.oldcar[i].monthnum)
+              } else if (type === 4) {
+                xAxisData.push(String(response.body.oldcar[i].yearnum))
+              }
+              seriesData.push({
+                value: response.body.oldcar[i].num ? response.body.oldcar[i].num : 0,
+                itemStyle: {
+                  color: '#ED8D1B',
+                  borderColor: '#ED8D1B'
+                }
+              })
+            }
+            if (xAxisData.length > 7) {
+              chartLimitDate = xAxisData[xAxisData.length - 7]
+            } else {
+              chartLimitDate = xAxisData[0]
+            }
+            this.escChartOpt.xAxis.data = xAxisData
+            this.escChartOpt.series[0].data = seriesData
+            this.escChartOpt.dataZoom = [
+              {
+                startValue: chartLimitDate
+              },
+              {
+                type: 'inside'
+              }
+            ]
+          }
+        })
+        // 保险
+        this.$comfun.http_post(this, `data/public/insurance/curve/${this.$moment.userInfo.user.id}`, {
+          type: type,
+          startDate: startDate,
+          endDate: endDate
+        }).then((response) => {
+          if (response.body.success === '1') {
+            var xAxisData = []
+            var seriesData = []
+            for (let i = 0; i < response.body.insurance.length; i++) {
+              let startDate = null
+              let endDate = null
+              if (type === 2) {
+                startDate = new Date(response.body.insurance[i].startDate.replace(/-/g, '/'))
+                endDate = new Date(response.body.insurance[i].endDate.replace(/-/g, '/'))
+                let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
+                xAxisData.push(xAxis)
+              } else if (type === 3) {
+                xAxisData.push(String(response.body.insurance[i].yearnum).substr(2, 2) + '-' + response.body.insurance[i].monthnum)
+              } else if (type === 4) {
+                xAxisData.push(String(response.body.insurance[i].yearnum))
+              }
+              seriesData.push({
+                value: response.body.insurance[i].num ? response.body.insurance[i].num : 0,
+                itemStyle: {
+                  color: '#ED8D1B',
+                  borderColor: '#ED8D1B'
+                }
+              })
+            }
+            if (xAxisData.length > 7) {
+              chartLimitDate = xAxisData[xAxisData.length - 7]
+            } else {
+              chartLimitDate = xAxisData[0]
+            }
+            this.bxChartOpt.xAxis.data = xAxisData
+            this.bxChartOpt.series[0].data = seriesData
+            this.bxChartOpt.dataZoom = [
+              {
+                startValue: chartLimitDate
+              },
+              {
+                type: 'inside'
+              }
+            ]
+          }
+        })
+        // 汽车用品
+        this.$comfun.http_post(this, `data/public/accessory/curve/${this.$moment.userInfo.user.id}`, {
+          type: type,
+          startDate: startDate,
+          endDate: endDate
+        }).then((response) => {
+          if (response.body.success === '1') {
+            var xAxisData = []
+            var seriesData = []
+            for (let i = 0; i < response.body.accessory.length; i++) {
+              let startDate = null
+              let endDate = null
+              if (type === 2) {
+                startDate = new Date(response.body.accessory[i].startDate.replace(/-/g, '/'))
+                endDate = new Date(response.body.accessory[i].endDate.replace(/-/g, '/'))
+                let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
+                xAxisData.push(xAxis)
+              } else if (type === 3) {
+                xAxisData.push(String(response.body.accessory[i].yearnum).substr(2, 2) + '-' + response.body.accessory[i].monthnum)
+              } else if (type === 4) {
+                xAxisData.push(String(response.body.accessory[i].yearnum))
+              }
+              seriesData.push({
+                value: response.body.accessory[i].num ? response.body.accessory[i].num : 0,
+                itemStyle: {
+                  color: '#ED8D1B',
+                  borderColor: '#ED8D1B'
+                }
+              })
+            }
+            if (xAxisData.length > 7) {
+              chartLimitDate = xAxisData[xAxisData.length - 7]
+            } else {
+              chartLimitDate = xAxisData[0]
+            }
+            this.qcypChartOpt.xAxis.data = xAxisData
+            this.qcypChartOpt.series[0].data = seriesData
+            this.qcypChartOpt.dataZoom = [
+              {
+                startValue: chartLimitDate
+              },
+              {
+                type: 'inside'
+              }
+            ]
+          }
+        })
+        // 金融
+        this.$comfun.http_post(this, `data/public/finance/curve/${this.$moment.userInfo.user.id}`, {
+          type: type,
+          startDate: startDate,
+          endDate: endDate
+        }).then((response) => {
+          if (response.body.success === '1') {
+            var xAxisData = []
+            var seriesData = []
+            for (let i = 0; i < response.body.finance.length; i++) {
+              let startDate = null
+              let endDate = null
+              if (type === 2) {
+                startDate = new Date(response.body.finance[i].startDate.replace(/-/g, '/'))
+                endDate = new Date(response.body.finance[i].endDate.replace(/-/g, '/'))
+                let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
+                xAxisData.push(xAxis)
+              } else if (type === 3) {
+                xAxisData.push(String(response.body.finance[i].yearnum).substr(2, 2) + '-' + response.body.finance[i].monthnum)
+              } else if (type === 4) {
+                xAxisData.push(String(response.body.finance[i].yearnum))
+              }
+              seriesData.push({
+                value: response.body.finance[i].num ? response.body.finance[i].num : 0,
+                itemStyle: {
+                  color: '#ED8D1B',
+                  borderColor: '#ED8D1B'
+                }
+              })
+            }
+            if (xAxisData.length > 7) {
+              chartLimitDate = xAxisData[xAxisData.length - 7]
+            } else {
+              chartLimitDate = xAxisData[0]
+            }
+            this.jrChartOpt.xAxis.data = xAxisData
+            this.jrChartOpt.series[0].data = seriesData
+            this.jrChartOpt.dataZoom = [
+              {
+                startValue: chartLimitDate
+              },
+              {
+                type: 'inside'
+              }
+            ]
+          }
+        })
+      } else {
+        var curveType = ''
+        var curveUris = []
+        if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+          curveType = 'serve'
+          curveUris = [
+            'serve/curve/num/', 'serve/curve/oneprofit/', 'serve/curve/sumprofits/', 'serve/curve/profit/',
+            'serve/curve/derive/', 'serve/curve/maintain/', 'serve/curve/newmember/', 'serve/curve/renewal/'
+          ]
+        } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+          curveType = 'group'
+          curveUris = [
+            'group/curve/num/', 'group/curve/sumprofits/', 'group/curve/cost/', 'group/curve/profit/', 'group/curve/profitrate/',
+            'group/curve/maintain/'
+          ]
+        } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+          curveType = 'accident'
+          curveUris = [
+            'accident/curve/num/', 'accident/curve/sumprofits/', 'accident/curve/profit/', 'accident/curve/renewal/'
           ]
         }
-      })
-      // 二手车
-      this.$comfun.http_post(this, `data/public/oldcar/curve/${this.$moment.userInfo.user.id}`, {
-        type: type,
-        startDate: startDate,
-        endDate: endDate
-      }).then((response) => {
-        if (response.body.success === '1') {
-          var xAxisData = []
-          var seriesData = []
-          for (let i = 0; i < response.body.oldcar.length; i++) {
-            let startDate = null
-            let endDate = null
-            if (type === 2) {
-              startDate = new Date(response.body.oldcar[i].startDate.replace(/-/g, '/'))
-              endDate = new Date(response.body.oldcar[i].endDate.replace(/-/g, '/'))
-              let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
-              xAxisData.push(xAxis)
-            } else if (type === 3) {
-              xAxisData.push(String(response.body.oldcar[i].yearnum).substr(2, 2) + '-' + response.body.oldcar[i].monthnum)
-            } else if (type === 4) {
-              xAxisData.push(String(response.body.oldcar[i].yearnum))
-            }
-            seriesData.push({
-              value: response.body.oldcar[i].num ? response.body.oldcar[i].num : 0,
-              itemStyle: {
-                color: '#ED8D1B',
-                borderColor: '#ED8D1B'
+        for (let uriIndex in curveUris) {
+          ;((uriIndex) => {
+            this.$comfun.http_post(this, `after/public/${curveUris[uriIndex]}${this.$moment.userInfo.user.id}`, {
+              type: type,
+              startDate: startDate,
+              endDate: endDate
+            }).then((response) => {
+              if (response.body.success === '1') {
+                var xAxisData = []
+                var seriesData = []
+                for (let i = 0; i < response.body[curveType].length; i++) {
+                  let startDate = new Date(response.body[curveType][i].date.replace(/-/g, '/'))
+                  let xAxis = ''
+                  if (type === 2) {
+                    xAxis = this.$comfun.formatDate(startDate, 'yy/M/d')
+                  } else if (type === 3) {
+                    xAxis = this.$comfun.formatDate(startDate, 'yy/M/d')
+                  } else if (type === 4) {
+                    xAxis = this.$comfun.formatDate(startDate, 'yy')
+                  }
+                  xAxisData.push(xAxis)
+                  seriesData.push({
+                    value: response.body[curveType][i].num ? response.body[curveType][i].num : 0,
+                    itemStyle: {
+                      color: '#ED8D1B',
+                      borderColor: '#ED8D1B'
+                    }
+                  })
+                }
+                if (xAxisData.length > 7) {
+                  chartLimitDate = xAxisData[xAxisData.length - 7]
+                } else {
+                  chartLimitDate = xAxisData[0]
+                }
+                this.curveChartOpts[uriIndex].xAxis.data = xAxisData
+                this.curveChartOpts[uriIndex].series[0].data = seriesData
+                this.curveChartOpts[uriIndex].dataZoom = [
+                  {
+                    startValue: chartLimitDate
+                  },
+                  {
+                    type: 'inside'
+                  }
+                ]
               }
             })
-          }
-          if (xAxisData.length > 7) {
-            chartLimitDate = xAxisData[xAxisData.length - 7]
-          } else {
-            chartLimitDate = xAxisData[0]
-          }
-          this.escChartOpt.xAxis.data = xAxisData
-          this.escChartOpt.series[0].data = seriesData
-          this.escChartOpt.dataZoom = [
-            {
-              startValue: chartLimitDate
-            },
-            {
-              type: 'inside'
-            }
-          ]
+          })(uriIndex)
         }
-      })
-      // 保险
-      this.$comfun.http_post(this, `data/public/insurance/curve/${this.$moment.userInfo.user.id}`, {
-        type: type,
-        startDate: startDate,
-        endDate: endDate
-      }).then((response) => {
-        if (response.body.success === '1') {
-          var xAxisData = []
-          var seriesData = []
-          for (let i = 0; i < response.body.insurance.length; i++) {
-            let startDate = null
-            let endDate = null
-            if (type === 2) {
-              startDate = new Date(response.body.insurance[i].startDate.replace(/-/g, '/'))
-              endDate = new Date(response.body.insurance[i].endDate.replace(/-/g, '/'))
-              let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
-              xAxisData.push(xAxis)
-            } else if (type === 3) {
-              xAxisData.push(String(response.body.insurance[i].yearnum).substr(2, 2) + '-' + response.body.insurance[i].monthnum)
-            } else if (type === 4) {
-              xAxisData.push(String(response.body.insurance[i].yearnum))
-            }
-            seriesData.push({
-              value: response.body.insurance[i].num ? response.body.insurance[i].num : 0,
-              itemStyle: {
-                color: '#ED8D1B',
-                borderColor: '#ED8D1B'
-              }
-            })
-          }
-          if (xAxisData.length > 7) {
-            chartLimitDate = xAxisData[xAxisData.length - 7]
-          } else {
-            chartLimitDate = xAxisData[0]
-          }
-          this.bxChartOpt.xAxis.data = xAxisData
-          this.bxChartOpt.series[0].data = seriesData
-          this.bxChartOpt.dataZoom = [
-            {
-              startValue: chartLimitDate
-            },
-            {
-              type: 'inside'
-            }
-          ]
-        }
-      })
-      // 汽车用品
-      this.$comfun.http_post(this, `data/public/accessory/curve/${this.$moment.userInfo.user.id}`, {
-        type: type,
-        startDate: startDate,
-        endDate: endDate
-      }).then((response) => {
-        if (response.body.success === '1') {
-          var xAxisData = []
-          var seriesData = []
-          for (let i = 0; i < response.body.accessory.length; i++) {
-            let startDate = null
-            let endDate = null
-            if (type === 2) {
-              startDate = new Date(response.body.accessory[i].startDate.replace(/-/g, '/'))
-              endDate = new Date(response.body.accessory[i].endDate.replace(/-/g, '/'))
-              let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
-              xAxisData.push(xAxis)
-            } else if (type === 3) {
-              xAxisData.push(String(response.body.accessory[i].yearnum).substr(2, 2) + '-' + response.body.accessory[i].monthnum)
-            } else if (type === 4) {
-              xAxisData.push(String(response.body.accessory[i].yearnum))
-            }
-            seriesData.push({
-              value: response.body.accessory[i].num ? response.body.accessory[i].num : 0,
-              itemStyle: {
-                color: '#ED8D1B',
-                borderColor: '#ED8D1B'
-              }
-            })
-          }
-          if (xAxisData.length > 7) {
-            chartLimitDate = xAxisData[xAxisData.length - 7]
-          } else {
-            chartLimitDate = xAxisData[0]
-          }
-          this.qcypChartOpt.xAxis.data = xAxisData
-          this.qcypChartOpt.series[0].data = seriesData
-          this.qcypChartOpt.dataZoom = [
-            {
-              startValue: chartLimitDate
-            },
-            {
-              type: 'inside'
-            }
-          ]
-        }
-      })
-      // 金融
-      this.$comfun.http_post(this, `data/public/finance/curve/${this.$moment.userInfo.user.id}`, {
-        type: type,
-        startDate: startDate,
-        endDate: endDate
-      }).then((response) => {
-        if (response.body.success === '1') {
-          var xAxisData = []
-          var seriesData = []
-          for (let i = 0; i < response.body.finance.length; i++) {
-            let startDate = null
-            let endDate = null
-            if (type === 2) {
-              startDate = new Date(response.body.finance[i].startDate.replace(/-/g, '/'))
-              endDate = new Date(response.body.finance[i].endDate.replace(/-/g, '/'))
-              let xAxis = this.$comfun.formatDate(startDate, 'yy/M/d') + '-' + this.$comfun.formatDate(endDate, 'yy/M/d')
-              xAxisData.push(xAxis)
-            } else if (type === 3) {
-              xAxisData.push(String(response.body.finance[i].yearnum).substr(2, 2) + '-' + response.body.finance[i].monthnum)
-            } else if (type === 4) {
-              xAxisData.push(String(response.body.finance[i].yearnum))
-            }
-            seriesData.push({
-              value: response.body.finance[i].num ? response.body.finance[i].num : 0,
-              itemStyle: {
-                color: '#ED8D1B',
-                borderColor: '#ED8D1B'
-              }
-            })
-          }
-          if (xAxisData.length > 7) {
-            chartLimitDate = xAxisData[xAxisData.length - 7]
-          } else {
-            chartLimitDate = xAxisData[0]
-          }
-          this.jrChartOpt.xAxis.data = xAxisData
-          this.jrChartOpt.series[0].data = seriesData
-          this.jrChartOpt.dataZoom = [
-            {
-              startValue: chartLimitDate
-            },
-            {
-              type: 'inside'
-            }
-          ]
-        }
-      })
+      }
     }
   }
 }
@@ -1603,6 +2156,7 @@ export default {
     position: relative;
     padding: 0rem 0 2.4rem;
     height: 8.4rem;
+    font-size: 0;
     pointer-events: none;
     div.progress-wrap {
       position: absolute;
@@ -1731,6 +2285,80 @@ export default {
         transform: scale(0.8);
       }
     }
+    /* 进度条样式 */
+    .progress-strip-wrap {
+      position: relative;
+      display: inline-block;
+      width: 50%;
+      font-size: 0.8rem;
+      .des-wrap {
+        position: relative;
+        .title {
+          position: relative;
+          display: inline-block;
+          font-size: 0.6rem;
+          transform: scale(0.8, 0.8);
+        }
+        .num-wrap {
+          position: absolute;
+          left: 4rem;
+          bottom: -0.2rem;
+          white-space: nowrap;
+          .num {
+            position: relative;
+            font-size: 1.2rem;
+            display: inline-block;
+            transform: scale(0.8, 0.8);
+          }
+          .des {
+            position: relative;
+            color: rgb(126, 172, 228);
+            font-size: 0.6rem;
+            display: inline-block;
+            transform: scale(0.8, 0.8);
+          }
+        }
+      }
+      .progress-rail {
+        position: relative;
+        margin-top: 0.6rem;
+        margin-bottom: 1.2rem;
+        width: 94%;
+        height: 3px;
+        background-color: rgb(84, 129, 184);
+        border-radius: 10px;
+        overflow: hidden;
+        font-size: 0;
+        .progress-cur {
+          position: relative;
+          height: 100%;
+          width: 0%;
+          background-color: #1FFF98;
+          transition: all 0.4s ease 0s;
+        }
+        div.progress-animate {
+          position: absolute;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(to left, rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(51, 106, 175, .4), rgba(51, 106, 175, .6), rgba(51, 106, 175, .8), rgba(51, 106, 175, .6), rgba(51, 106, 175, .4), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0), rgba(243, 239, 251, 0));
+          animation: moveflash 5s ease 0s infinite;
+        }
+      }
+      .progress-percent-val {
+        position: absolute;
+        bottom: 0.9rem;
+        display: inline-block;
+        font-size: 0.6rem;
+        color: #3dbbff;
+        transition: all 0.4s ease 0s;
+        margin-left: 0.2rem;
+      }
+    }
+    .line-last {
+      padding-left: 0.8rem;
+      width: calc(50% - 0.8rem);
+    }
   }
   .summarizing-wrap::after {
     content: '';
@@ -1842,6 +2470,15 @@ export default {
   }
   .echarts {
     height: 16rem;
+  }
+}
+
+@keyframes moveflash {
+  0% {
+    transform: translateX(-68%);
+  }
+  100% {
+    transform: translateX(68%);
   }
 }
 </style>
