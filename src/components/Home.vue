@@ -666,7 +666,11 @@ export default {
     this.userScrope = this.$moment.userInfo.user.scope
     this.initPageByScope()
     if (this.userScrope !== 'A') {
-      this.sellTabWrapScrollTop = 26.6 * 16 + Math.ceil(this.summarizings.length / 2) * 2.3 * 16
+      if (this.summarizings.length > 5) {
+        this.sellTabWrapScrollTop = 26.6 * 16 + Math.ceil(this.summarizings.length / 2) * 2.3 * 16
+      } else {
+        this.sellTabWrapScrollTop = 34.8 * 16
+      }
     }
     this.resetDateEvery(this.dateTabs[0].id)
 
