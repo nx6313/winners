@@ -1,7 +1,7 @@
 var HttpIp = ''
 var HttpPort = ''
-// var HttpAddress = 'http://172.18.168.222:8080/'
-var HttpAddress = 'http://wx.dcsc520.cn/lhp/'
+var HttpAddress = 'http://172.18.168.222:8080/'
+// var HttpAddress = 'http://wx.dcsc520.cn/lhp/'
 var HttpAddressRoot = 'http://wx.dcsc520.cn/'
 var localforage = require('localforage')
 
@@ -34,7 +34,17 @@ export default {
       userInfo: {},
       defaultDcLogo: defaultDcLogo,
       defaultDcHead: defaultDcHead,
-      defaultHead: defaultHead
+      defaultHead: defaultHead,
+      dutyOpt: {
+        sale: 'A', // 销售
+        jdfwgw: 'B', // 机电服务顾问
+        jxbz: 'C', // 机修班组
+        sgfwgw: 'D', // 事故服务顾问
+        bj: 'E', // 钣金
+        pq: 'F', // 喷漆
+        sale_after: 'G', // 售后
+        sale_all: 'H' // 售前兼售后
+      }
     }
 
     Object.defineProperty(Vue.prototype, '$moment', { value: Moment })

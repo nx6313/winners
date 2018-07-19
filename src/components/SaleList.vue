@@ -62,7 +62,7 @@
       <span @click="refOrder('way', 9)">本厂</span>
     </div>
     <div class="all-sale-list-wrap">
-      <div :class="['sale-item-wrap', ((saleIndex + 1) >= 1 && (saleIndex + 1) <= 3)? 'ranking-' + (saleIndex + 1) : '']" v-for="(sale, saleIndex) in saleList" :key="saleIndex">
+      <div :class="['sale-item-wrap', ((saleIndex + 1) >= 1 && (saleIndex + 1) <= 3)? 'ranking-' + (saleIndex + 1) : '']" v-for="(sale, saleIndex) in saleList" :key="saleIndex" @click="toUserData(sale.userId)">
         <span class="ranking"><span>{{saleIndex + 1}}</span><i></i></span>
         <i class="user-head-wrap"></i>
         <span :class="['user-head', sale.userHead ? 'has-head' : '']">
@@ -208,7 +208,7 @@ export default {
   },
   methods: {
     initPageByScope () {
-      if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+      if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
         this.tabs = [
           {
             id: 'num',
@@ -243,7 +243,7 @@ export default {
             txt: '续保'
           }
         ]
-      } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) { // C:机电班组
         this.tabs = [
           {
             id: 'num',
@@ -270,7 +270,7 @@ export default {
             txt: '保险套餐'
           }
         ]
-      } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) { // D:事故服务顾问
         this.tabs = [
           {
             id: 'num',
@@ -368,7 +368,7 @@ export default {
     getDesAndUnit (datePre) {
       var preDes = ''
       var unit = ''
-      if (this.$moment.userInfo.user.scope === 'A') {
+      if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sale) {
         if (this.curTabType === 'newcar') {
           preDes = datePre + '销量'
           unit = '台'
@@ -388,7 +388,7 @@ export default {
           preDes = datePre + '销售额'
           unit = '元'
         }
-      } else if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
         if (this.curTabType === 'num') {
           preDes = datePre + '接车台次'
           unit = '台'
@@ -414,7 +414,7 @@ export default {
           preDes = datePre + '续保'
           unit = '元'
         }
-      } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) { // C:机电班组
         if (this.curTabType === 'num') {
           preDes = datePre + '维修台次'
           unit = '台次'
@@ -434,7 +434,7 @@ export default {
           preDes = datePre + '保险套餐'
           unit = '套'
         }
-      } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) { // D:事故服务顾问
         if (this.curTabType === 'num') {
           preDes = datePre + '接车台次'
           unit = '台次'
@@ -486,11 +486,11 @@ export default {
       var preDes = this.getDesAndUnit(datePre).preDes
       var unit = this.getDesAndUnit(datePre).unit
       var orderSelfUri = 'data/public/' + this.curTabType + `/order/my/${this.$moment.userInfo.user.id}`
-      if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+      if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
         orderSelfUri = `after/public/serve/order/${this.curTabType}/my/${this.$moment.userInfo.user.id}`
-      } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) { // C:机电班组
         orderSelfUri = `after/public/group/order/${this.curTabType}/my/${this.$moment.userInfo.user.id}`
-      } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) { // D:事故服务顾问
         orderSelfUri = `after/public/accident/order/${this.curTabType}/my/${this.$moment.userInfo.user.id}`
       }
       this.$comfun.http_post(this, orderSelfUri, {
@@ -568,11 +568,11 @@ export default {
       var preDes = this.getDesAndUnit(datePre).preDes
       var unit = this.getDesAndUnit(datePre).unit
       var orderDataUri = 'data/public/' + this.curTabType + `/order/${this.$moment.userInfo.user.id}`
-      if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+      if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
         orderDataUri = `after/public/serve/order/${this.curTabType}/${this.$moment.userInfo.user.id}`
-      } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) { // C:机电班组
         orderDataUri = `after/public/group/order/${this.curTabType}/${this.$moment.userInfo.user.id}`
-      } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) { // D:事故服务顾问
         orderDataUri = `after/public/accident/order/${this.curTabType}/${this.$moment.userInfo.user.id}`
       }
       this.$comfun.http_post(this, orderDataUri, {
@@ -588,6 +588,7 @@ export default {
           this.saleList = []
           for (let s = 0; s < response.body[this.curTabType].length; s++) {
             this.saleList.push({
+              userId: response.body[this.curTabType][s].consultantId,
               userHead: response.body[this.curTabType][s].photo ? this.$moment.HttpAddress_1 + `showFile/${response.body[this.curTabType][s].photo}` : '',
               userName: response.body[this.curTabType][s].name,
               saleNum: response.body[this.curTabType][s].num,
@@ -604,6 +605,9 @@ export default {
           })
         }
       })
+    },
+    toUserData (userId) {
+      this.$router.push(`/user-data/${userId}`)
     }
   }
 }

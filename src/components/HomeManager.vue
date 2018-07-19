@@ -1,5 +1,5 @@
 <template>
-  <div id="page-home-manager" class="page-home-manager" @scroll="scrollPage">
+  <div id="page-home-manager" ref="page-home-manager" class="page-home-manager" @scroll="scrollPage">
     <div class="page-header-wrap">
       <span :class="['user-head', userHead !== '' ? 'has-head' : '']">
         <i :style="userHead !== '' ? { 'background-image': `url(${userHead})` } : { 'background-image': `url(${defaultUserHead})` }"></i>
@@ -82,6 +82,7 @@ export default {
   name: 'HomeManager',
   data () {
     return {
+      curPageScope: '',
       userHead: '',
       defaultUserHead: '',
       curHeaderTab: '',
@@ -490,7 +491,14 @@ export default {
     }
   },
   mounted () {
-    document.querySelector('#app-footer').style.display = 'flex'
+    if (this.$route.params['pagetype'] === 'unknown') {
+      document.querySelector('#app-footer').style.display = 'flex'
+      this.curPageScope = 'A'
+    } else {
+      document.querySelector('#app-footer').style.display = 'none'
+      this.$refs['page-home-manager'].style.height = '100vh'
+      this.curPageScope = this.$route.params['pagetype']
+    }
     this.defaultUserHead = this.$moment.defaultDcHead
     this.userName = this.$moment.userInfo.user.name
     this.curHeaderTab = this.summarizings[this.curHeaderTypeIndex].id
@@ -680,8 +688,8 @@ export default {
       this.moveDistance = (event.touches[0].pageX - this.headerTouchStartX) * 0.8
       this.headerDateMoveToTansX = this.headerTouchStartTransX + this.moveDistance
       if (this.headerDateTabTransXMax < 0) {
-        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2) {
-          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2
+        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16) {
+          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16
           if (this.curHeaderDateTabType !== 'day') {
             this.headerTabToggle = -1
           } else {
@@ -698,8 +706,8 @@ export default {
           this.headerTabToggle = 0
         }
       } else {
-        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2) {
-          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2
+        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16) {
+          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16
           if (this.curHeaderDateTabType !== 'day') {
             this.headerTabToggle = -1
           } else {

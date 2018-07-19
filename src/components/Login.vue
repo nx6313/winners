@@ -65,8 +65,7 @@ export default {
           var loginUserInfo = {
             loginDate: new Date(),
             basedate: response.body.user.createDate ? new Date(response.body.user.createDate) : new Date(),
-            user: response.body.user,
-            type: response.body.type
+            user: response.body.user
           }
           if (response.body.user.args) {
             loginUserInfo.user.args = JSON.parse(response.body.user.args)

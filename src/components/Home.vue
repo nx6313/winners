@@ -683,7 +683,7 @@ export default {
   },
   methods: {
     initPageByScope () {
-      if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+      if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
         this.summarizings = [
           {
             progress: 0,
@@ -806,7 +806,7 @@ export default {
             needRetract: true
           }
         ])
-      } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) { // C:机电班组
         this.summarizings = [
           {
             progress: 0,
@@ -907,7 +907,7 @@ export default {
             needRetract: false
           }
         ])
-      } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) { // D:事故服务顾问
         this.summarizings = [
           {
             progress: 0,
@@ -1343,8 +1343,8 @@ export default {
       this.moveDistance = (event.touches[0].pageX - this.headerTouchStartX) * 0.8
       this.headerDateMoveToTansX = this.headerTouchStartTransX + this.moveDistance
       if (this.headerDateTabTransXMax < 0) {
-        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2) {
-          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2
+        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16) {
+          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16
           if (this.curHeaderDateTabType !== 'day') {
             this.headerTabToggle = -1
           } else {
@@ -1361,8 +1361,8 @@ export default {
           this.headerTabToggle = 0
         }
       } else {
-        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2) {
-          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2
+        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16) {
+          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16
           if (this.curHeaderDateTabType !== 'day') {
             this.headerTabToggle = -1
           } else {
@@ -1505,11 +1505,11 @@ export default {
         endDate = this.curHeaderSearchDate.val[1]
       }
       var headerUri = `data/public/contrast/${this.$moment.userInfo.user.id}`
-      if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+      if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
         headerUri = `after/public/contrast/serve/${this.$moment.userInfo.user.id}`
-      } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) { // C:机电班组
         headerUri = `after/public/contrast/group/${this.$moment.userInfo.user.id}`
-      } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) { // D:事故服务顾问
         headerUri = `after/public/contrast/accident/${this.$moment.userInfo.user.id}`
       }
       this.$comfun.http_post(this, headerUri, {
@@ -1518,7 +1518,7 @@ export default {
         endDate: endDate
       }).then((response) => {
         if (response.body.success === '1') {
-          if (this.$moment.userInfo.user.scope === 'A') { // A 为售前 B:机电服务顾问 C:机电班组 D:事故服务顾问
+          if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sale) { // A 为售前 B:机电服务顾问 C:机电班组 D:事故服务顾问
             this.summarizings[0].progress = !response.body.contrast.personNewcarNum || !response.body.contrast.maxNewcarNum ? 0 : Math.floor(response.body.contrast.personNewcarNum / response.body.contrast.maxNewcarNum * 100)
             this.summarizings[0].num = response.body.contrast.personNewcarNum || 0
             this.summarizings[1].progress = !response.body.contrast.personAccessorySum || !response.body.contrast.maxAccessorySum ? 0 : Math.floor(response.body.contrast.personAccessorySum / response.body.contrast.maxAccessorySum * 100)
@@ -1530,7 +1530,7 @@ export default {
             this.summarizings[3].num = response.body.contrast.personInsuranceNum || 0
             this.summarizings[4].progress = !response.body.contrast.personOldcarNum || !response.body.contrast.maxOldcarNum ? 0 : Math.floor(response.body.contrast.personOldcarNum / response.body.contrast.maxOldcarNum * 100)
             this.summarizings[4].num = response.body.contrast.personOldcarNum || 0
-          } else if (this.$moment.userInfo.user.scope === 'B') {
+          } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) {
             this.summarizings[0].progress = !response.body.result.personNumNum || !response.body.result.maxNumNum ? 0 : Math.floor(response.body.result.personNumNum / response.body.result.maxNumNum * 100)
             this.summarizings[0].num = response.body.result.personNumNum || 0
             this.summarizings[1].progress = !response.body.result.personOneprofitNum || !response.body.result.maxOneprofitNum ? 0 : Math.floor(response.body.result.personOneprofitNum / response.body.result.maxOneprofitNum * 100)
@@ -1552,7 +1552,7 @@ export default {
             this.summarizings[7].progress = !response.body.result.personRenewalNum || !response.body.result.maxRenewalNum ? 0 : Math.floor(response.body.result.personRenewalNum / response.body.result.maxRenewalNum * 100)
             this.summarizings[7].num = (response.body.result.personRenewalNum || 0) >= 10000 ? Math.floor((response.body.result.personRenewalNum || 0) / 10000) : (response.body.result.personRenewalNum || 0)
             this.summarizings[7].des = (response.body.result.personRenewalNum || 0) >= 10000 ? '万元' : '元'
-          } else if (this.$moment.userInfo.user.scope === 'C') {
+          } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) {
             this.summarizings[0].progress = !response.body.result.personNumNum || !response.body.result.maxNumNum ? 0 : Math.floor(response.body.result.personNumNum / response.body.result.maxNumNum * 100)
             this.summarizings[0].num = response.body.result.personNumNum || 0
             this.summarizings[1].progress = !response.body.result.personSumprofitsNum || !response.body.result.maxSumprofitsNum ? 0 : Math.floor(response.body.result.personSumprofitsNum / response.body.result.maxSumprofitsNum * 100)
@@ -1568,7 +1568,7 @@ export default {
             this.summarizings[4].num = response.body.result.personProfitrateNum || 0
             this.summarizings[5].progress = !response.body.result.personMaintainNum || !response.body.result.maxMaintainNum ? 0 : Math.floor(response.body.result.personMaintainNum / response.body.result.maxMaintainNum * 100)
             this.summarizings[5].num = response.body.result.personMaintainNum || 0
-          } else if (this.$moment.userInfo.user.scope === 'D') {
+          } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) {
             this.summarizings[0].progress = !response.body.result.personNumNum || !response.body.result.maxNumNum ? 0 : Math.floor(response.body.result.personNumNum / response.body.result.maxNumNum * 100)
             this.summarizings[0].num = response.body.result.personNumNum || 0
             this.summarizings[1].progress = !response.body.result.personSumprofitsNum || !response.body.result.maxSumprofitsNum ? 0 : Math.floor(response.body.result.personSumprofitsNum / response.body.result.maxSumprofitsNum * 100)
@@ -1582,7 +1582,7 @@ export default {
             this.summarizings[3].des = (response.body.result.personRenewalNum || 0) >= 10000 ? '万元' : '元'
           }
         }
-        if (this.$moment.userInfo.user.scope === 'A') {
+        if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sale) {
           this.$comfun.http_post(this, `data/public/profit/${this.$moment.userInfo.user.id}`, {
             startDate: startDate,
             endDate: endDate
@@ -1598,11 +1598,11 @@ export default {
           })
         }
         var grjxUri = `data/public/perf/${this.$moment.userInfo.user.id}`
-        if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+        if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
           grjxUri = `after/public/perf/serve/${this.$moment.userInfo.user.id}`
-        } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+        } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) { // C:机电班组
           grjxUri = `after/public/perf/group/${this.$moment.userInfo.user.id}`
-        } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+        } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) { // D:事故服务顾问
           grjxUri = `after/public/perf/accident/${this.$moment.userInfo.user.id}`
         }
         this.$comfun.http_post(this, grjxUri, {
@@ -1611,14 +1611,14 @@ export default {
         }).then((response) => {
           this.dateChangeLoading = false
           if (response.body.success === '1') {
-            if (this.$moment.userInfo.user.scope === 'A') {
+            if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sale) {
               this.grjxChartOpt.title.text = `{money|${response.body.perf.profitSum || 0}}\t\t{unit|元}\n个人绩效`
               this.grjxChartOpt.series[0].data[0].value = response.body.perf.newcarPerf || 0
               this.grjxChartOpt.series[0].data[1].value = response.body.perf.insurancePerf || 0
               this.grjxChartOpt.series[0].data[2].value = response.body.perf.oldcarPerf || 0
               this.grjxChartOpt.series[0].data[3].value = response.body.perf.financePerf || 0
               this.grjxChartOpt.series[0].data[4].value = response.body.perf.accessoryPerf || 0
-            } else if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+            } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
               this.grjxChartOpt.title.text = `{money|${response.body.result.sumAll || 0}}\t\t{unit|元}\n个人绩效`
               this.grjxChartOpt.series[0].data[0].value = response.body.result.hrSenioritypay || 0
               this.grjxChartOpt.series[0].data[1].value = response.body.result.hrAllowance || 0
@@ -1627,7 +1627,7 @@ export default {
               this.grjxChartOpt.series[0].data[4].value = response.body.result.hrDerive || 0
               this.grjxChartOpt.series[0].data[5].value = response.body.result.hrRenewal || 0
               this.grjxChartOpt.series[0].data[6].value = response.body.result.hrOtherroyalty || 0
-            } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+            } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) { // C:机电班组
               this.grjxChartOpt.title.text = `{money|${response.body.result.sumAll || 0}}\t\t{unit|元}\n个人绩效`
               this.grjxChartOpt.series[0].data[0].value = response.body.result.hrNum || 0
               this.grjxChartOpt.series[0].data[1].value = response.body.result.hrProfit || 0
@@ -1636,7 +1636,7 @@ export default {
               this.grjxChartOpt.series[0].data[4].value = response.body.result.hrDerive || 0
               this.grjxChartOpt.series[0].data[5].value = response.body.result.hrRenewal || 0
               this.grjxChartOpt.series[0].data[6].value = response.body.result.hrOtherroyalty || 0
-            } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+            } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) { // D:事故服务顾问
               this.grjxChartOpt.title.text = `{money|${response.body.result.sumAll || 0}}\t\t{unit|元}\n个人绩效`
               this.grjxChartOpt.series[0].data[0].value = response.body.result.hrSenioritypay || 0
               this.grjxChartOpt.series[0].data[1].value = response.body.result.hrAllowance || 0
@@ -1668,7 +1668,7 @@ export default {
     },
     getLineChartData (type, startDate, endDate) {
       var chartLimitDate = ''
-      if (this.$moment.userInfo.user.scope === 'A') {
+      if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sale) {
         // 整车
         this.$comfun.http_post(this, `data/public/newcar/curve/${this.$moment.userInfo.user.id}`, {
           type: type,
@@ -1907,19 +1907,19 @@ export default {
       } else {
         var curveType = ''
         var curveUris = []
-        if (this.$moment.userInfo.user.scope === 'B') { // B:机电服务顾问
+        if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
           curveType = 'serve'
           curveUris = [
             'serve/curve/num/', 'serve/curve/oneprofit/', 'serve/curve/sumprofits/', 'serve/curve/profit/',
             'serve/curve/derive/', 'serve/curve/maintain/', 'serve/curve/newmember/', 'serve/curve/renewal/'
           ]
-        } else if (this.$moment.userInfo.user.scope === 'C') { // C:机电班组
+        } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) { // C:机电班组
           curveType = 'group'
           curveUris = [
             'group/curve/num/', 'group/curve/sumprofits/', 'group/curve/cost/', 'group/curve/profit/', 'group/curve/profitrate/',
             'group/curve/maintain/'
           ]
-        } else if (this.$moment.userInfo.user.scope === 'D') { // D:事故服务顾问
+        } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) { // D:事故服务顾问
           curveType = 'accident'
           curveUris = [
             'accident/curve/num/', 'accident/curve/sumprofits/', 'accident/curve/profit/', 'accident/curve/renewal/'
@@ -2338,6 +2338,7 @@ export default {
           height: 100%;
           width: 0%;
           background-color: #1FFF98;
+          border-radius: 10px;
           transition: all 0.4s ease 0s;
         }
         div.progress-animate {

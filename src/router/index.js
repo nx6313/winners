@@ -19,11 +19,16 @@ import '@/plugins/animate.css'
 import '@/assets/fonts/iconfont.css'
 import Home from '@/components/Home'
 import HomeManager from '@/components/HomeManager'
+import HomeManagerList from '@/components/HomeManagerList'
 import HomeBoss from '@/components/HomeBoss'
+import HomeBossList from '@/components/HomeBossList'
 import SalePerformance from '@/components/SalePerformance'
+import SalePerformanceList from '@/components/SalePerformanceList'
 import SaleList from '@/components/SaleList'
+import SaleListItems from '@/components/SaleListItems'
 import Me from '@/components/Me'
 import CompanyPerformance from '@/components/CompanyPerformance'
+import CompanyPerformanceList from '@/components/CompanyPerformanceList'
 import UserList from '@/components/UserList'
 
 Vue.use(Router)
@@ -49,26 +54,58 @@ var router = new Router({
       component: Home
     },
     {
-      path: '/home-manager',
+      path: '/home-manager/:pagetype',
       name: 'HomeManager',
       component: HomeManager
     },
     {
-      path: '/home-boss',
+      path: '/home-manager-list',
+      name: 'HomeManagerList',
+      component: HomeManagerList,
+      meta: {
+        title: '智能决策相关列表'
+      }
+    },
+    {
+      path: '/home-boss/:pagetype',
       name: 'HomeBoss',
       component: HomeBoss
     },
     {
-      path: '/sale-performance',
+      path: '/home-boss-list',
+      name: 'HomeBossList',
+      component: HomeBossList,
+      meta: {
+        title: '智能决策相关列表'
+      }
+    },
+    {
+      path: '/sale-performance/:pagetype',
       name: 'SalePerformance',
       component: SalePerformance
     },
     {
-      path: '/sale-list',
+      path: '/sale-performance-list',
+      name: 'SalePerformanceList',
+      component: SalePerformanceList,
+      meta: {
+        title: '销售业绩相关列表'
+      }
+    },
+    {
+      path: '/sale-list/:pagetype',
       name: 'SaleList',
       component: SaleList,
       meta: {
         title: '龙虎榜'
+      }
+    },
+    {
+      path: '/sale-list-items',
+      name: 'SaleListItems',
+      component: SaleListItems,
+      meta: {
+        title: '龙虎榜相关列表'
       }
     },
     {
@@ -77,9 +114,17 @@ var router = new Router({
       component: Me
     },
     {
-      path: '/company-performance',
+      path: '/company-performance/:pagetype',
       name: 'CompanyPerformance',
       component: CompanyPerformance
+    },
+    {
+      path: '/company-performance-list',
+      name: 'CompanyPerformanceList',
+      component: CompanyPerformanceList,
+      meta: {
+        title: '销售业绩相关列表'
+      }
     },
     {
       path: '/user-list',
@@ -93,6 +138,11 @@ var router = new Router({
       path: '/sell-data/:userid',
       name: 'SellData',
       component: resolve => require(['@/components/SellData'], resolve)
+    },
+    {
+      path: '/user-data/:userid',
+      name: 'UserData',
+      component: resolve => require(['@/components/UserData'], resolve)
     }
   ]
 })
@@ -110,7 +160,45 @@ router.beforeEach((to, from, next) => {
       } else {
         router.app.$root.eventHub.$emit('clear-menu')
       }
-      next()
+      if (to.path === '/home-manager') {
+        if (loginInfo.user.grade === '2' && (loginInfo.user.scope === router.app.$moment.dutyOpt.sale_after || loginInfo.user.scope === router.app.$moment.dutyOpt.sale_all)) {
+          if (to.params['parapagetype']) {
+            next()
+          } else {
+            next('/home-manager-list')
+          }
+        } else {
+          next('/home-manager/unknown')
+        }
+      } else if (to.path === '/sale-performance') {
+        if (loginInfo.user.grade === '2' && (loginInfo.user.scope === router.app.$moment.dutyOpt.sale_after || loginInfo.user.scope === router.app.$moment.dutyOpt.sale_all)) {
+          if (to.params['parapagetype']) {
+            next()
+          } else {
+            next('/sale-performance-list')
+          }
+        } else {
+          next('/sale-performance/unknown')
+        }
+      } else if (to.path === '/home-boss' && loginInfo.user.grade === '3') {
+        if (to.params['parapagetype']) {
+          next()
+        } else {
+          next('/home-boss-list')
+        }
+      } else if (to.path === '/sale-list') { // 龙虎榜页面
+        if (loginInfo.user.grade === '2' && (loginInfo.user.scope === router.app.$moment.dutyOpt.sale_after || loginInfo.user.scope === router.app.$moment.dutyOpt.sale_all)) {
+          if (to.params['parapagetype']) {
+            next()
+          } else {
+            next('/sale-list-items')
+          }
+        } else {
+          next('/sale-list/unknown')
+        }
+      } else {
+        next()
+      }
       if (to.path !== '/') {
         router.app.$root.eventHub.$emit('ref-menu')
       } else {

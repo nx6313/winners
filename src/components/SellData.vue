@@ -652,15 +652,14 @@ export default {
     }
   },
   mounted () {
-    document.querySelector('#app-footer').style.display = 'flex'
+    document.querySelector('#app-footer').style.display = 'none'
     this.defaultUserHead = this.$moment.defaultHead
     var userId = this.$route.params['userid']
     this.$comfun.http_post(this, `data/senior/consultant/${userId}`).then((response) => {
       if (response.body.success === '1') {
         this.userInfoData = {
           basedate: response.body.user.createDate ? new Date(response.body.user.createDate) : new Date(),
-          user: response.body.user,
-          type: response.body.type
+          user: response.body.user
         }
 
         if (this.userInfoData.user.photo !== null) {
@@ -968,8 +967,8 @@ export default {
       this.moveDistance = (event.touches[0].pageX - this.headerTouchStartX) * 0.8
       this.headerDateMoveToTansX = this.headerTouchStartTransX + this.moveDistance
       if (this.headerDateTabTransXMax < 0) {
-        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2) {
-          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2
+        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16) {
+          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16
           if (this.curHeaderDateTabType !== 'day') {
             this.headerTabToggle = -1
           } else {
@@ -986,8 +985,8 @@ export default {
           this.headerTabToggle = 0
         }
       } else {
-        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2) {
-          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2
+        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16) {
+          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16
           if (this.curHeaderDateTabType !== 'day') {
             this.headerTabToggle = -1
           } else {
@@ -1435,6 +1434,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.page-sell-data {
+  position: relative;
+  height: 100vh;
+}
 .page-header-wrap {
   position: relative;
   background-color: #0F4E97;

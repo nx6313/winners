@@ -761,8 +761,8 @@ export default {
       this.moveDistance = (event.touches[0].pageX - this.headerTouchStartX) * 0.8
       this.headerDateMoveToTansX = this.headerTouchStartTransX + this.moveDistance
       if (this.headerDateTabTransXMax < 0) {
-        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2) {
-          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2
+        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16) {
+          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16
           if (this.curHeaderDateTabType !== 'day') {
             this.headerTabToggle = -1
           } else {
@@ -779,8 +779,8 @@ export default {
           this.headerTabToggle = 0
         }
       } else {
-        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2) {
-          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2
+        if (this.headerDateMoveToTansX > (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16) {
+          this.headerDateMoveToTansX = (document.body.clientWidth - this.headerDateTabTransXCeilWidth) / 2 - 1.4 * 16
           if (this.curHeaderDateTabType !== 'day') {
             this.headerTabToggle = -1
           } else {
