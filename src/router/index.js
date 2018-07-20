@@ -14,6 +14,7 @@ import Directives from '@/plugins/directives.js'
 import Dialogbox from '@/plugins/dialogbox/dialogbox.js'
 import FireParticle from '@/plugins/canvas/fire-particle.js'
 import Cvsbg from '@/plugins/canvas/cvsbg.js'
+import android from '@/utils/app'
 import '@/plugins/comm.css'
 import '@/plugins/animate.css'
 import '@/assets/fonts/iconfont.css'
@@ -151,6 +152,9 @@ router.beforeEach((to, from, next) => {
     document.title = to.meta.title
   } else {
     document.title = document.querySelector('meta[name="web-describe"]').getAttribute('content')
+  }
+  if (router.app.$comfun.getRequest('deviceType') === 'android' || router.app.$comfun.getRequest('deviceType') === 'ios') {
+    alert(android.callAndroid)
   }
   router.app.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
     if (loginInfo) {

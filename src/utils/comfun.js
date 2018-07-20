@@ -273,13 +273,13 @@ export default {
       },
       // 获取网址中的参数
       getRequest: function (key) {
-        var url = location.search
+        var url = location.href
         var theRequest = {}
         if (url.indexOf('?') !== -1) {
-          var str = url.substr(1)
+          var str = url.split('?')[1]
           var strs = str.split('&')
           for (var i = 0; i < strs.length; i++) {
-            theRequest[strs[i].split('=')[0]] = unescape(strs[i].split('=')[1])
+            theRequest[strs[i].split('=')[0]] = strs[i].split('=')[1]
           }
         }
         if (key) {
