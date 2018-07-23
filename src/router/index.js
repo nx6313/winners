@@ -14,7 +14,7 @@ import Directives from '@/plugins/directives.js'
 import Dialogbox from '@/plugins/dialogbox/dialogbox.js'
 import FireParticle from '@/plugins/canvas/fire-particle.js'
 import Cvsbg from '@/plugins/canvas/cvsbg.js'
-import android from '@/utils/app'
+import android from '@/utils/app.js'
 import '@/plugins/comm.css'
 import '@/plugins/animate.css'
 import '@/assets/fonts/iconfont.css'
@@ -144,6 +144,11 @@ var router = new Router({
       path: '/user-data/:userid',
       name: 'UserData',
       component: resolve => require(['@/components/UserData'], resolve)
+    },
+    {
+      path: '/app-me',
+      name: 'AppMe',
+      component: resolve => require(['@/components/app/Me'], resolve)
     }
   ]
 })
@@ -154,72 +159,75 @@ router.beforeEach((to, from, next) => {
     document.title = document.querySelector('meta[name="web-describe"]').getAttribute('content')
   }
   if (router.app.$comfun.getRequest('deviceType') === 'android' || router.app.$comfun.getRequest('deviceType') === 'ios') {
-    alert(android.callAndroid)
-  }
-  router.app.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
-    if (loginInfo) {
-      router.app.$moment.userInfo = loginInfo
-      if (to.path !== '/') {
-        router.app.$root.eventHub.$emit('init-menu')
-      } else {
-        router.app.$root.eventHub.$emit('clear-menu')
-      }
-      if (to.path === '/home-manager') {
-        if (loginInfo.user.grade === '2' && (loginInfo.user.scope === router.app.$moment.dutyOpt.sale_after || loginInfo.user.scope === router.app.$moment.dutyOpt.sale_all)) {
+    window['app'] = router.app
+    android.callAndroid('saveUserInfoForAndroid')
+    next()
+  } else {
+    router.app.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
+      if (loginInfo) {
+        router.app.$moment.userInfo = loginInfo
+        if (to.path !== '/') {
+          router.app.$root.eventHub.$emit('init-menu')
+        } else {
+          router.app.$root.eventHub.$emit('clear-menu')
+        }
+        if (to.path === '/home-manager') {
+          if (loginInfo.user.grade === '2' && (loginInfo.user.scope === router.app.$moment.dutyOpt.sale_after || loginInfo.user.scope === router.app.$moment.dutyOpt.sale_all)) {
+            if (to.params['parapagetype']) {
+              next()
+            } else {
+              next('/home-manager-list')
+            }
+          } else {
+            next('/home-manager/unknown')
+          }
+        } else if (to.path === '/sale-performance') {
+          if (loginInfo.user.grade === '2' && (loginInfo.user.scope === router.app.$moment.dutyOpt.sale_after || loginInfo.user.scope === router.app.$moment.dutyOpt.sale_all)) {
+            if (to.params['parapagetype']) {
+              next()
+            } else {
+              next('/sale-performance-list')
+            }
+          } else {
+            next('/sale-performance/unknown')
+          }
+        } else if (to.path === '/home-boss' && loginInfo.user.grade === '3') {
           if (to.params['parapagetype']) {
             next()
           } else {
-            next('/home-manager-list')
+            next('/home-boss-list')
           }
-        } else {
-          next('/home-manager/unknown')
-        }
-      } else if (to.path === '/sale-performance') {
-        if (loginInfo.user.grade === '2' && (loginInfo.user.scope === router.app.$moment.dutyOpt.sale_after || loginInfo.user.scope === router.app.$moment.dutyOpt.sale_all)) {
-          if (to.params['parapagetype']) {
-            next()
+        } else if (to.path === '/sale-list') { // 龙虎榜页面
+          if (loginInfo.user.grade === '2' && (loginInfo.user.scope === router.app.$moment.dutyOpt.sale_after || loginInfo.user.scope === router.app.$moment.dutyOpt.sale_all)) {
+            if (to.params['parapagetype']) {
+              next()
+            } else {
+              next('/sale-list-items')
+            }
           } else {
-            next('/sale-performance-list')
+            next('/sale-list/unknown')
           }
         } else {
-          next('/sale-performance/unknown')
-        }
-      } else if (to.path === '/home-boss' && loginInfo.user.grade === '3') {
-        if (to.params['parapagetype']) {
           next()
-        } else {
-          next('/home-boss-list')
         }
-      } else if (to.path === '/sale-list') { // 龙虎榜页面
-        if (loginInfo.user.grade === '2' && (loginInfo.user.scope === router.app.$moment.dutyOpt.sale_after || loginInfo.user.scope === router.app.$moment.dutyOpt.sale_all)) {
-          if (to.params['parapagetype']) {
-            next()
-          } else {
-            next('/sale-list-items')
-          }
+        if (to.path !== '/') {
+          router.app.$root.eventHub.$emit('ref-menu')
         } else {
-          next('/sale-list/unknown')
+          router.app.$root.eventHub.$emit('clear-menu')
         }
-      } else {
-        next()
-      }
-      if (to.path !== '/') {
-        router.app.$root.eventHub.$emit('ref-menu')
       } else {
         router.app.$root.eventHub.$emit('clear-menu')
+        if (to.path !== '/') {
+          router.app.$dialog_msg({
+            msg: '登陆信息失效'
+          })
+          next('/')
+        } else {
+          next()
+        }
       }
-    } else {
-      router.app.$root.eventHub.$emit('clear-menu')
-      if (to.path !== '/') {
-        router.app.$dialog_msg({
-          msg: '登陆信息失效'
-        })
-        next('/')
-      } else {
-        next()
-      }
-    }
-  })
+    })
+  }
 })
 
 export default router

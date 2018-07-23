@@ -1,7 +1,8 @@
 const android = window.android
 
-window['callByAndroid'] = () => {
-  alert(123456789)
+window['saveUserInfoForAndroid'] = (userInfo) => {
+  window.app.$moment.userInfo = userInfo
+  window.app.$root.eventHub.$emit('app-has-save-user-info')
 }
 
-export default { android }
+export default android
