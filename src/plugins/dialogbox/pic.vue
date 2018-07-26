@@ -53,6 +53,9 @@ export default {
           color: '#0E4E96'
         }
       ],
+      custom: false,
+      selectPic: () => {},
+      selectPhoto: () => {},
       cropImg: '',
       cropTouchMoveStart: [],
       cropTouchMoveDistance: [],
@@ -89,16 +92,33 @@ export default {
         if (this.$refs['pic-crop-wrap'].classList.contains('close')) {
           setTimeout(() => {
             this.isShow = false
+            let dialogPic = document.querySelector('#dialog-pic-wrap')
+            if (dialogPic && dialogPic.parentNode) {
+              dialogPic.parentNode.removeChild(dialogPic)
+            }
           }, 210)
         } else {
           setTimeout(() => {
             this.isShow = false
+            let dialogPic = document.querySelector('#dialog-pic-wrap')
+            if (dialogPic && dialogPic.parentNode) {
+              dialogPic.parentNode.removeChild(dialogPic)
+            }
           }, 610)
         }
       }
     },
     getPicByWay (way) {
-      this.$refs[`pic-by-${way}`].click()
+      if (!this.custom) {
+        this.$refs[`pic-by-${way}`].click()
+      } else {
+        if (way === this.selectPicWays[0].id) {
+          this.selectPhoto()
+        } else if (way === this.selectPicWays[1].id) {
+          this.selectPic()
+        }
+        this.closePic()
+      }
     },
     getPic (way) {
       this[`clearShow${way}`] = false
@@ -151,7 +171,11 @@ export default {
       }
     },
     cropSure () {
-      this.callBack(this.cropFile)
+      if (!this.custom) {
+        this.callBack(this.cropFile)
+      } else {
+        this.callBack()
+      }
       this.closePic()
     },
     cropTargetTouchStart () {

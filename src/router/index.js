@@ -148,7 +148,34 @@ var router = new Router({
     {
       path: '/app-me',
       name: 'AppMe',
-      component: resolve => require(['@/components/app/Me'], resolve)
+      component: resolve => require(['@/components/app/Me'], resolve),
+      meta: {
+        title: '我的'
+      }
+    },
+    {
+      path: '/app-sale-list',
+      name: 'AppSaleList',
+      component: resolve => require(['@/components/app/SaleList'], resolve),
+      meta: {
+        title: '龙虎榜'
+      }
+    },
+    {
+      path: '/app-user-data/:userid',
+      name: 'AppUserData',
+      component: resolve => require(['@/components/app/UserData'], resolve),
+      meta: {
+        title: '个人信息'
+      }
+    },
+    {
+      path: '/app-home',
+      name: 'AppHome',
+      component: resolve => require(['@/components/app/Home'], resolve),
+      meta: {
+        title: '业绩看板'
+      }
     }
   ]
 })
@@ -159,8 +186,19 @@ router.beforeEach((to, from, next) => {
     document.title = document.querySelector('meta[name="web-describe"]').getAttribute('content')
   }
   if (router.app.$comfun.getRequest('deviceType') === 'android' || router.app.$comfun.getRequest('deviceType') === 'ios') {
+    setTimeout(() => {
+      router.app.$root.eventHub.$on('webActivated', (userData) => {
+        router.app.$moment.userInfo = userData
+        router.app.$moment.userInfo.loginDate = new Date(router.app.$moment.userInfo.loginDate)
+        router.app.$moment.userInfo.basedate = new Date(router.app.$moment.userInfo.basedate)
+        if (!router.app.$moment.userInfo.user.photo) {
+          router.app.$moment.userInfo.user.photo = null
+        }
+        router.app.$root.eventHub.$emit('app-has-save-user-info')
+      })
+    }, 10)
     window['app'] = router.app
-    android.callAndroid('saveUserInfoForAndroid')
+    android.callAndroid('saveUserInfoForAndroid', '')
     next()
   } else {
     router.app.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {

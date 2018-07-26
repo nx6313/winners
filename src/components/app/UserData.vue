@@ -1,7 +1,7 @@
 <template>
-  <div class="page-me">
+  <div class="page-user-data">
     <div class="user-header-wrap">
-      <span class="user-head" @click="selectPic">
+      <span class="user-head">
         <span :class="userInfo.userHead ? 'has-head' : ''">
           <i :style="userInfo.userHead ? { 'background-image': `url(${userInfo.userHead})` } : { 'background-image': `url(${defaultUserHead})` }">
             <span class="user-name-for-head" v-if="!userInfo.userHead && userInfo.userName">{{userInfo.userName.substr(userInfo.userName.trim().length - 2)}}</span>
@@ -27,76 +27,61 @@
 </template>
 
 <script>
-import android from '@/utils/app.js'
-
 export default {
-  name: 'AppMe',
+  name: 'AppUserData',
   data () {
     return {
       starCount: 5,
       defaultUserHead: '',
+      userInfoData: null,
       userInfo: {},
       userLevel: 3,
       userInfos: []
     }
   },
   mounted () {
-    this.$root.eventHub.$on('app-has-save-user-info', () => {
-      this.initUserInfo()
-    })
-    this.$root.eventHub.$on('userHeadUploadSuccess', (headData) => {
-      this.$set(this.userInfo, 'userHead', this.$moment.HttpAddress_1 + `showFile/${headData.fid}`)
-      this.$moment.localforage.getItem('userLoginInfo').then((userInfo) => {
-        userInfo.user.photo = headData.fid
-        this.$moment.localforage.setItem('userLoginInfo', userInfo)
-      })
-    })
     document.querySelector('#app-footer').style.display = 'none'
     this.defaultUserHead = this.$moment.defaultHead
-    this.initUserInfo()
-  },
-  methods: {
-    initUserInfo () {
-      if (this.$moment.userInfo.user.photo) {
-        this.$set(this.userInfo, 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)
-      }
-      this.$set(this.userInfo, 'userName', this.$moment.userInfo.user.name)
-      this.userInfos = [
-        {
-          title: '公司',
-          content: this.$moment.userInfo.user.companyName || '未设置'
-        },
-        {
-          title: '职务',
-          content: this.$moment.userInfo.user.dutyName || '未设置'
-        },
-        {
-          title: '电话',
-          content: this.$moment.userInfo.user.phone || '未设置'
-        }
-      ]
-    },
-    selectPic () {
-      this.$dialog_pic({
-        custom: true,
-        selectPhoto: () => {
-          if (android) {
-            android.callAndroid('selectPhoto', '')
-          }
-        },
-        selectPic: () => {
-          if (android) {
-            android.callAndroid('selectPic', '')
-          }
-        }
-      })
+    var userId = this.$route.params['userid']
+    var userInfoUri = `data/senior/consultant/${userId}`
+    if (this.$moment.userInfo.user.scope !== this.$moment.dutyOpt.sale) {
+      userInfoUri = `after/senior/consultant/${userId}`
     }
+    this.$comfun.http_post(this, userInfoUri).then((response) => {
+      if (response.body.success === '1') {
+        this.userInfoData = {
+          basedate: response.body.user.createDate ? new Date(response.body.user.createDate) : new Date(),
+          user: response.body.user
+        }
+
+        if (this.userInfoData.user.photo !== null) {
+          this.$set(this.userInfo, 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.userInfoData.user.photo}`)
+        }
+
+        this.$set(this.userInfo, 'userName', this.userInfoData.user.name)
+        this.userInfos = [
+          {
+            title: '公司',
+            content: this.$moment.userInfo.user.companyName || '未设置'
+          },
+          {
+            title: '职务',
+            content: this.$moment.userInfo.user.dutyName || '未设置'
+          },
+          {
+            title: '电话',
+            content: this.$moment.userInfo.user.phone || '未设置'
+          }
+        ]
+      }
+    })
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.page-me {
+.page-user-data {
+  position: relative;
   background-color: #f0f0f0;
   height: 100vh;
 }
@@ -168,18 +153,6 @@ export default {
         background-size: 100% auto;
       }
     }
-  }
-  .user-head::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 1.2rem;
-    height: 1.2rem;
-    background-image: url('./../../assets/user-info-write.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 100% auto;
   }
   .user-name {
     position: relative;
