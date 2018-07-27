@@ -49,7 +49,7 @@
             </div>
             </div>
             <div class="page-index">
-            <span v-for="(indicator, indicatorIndex) in 3" :key="indicatorIndex" :class="indicatorIndex === userSaleInfoIndex ? 'cur-page' : ''"></span>
+            <span v-for="(indicator, indicatorIndex) in 4" :key="indicatorIndex" :class="indicatorIndex === userSaleInfoIndex ? 'cur-page' : ''"></span>
             </div>
         </div>
       </div>
@@ -110,7 +110,7 @@ export default {
       userSelfTouchStartX: -1,
       userSelfMoveDistance: 0,
       curTabType: 'newcar',
-      curDateTabType: 'week',
+      curDateTabType: 'day',
       curOrderWay: 8, // 8 集团 、9 公司
       defaultUserHead: '',
       tabShowCount: 6,
@@ -142,6 +142,10 @@ export default {
       ],
       tabs2: [
         {
+          id: 'day',
+          txt: '日排行'
+        },
+        {
           id: 'week',
           txt: '周排行'
         },
@@ -155,6 +159,18 @@ export default {
         }
       ],
       userSaleInfos: [
+        {
+          userHead: '',
+          'company-ranking': 0,
+          'group-ranking': 0,
+          'company-up': 0,
+          'group-up': 0,
+          userName: '~',
+          saleNum: '~',
+          salePre: '~',
+          saleUnit: '~',
+          dateType: '日'
+        },
         {
           userHead: '',
           'company-ranking': 0,
@@ -211,7 +227,9 @@ export default {
         this.$set(this.userSaleInfos[0], 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)
         this.$set(this.userSaleInfos[1], 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)
         this.$set(this.userSaleInfos[2], 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)
+        this.$set(this.userSaleInfos[3], 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)
       }
+      this.getUserSelfOrder('day')
       this.getUserSelfOrder('week')
       this.getUserSelfOrder('month')
       this.getUserSelfOrder('year')
@@ -315,6 +333,7 @@ export default {
       }
       if (type === 'tabType') {
         this.curTabType = val
+        this.getUserSelfOrder('day')
         this.getUserSelfOrder('week')
         this.getUserSelfOrder('month')
         this.getUserSelfOrder('year')
@@ -341,7 +360,7 @@ export default {
         this.userSelfTouchStartX = event.touches[0].pageX
       }
       this.userSelfMoveDistance = event.touches[0].pageX - this.userSelfTouchStartX
-      if (!((this.userSelfMoveDistance > 0 && this.userSelfCurPage === 0) || (this.userSelfMoveDistance < 0 && this.userSelfCurPage === 2) || Math.abs(this.userSelfMoveDistance) > document.body.clientWidth)) {
+      if (!((this.userSelfMoveDistance > 0 && this.userSelfCurPage === 0) || (this.userSelfMoveDistance < 0 && this.userSelfCurPage === 3) || Math.abs(this.userSelfMoveDistance) > document.body.clientWidth)) {
         var transTo = `translateX(calc(${-this.userSelfCurPage} * 100vw + ${this.userSelfMoveDistance}px))`
         this.$refs['user-self-order-wrap'].style.transform = transTo
       }
@@ -356,7 +375,7 @@ export default {
           }
         } else if (this.userSelfMoveDistance < 0) {
           // 上一页
-          if (this.userSelfCurPage < 2) {
+          if (this.userSelfCurPage < 3) {
             this.userSelfCurPage++
           }
         }
@@ -469,9 +488,31 @@ export default {
       var endDate = ''
       var startOldDate = ''
       var endOldDate = ''
-      var datePre = '周'
-      if (dateType === 'week') {
+      var datePre = '日'
+      var preDes = ''
+      var unit = ''
+      if (dateType === 'day') {
+        this.$set(this.userSaleInfos[0], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}` : '')
+        this.$set(this.userSaleInfos[0], 'userName', this.$moment.userInfo.user.name)
+        datePre = '日'
+        preDes = this.getDesAndUnit(datePre).preDes
+        unit = this.getDesAndUnit(datePre).unit
+        this.$set(this.userSaleInfos[0], 'salePre', preDes)
+        this.$set(this.userSaleInfos[0], 'saleUnit', unit)
+        var yesterday = this.$comfun.getTargetDate(-1)
+        var beforeYesterday = this.$comfun.getTargetDate(-2)
+        startDate = this.$comfun.formatDate(yesterday, 'yyyy-MM-dd')
+        endDate = this.$comfun.formatDate(yesterday, 'yyyy-MM-dd')
+        startOldDate = this.$comfun.formatDate(beforeYesterday, 'yyyy-MM-dd')
+        endOldDate = this.$comfun.formatDate(beforeYesterday, 'yyyy-MM-dd')
+      } else if (dateType === 'week') {
+        this.$set(this.userSaleInfos[1], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}` : '')
+        this.$set(this.userSaleInfos[1], 'userName', this.$moment.userInfo.user.name)
         datePre = '周'
+        preDes = this.getDesAndUnit(datePre).preDes
+        unit = this.getDesAndUnit(datePre).unit
+        this.$set(this.userSaleInfos[1], 'salePre', preDes)
+        this.$set(this.userSaleInfos[1], 'saleUnit', unit)
         var curWeek = this.$comfun.getWeekStartEnd()
         var beforeWeek = this.$comfun.getWeekStartEnd(-1)
         startDate = this.$comfun.formatDate(curWeek[0], 'yyyy-MM-dd')
@@ -479,7 +520,13 @@ export default {
         startOldDate = this.$comfun.formatDate(beforeWeek[0], 'yyyy-MM-dd')
         endOldDate = this.$comfun.formatDate(beforeWeek[1], 'yyyy-MM-dd')
       } else if (dateType === 'month') {
+        this.$set(this.userSaleInfos[2], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}` : '')
+        this.$set(this.userSaleInfos[2], 'userName', this.$moment.userInfo.user.name)
         datePre = '月'
+        preDes = this.getDesAndUnit(datePre).preDes
+        unit = this.getDesAndUnit(datePre).unit
+        this.$set(this.userSaleInfos[2], 'salePre', preDes)
+        this.$set(this.userSaleInfos[2], 'saleUnit', unit)
         var curMonth = this.$comfun.getMonthStartEnd()
         var beforeMonth = this.$comfun.getMonthStartEnd(-1)
         startDate = this.$comfun.formatDate(curMonth[0], 'yyyy-MM-dd')
@@ -487,14 +534,18 @@ export default {
         startOldDate = this.$comfun.formatDate(beforeMonth[0], 'yyyy-MM-dd')
         endOldDate = this.$comfun.formatDate(beforeMonth[1], 'yyyy-MM-dd')
       } else if (dateType === 'year') {
+        this.$set(this.userSaleInfos[3], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}` : '')
+        this.$set(this.userSaleInfos[3], 'userName', this.$moment.userInfo.user.name)
         datePre = '年'
+        preDes = this.getDesAndUnit(datePre).preDes
+        unit = this.getDesAndUnit(datePre).unit
+        this.$set(this.userSaleInfos[3], 'salePre', preDes)
+        this.$set(this.userSaleInfos[3], 'saleUnit', unit)
         startDate = new Date().getFullYear() + '-01-01'
         endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
         startOldDate = (new Date().getFullYear() - 1) + '-01-01'
         endOldDate = this.$comfun.formatDate(this.$comfun.getLastDay(new Date().getFullYear() - 1, 12), 'yyyy-MM-dd')
       }
-      var preDes = this.getDesAndUnit(datePre).preDes
-      var unit = this.getDesAndUnit(datePre).unit
       var orderSelfUri = 'data/public/' + this.curTabType + `/order/my/${this.$moment.userInfo.user.id}`
       if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
         orderSelfUri = `after/public/serve/order/${this.curTabType}/my/${this.$moment.userInfo.user.id}`
@@ -509,39 +560,34 @@ export default {
         startOldDate: startOldDate,
         endOldDate: endOldDate
       }).then((response) => {
-        this.$set(this.userSaleInfos[0], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}` : '')
-        this.$set(this.userSaleInfos[0], 'userName', this.$moment.userInfo.user.name)
-        this.$set(this.userSaleInfos[1], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}` : '')
-        this.$set(this.userSaleInfos[1], 'userName', this.$moment.userInfo.user.name)
-        this.$set(this.userSaleInfos[2], 'userHead', this.$moment.userInfo.user.photo ? this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}` : '')
-        this.$set(this.userSaleInfos[2], 'userName', this.$moment.userInfo.user.name)
         if (response.body.success === '1') {
-          if (dateType === 'week') {
+          if (dateType === 'day') {
             this.$set(this.userSaleInfos[0], 'company-ranking', response.body.company.rank)
             this.$set(this.userSaleInfos[0], 'group-ranking', response.body.group.rank)
             this.$set(this.userSaleInfos[0], 'company-up', !response.body.company.oldRank || response.body.company.oldRank === 0 ? 0 : response.body.company.oldRank - response.body.company.rank)
             this.$set(this.userSaleInfos[0], 'group-up', !response.body.group.oldRank || response.body.group.oldRank === 0 ? 0 : response.body.group.oldRank - response.body.group.rank)
             this.$set(this.userSaleInfos[0], 'saleNum', response.body.company.num)
-            this.$set(this.userSaleInfos[0], 'salePre', preDes)
-            this.$set(this.userSaleInfos[0], 'saleUnit', unit)
           }
-          if (dateType === 'month') {
+          if (dateType === 'week') {
             this.$set(this.userSaleInfos[1], 'company-ranking', response.body.company.rank)
             this.$set(this.userSaleInfos[1], 'group-ranking', response.body.group.rank)
             this.$set(this.userSaleInfos[1], 'company-up', !response.body.company.oldRank || response.body.company.oldRank === 0 ? 0 : response.body.company.oldRank - response.body.company.rank)
             this.$set(this.userSaleInfos[1], 'group-up', !response.body.group.oldRank || response.body.group.oldRank === 0 ? 0 : response.body.group.oldRank - response.body.group.rank)
             this.$set(this.userSaleInfos[1], 'saleNum', response.body.company.num)
-            this.$set(this.userSaleInfos[1], 'salePre', preDes)
-            this.$set(this.userSaleInfos[1], 'saleUnit', unit)
           }
-          if (dateType === 'year') {
+          if (dateType === 'month') {
             this.$set(this.userSaleInfos[2], 'company-ranking', response.body.company.rank)
             this.$set(this.userSaleInfos[2], 'group-ranking', response.body.group.rank)
             this.$set(this.userSaleInfos[2], 'company-up', !response.body.company.oldRank || response.body.company.oldRank === 0 ? 0 : response.body.company.oldRank - response.body.company.rank)
             this.$set(this.userSaleInfos[2], 'group-up', !response.body.group.oldRank || response.body.group.oldRank === 0 ? 0 : response.body.group.oldRank - response.body.group.rank)
             this.$set(this.userSaleInfos[2], 'saleNum', response.body.company.num)
-            this.$set(this.userSaleInfos[2], 'salePre', preDes)
-            this.$set(this.userSaleInfos[2], 'saleUnit', unit)
+          }
+          if (dateType === 'year') {
+            this.$set(this.userSaleInfos[3], 'company-ranking', response.body.company.rank)
+            this.$set(this.userSaleInfos[3], 'group-ranking', response.body.group.rank)
+            this.$set(this.userSaleInfos[3], 'company-up', !response.body.company.oldRank || response.body.company.oldRank === 0 ? 0 : response.body.company.oldRank - response.body.company.rank)
+            this.$set(this.userSaleInfos[3], 'group-up', !response.body.group.oldRank || response.body.group.oldRank === 0 ? 0 : response.body.group.oldRank - response.body.group.rank)
+            this.$set(this.userSaleInfos[3], 'saleNum', response.body.company.num)
           }
         }
       })
@@ -551,8 +597,16 @@ export default {
       var endDate = ''
       var startOldDate = ''
       var endOldDate = ''
-      var datePre = '周'
-      if (this.curDateTabType === 'week') {
+      var datePre = '日'
+      if (this.curDateTabType === 'day') {
+        datePre = '日'
+        var yesterday = this.$comfun.getTargetDate(-1)
+        var beforeYesterday = this.$comfun.getTargetDate(-2)
+        startDate = this.$comfun.formatDate(yesterday, 'yyyy-MM-dd')
+        endDate = this.$comfun.formatDate(yesterday, 'yyyy-MM-dd')
+        startOldDate = this.$comfun.formatDate(beforeYesterday, 'yyyy-MM-dd')
+        endOldDate = this.$comfun.formatDate(beforeYesterday, 'yyyy-MM-dd')
+      } else if (this.curDateTabType === 'week') {
         datePre = '周'
         var curWeek = this.$comfun.getWeekStartEnd()
         var beforeWeek = this.$comfun.getWeekStartEnd(-1)
@@ -677,7 +731,7 @@ export default {
   .user-self-order-wrap {
     position: relative;
     white-space: nowrap;
-    width: 300vw;
+    width: 400vw;
     transition: all 0.4s ease 0s;
     transform: translateX(0vw);
     font-size: 0px;
@@ -1193,8 +1247,8 @@ export default {
         content: '';
         position: absolute;
         bottom: 0;
-        left: 2.6rem;
-        right: 2.6rem;
+        left: 2.2rem;
+        right: 2.2rem;
         border-bottom: 4px solid #246dc1;
       }
     }

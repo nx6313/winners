@@ -176,6 +176,22 @@ var router = new Router({
       meta: {
         title: '业绩看板'
       }
+    },
+    {
+      path: '/app-client',
+      name: 'AppClient',
+      component: resolve => require(['@/components/app/Client'], resolve),
+      meta: {
+        title: '客户'
+      }
+    },
+    {
+      path: '/app-client-in',
+      name: 'AppClientIn',
+      component: resolve => require(['@/components/app/ClientIn'], resolve),
+      meta: {
+        title: '潜客录入'
+      }
     }
   ]
 })

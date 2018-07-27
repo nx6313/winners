@@ -1,5 +1,5 @@
 <template>
-  <div id="page-home" class="page-home" @scroll="scrollPage">
+  <div id="page-client" class="page-client" @scroll="scrollPage">
     <div class="page-header-wrap">
       <span :class="['user-head', userHead !== '' ? 'has-head' : '']">
         <i :style="userHead !== '' ? { 'background-image': `url(${userHead})` } : { 'background-image': `url(${defaultUserHead})` }">
@@ -45,8 +45,8 @@
             </div>
             <div class="progress-des-wrap" v-for="(summarizingDes, summarizingDesIndex) in summarizings" :key="'des-' + summarizingDesIndex" :style="{ 'width': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length})`, 'left': `calc((100vw - 1.6rem - ${summarizings.length - 1} * ${progressBallSpace}rem) / ${summarizings.length} * ${summarizingDesIndex} + ${summarizingDesIndex} * ${progressBallSpace}rem)` }">
               <span class="title">{{summarizingDes.title}}</span>
-              <span class="num" :ref="'des-num-' + summarizingDesIndex">{{summarizingDes.num}}</span>
-              <span class="des">{{summarizingDes.des}}</span>
+              <span class="num" :ref="'des-num-' + summarizingDesIndex" v-if="summarizingDes.num !== undefined">{{summarizingDes.num}}</span>
+              <span class="des" v-if="summarizingDes.des !== undefined">{{summarizingDes.des}}</span>
             </div>
           </template>
           <template v-if="summarizings.length > 5">
@@ -91,8 +91,39 @@
       </div>
     </div>
     <div class="header-date-data-des" :style="(headerIsLoading || dateChangeLoading) ? { 'max-height': '0' } : {}">
-      <chart class="mlv-chart" :options="mlvChartOpt" :auto-resize="true" v-if="userScrope === 'A'"></chart>
-      <chart class="gejx-chart" :options="grjxChartOpt" :auto-resize="true"></chart>
+      <div class="all-data-wrap">
+        <div class="main-data-wrap">
+          <div class="cjl">
+            <span>成交量</span>
+            <span><i>{{headerDataDetail.dealNum}}</i> 台</span>
+          </div>
+          <div class="zbl">
+            <span>战败 <i>{{headerDataDetail.defeatNum}}</i> 人</span>
+          </div>
+        </div>
+        <div class="second-data-wrap">
+          <div class="line-one flex-r flex-b">
+            <div class="jdl">
+              <span>接待量（人）</span>
+              <span>{{headerDataDetail.receptionNum}}</span>
+            </div>
+            <div class="ecddl">
+              <span>二次到店量（人）</span>
+              <span>{{headerDataDetail.twiceToNum}}</span>
+            </div>
+          </div>
+          <div class="line-two flex-r flex-b">
+            <div class="ldl">
+              <span>留档量（人）</span>
+              <span>{{headerDataDetail.recordNum}}</span>
+            </div>
+            <div class="sjl">
+              <span>试驾量（人）</span>
+              <span>{{headerDataDetail.testDriveNum}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="sell-chart-wrap">
       <div class="sell-tab-wrap" ref="sell-tab-wrap" :style="isFixed ? { 'position': 'fixed', 'top': '0px', 'left': '0px', 'background': 'rgba(255, 255, 255, 1)' } : {}">
@@ -102,11 +133,11 @@
       </div>
       <div class="sell-tab-wrap-replace" ref="sell-tab-wrap-replace" :style="{ 'height': sellTabWrapHeight }" v-show="isFixed"></div>
       <template v-if="userScrope === 'A'">
-        <chart class="zc-chart" :options="zcChartOpt" :auto-resize="true"></chart>
-        <chart class="qcyp-chart" :options="qcypChartOpt" :auto-resize="true"></chart>
-        <chart class="jr-chart" :options="jrChartOpt" :auto-resize="true"></chart>
-        <chart class="bx-chart" :options="bxChartOpt" :auto-resize="true"></chart>
-        <chart class="esc-chart" :options="escChartOpt" :auto-resize="true"></chart>
+        <chart class="zc-chart" :options="cjlChartOpt" :auto-resize="true"></chart>
+        <chart class="qcyp-chart" :options="jdlChartOpt" :auto-resize="true"></chart>
+        <chart class="jr-chart" :options="ecddChartOpt" :auto-resize="true"></chart>
+        <chart class="bx-chart" :options="ldlChartOpt" :auto-resize="true"></chart>
+        <chart class="esc-chart" :options="sjlChartOpt" :auto-resize="true"></chart>
       </template>
       <template v-if="userScrope !== 'A'">
         <chart class="curve-chart" :options="curveChart" :auto-resize="true" v-for="(curveChart, curveChartIndex) in curveChartOpts" :key="curveChartIndex"></chart>
@@ -119,7 +150,7 @@
 import android from '@/utils/app.js'
 
 export default {
-  name: 'AppHome',
+  name: 'AppClient',
   data () {
     return {
       defaultUserHead: '',
@@ -142,7 +173,7 @@ export default {
       curHeaderSearchDate: null,
       reg: /[-?\d.]+/g,
       isFixed: false,
-      sellTabWrapScrollTop: 52.2 * 16,
+      sellTabWrapScrollTop: 25 * 16,
       sellTabWrapHeight: 3.9 * 16 + 'px',
       userName: '~',
       dateTabs: [
@@ -167,247 +198,34 @@ export default {
       summarizings: [
         {
           progress: 0,
-          title: '整车',
-          num: 0,
-          des: '销售（台）'
+          title: '留档率'
         },
         {
           progress: 0,
-          title: '汽车用品',
-          num: 0,
-          des: '销售额（元）'
+          title: '二次到店率'
         },
         {
           progress: 0,
-          title: '金融',
-          num: 0,
-          des: '信贷量（台）'
+          title: '试驾率'
         },
         {
           progress: 0,
-          title: '保险',
-          num: 0,
-          des: '投保量（单）'
-        },
-        {
-          progress: 0,
-          title: '二手车',
-          num: 0,
-          des: '销售（台）'
+          title: '成交率'
         }
       ],
-      mlvChartOpt: {
-        title: {
-          text: '{money|0}\t\t{unit|元}\n综合毛利',
-          left: 'center',
-          top: '38%',
-          textStyle: {
-            color: '#4D4D4D',
-            fontSize: 13,
-            align: 'center',
-            lineHeight: 20,
-            fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
-            rich: {
-              money: {
-                color: '#ff721f',
-                fontSize: 20,
-                fontWeight: 'bold',
-                verticalAlign: 'bottom',
-                fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
-              },
-              unit: {
-                color: '#ff721f',
-                fontSize: 8,
-                fontWeight: 'bold',
-                verticalAlign: 'bottom',
-                fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
-              }
-            }
-          }
-        },
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} 元 ({d}%)',
-          backgroundColor: 'rgba(80, 30, 30, .8)'
-        },
-        series: [
-          {
-            name: '毛利占比率',
-            type: 'pie',
-            center: ['50%', '46%'],
-            radius: ['44%', '30%'],
-            label: {
-              normal: {
-                show: true,
-                position: 'outside',
-                formatter: [
-                  '{rate|{d}}\t\t{rateTip|%}',
-                  '{c} 元',
-                  '{b}'
-                ].join('\n'),
-                lineHeight: 10,
-                fontSize: 8,
-                color: '#4D4D4D',
-                fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
-                rich: {
-                  rate: {
-                    fontSize: 16,
-                    color: '#003B8D',
-                    fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
-                    verticalAlign: 'bottom',
-                    fontWeight: 'bold'
-                  },
-                  rateTip: {
-                    fontSize: 12,
-                    color: '#003B8D',
-                    fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
-                    verticalAlign: 'bottom'
-                  }
-                }
-              }
-            },
-            labelLine: {
-              normal: {
-                show: true,
-                length: 40,
-                length2: 20,
-                smooth: true
-              }
-            },
-            data: [
-              {
-                value: 0,
-                name: '裸车毛利'
-              },
-              {
-                value: 0,
-                name: '保险'
-              },
-              {
-                value: 0,
-                name: '二手车'
-              },
-              {
-                value: 0,
-                name: '金融'
-              },
-              {
-                value: 0,
-                name: '汽车用品'
-              }
-            ]
-          }
-        ],
-        animationDuration: 2000
-      },
-      grjxChartOpt: {
-        title: {
-          text: '{money|0}\t\t{unit|元}\n个人绩效',
-          left: 'center',
-          top: '48%',
-          textStyle: {
-            color: '#4D4D4D',
-            fontSize: 13,
-            align: 'center',
-            lineHeight: 20,
-            fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
-            rich: {
-              money: {
-                color: '#ff721f',
-                fontSize: 20,
-                fontWeight: 'bold',
-                verticalAlign: 'bottom',
-                fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
-              },
-              unit: {
-                color: '#ff721f',
-                fontSize: 8,
-                fontWeight: 'bold',
-                verticalAlign: 'bottom',
-                fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
-              }
-            }
-          }
-        },
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} 元 ({d}%)',
-          backgroundColor: 'rgba(80, 30, 30, .8)'
-        },
-        series: [
-          {
-            name: '个人绩效',
-            type: 'pie',
-            center: ['50%', '56%'],
-            radius: ['44%', '30%'],
-            label: {
-              normal: {
-                show: true,
-                position: 'outside',
-                formatter: [
-                  '{rate|{d}}\t\t{rateTip|%}',
-                  '{c} 元',
-                  '{b}'
-                ].join('\n'),
-                lineHeight: 10,
-                fontSize: 8,
-                color: '#4D4D4D',
-                fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
-                rich: {
-                  rate: {
-                    fontSize: 16,
-                    color: '#003B8D',
-                    fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
-                    verticalAlign: 'bottom',
-                    fontWeight: 'bold'
-                  },
-                  rateTip: {
-                    fontSize: 12,
-                    color: '#003B8D',
-                    fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif',
-                    verticalAlign: 'bottom'
-                  }
-                }
-              }
-            },
-            labelLine: {
-              normal: {
-                show: true,
-                length: 40,
-                length2: 20,
-                smooth: true
-              }
-            },
-            data: [
-              {
-                value: 0,
-                name: '整车'
-              },
-              {
-                value: 0,
-                name: '保险'
-              },
-              {
-                value: 0,
-                name: '二手车'
-              },
-              {
-                value: 0,
-                name: '金融'
-              },
-              {
-                value: 0,
-                name: '汽车用品'
-              }
-            ]
-          }
-        ],
-        animationDuration: 2000
+      headerDataDetail: {
+        dealNum: 12,
+        unit: '台',
+        receptionNum: 128,
+        twiceToNum: 125,
+        recordNum: 128,
+        testDriveNum: 122,
+        defeatNum: 124
       },
       curveChartOpts: [],
-      zcChartOpt: {
+      cjlChartOpt: {
         title: {
-          text: '整车 / 台',
+          text: '成交量 / 台',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -455,61 +273,9 @@ export default {
         ],
         animationDuration: 2000
       },
-      qcypChartOpt: {
+      jdlChartOpt: {
         title: {
-          text: '汽车用品 / 元',
-          textStyle: {
-            color: '#3A3A3A',
-            fontSize: 14,
-            fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
-          }
-        },
-        dataZoom: [
-          {
-            type: 'inside'
-          }
-        ],
-        xAxis: {
-          type: 'category',
-          data: []
-        },
-        yAxis: {
-          type: 'value'
-        },
-        grid: {
-          left: '60'
-        },
-        series: [
-          {
-            data: [],
-            type: 'line',
-            smooth: true,
-            lineStyle: {
-              color: '#ED8D1B'
-            },
-            areaStyle: {
-              color: {
-                type: 'linear',
-                x: 0,
-                y: 0,
-                x2: 0,
-                y2: 1,
-                colorStops: [{
-                  offset: 0, color: '#E6B940'
-                }, {
-                  offset: 0.5, color: '#408AE6'
-                }, {
-                  offset: 1, color: '#2FE321'
-                }]
-              }
-            }
-          }
-        ],
-        animationDuration: 2000
-      },
-      jrChartOpt: {
-        title: {
-          text: '金融 / 台',
+          text: '接待量 / 人',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -557,9 +323,9 @@ export default {
         ],
         animationDuration: 2000
       },
-      bxChartOpt: {
+      ecddChartOpt: {
         title: {
-          text: '保险 / 单',
+          text: '二次到店 / 人',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -607,9 +373,59 @@ export default {
         ],
         animationDuration: 2000
       },
-      escChartOpt: {
+      ldlChartOpt: {
         title: {
-          text: '二手车 / 台',
+          text: '留档量 / 人',
+          textStyle: {
+            color: '#3A3A3A',
+            fontSize: 14,
+            fontFamily: 'FZLTHJW, "Avenir", Helvetica, Arial, sans-serif'
+          }
+        },
+        dataZoom: [
+          {
+            type: 'inside'
+          }
+        ],
+        xAxis: {
+          type: 'category',
+          data: []
+        },
+        yAxis: {
+          type: 'value',
+          minInterval: 1
+        },
+        series: [
+          {
+            data: [],
+            type: 'line',
+            smooth: true,
+            lineStyle: {
+              color: '#ED8D1B'
+            },
+            areaStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [{
+                  offset: 0, color: '#E6B940'
+                }, {
+                  offset: 0.5, color: '#408AE6'
+                }, {
+                  offset: 1, color: '#2FE321'
+                }]
+              }
+            }
+          }
+        ],
+        animationDuration: 2000
+      },
+      sjlChartOpt: {
+        title: {
+          text: '试驾量 / 人',
           textStyle: {
             color: '#3A3A3A',
             fontSize: 14,
@@ -705,308 +521,8 @@ export default {
     },
     initPageByScope () {
       if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
-        this.summarizings = [
-          {
-            progress: 0,
-            title: '接车台次',
-            num: 0,
-            des: '台次'
-          },
-          {
-            progress: 0,
-            title: '单车产值',
-            num: 0,
-            des: '元'
-          },
-          {
-            progress: 0,
-            title: '总产值',
-            num: 0,
-            des: '元'
-          },
-          {
-            progress: 0,
-            title: '毛利',
-            num: 0,
-            des: '元'
-          },
-          {
-            progress: 0,
-            title: '衍生产值',
-            num: 0,
-            des: '元'
-          },
-          {
-            progress: 0,
-            title: '保养套餐',
-            num: 0,
-            des: '套'
-          },
-          {
-            progress: 0,
-            title: '新入会员',
-            num: 0,
-            des: '个'
-          },
-          {
-            progress: 0,
-            title: '续保',
-            num: 0,
-            des: '元'
-          }
-        ]
-        this.grjxChartOpt.series[0].data = [
-          {
-            value: 0,
-            name: '工龄工资'
-          },
-          {
-            value: 0,
-            name: '岗位津贴'
-          },
-          {
-            value: 0,
-            name: '接车台次'
-          },
-          {
-            value: 0,
-            name: '产值'
-          },
-          {
-            value: 0,
-            name: '衍生产品'
-          },
-          {
-            value: 0,
-            name: '续保'
-          },
-          {
-            value: 0,
-            name: '其他政策提成'
-          }
-        ]
-        this.initCurveChartOpts([
-          {
-            title: '接车台次 / 台',
-            needInteger: true,
-            needRetract: false
-          },
-          {
-            title: '单车产值 / 元',
-            needInteger: false,
-            needRetract: true
-          },
-          {
-            title: '总产值 / 元',
-            needInteger: false,
-            needRetract: true
-          },
-          {
-            title: '毛利 / 元',
-            needInteger: false,
-            needRetract: true
-          },
-          {
-            title: '衍生产值 / 元',
-            needInteger: false,
-            needRetract: true
-          },
-          {
-            title: '保养套餐 / 套',
-            needInteger: true,
-            needRetract: false
-          },
-          {
-            title: '新入会员 / 个',
-            needInteger: true,
-            needRetract: false
-          },
-          {
-            title: '续保 / 元',
-            needInteger: false,
-            needRetract: true
-          }
-        ])
       } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) { // C:机电班组
-        this.summarizings = [
-          {
-            progress: 0,
-            title: '维修台次',
-            num: 0,
-            des: '台次'
-          },
-          {
-            progress: 0,
-            title: '产值',
-            num: 0,
-            des: '元'
-          },
-          {
-            progress: 0,
-            title: '工时费',
-            num: 0,
-            des: '元'
-          },
-          {
-            progress: 0,
-            title: '毛利',
-            num: 0,
-            des: '元'
-          },
-          {
-            progress: 0,
-            title: '毛利率',
-            num: 0,
-            des: '%'
-          },
-          {
-            progress: 0,
-            title: '保养套餐',
-            num: 0,
-            des: '套'
-          }
-        ]
-        this.grjxChartOpt.series[0].data = [
-          {
-            value: 0,
-            name: '维修台次'
-          },
-          {
-            value: 0,
-            name: '产值'
-          },
-          {
-            value: 0,
-            name: '工时'
-          },
-          {
-            value: 0,
-            name: '追加产值'
-          },
-          {
-            value: 0,
-            name: '衍生产品'
-          },
-          {
-            value: 0,
-            name: '续保业务'
-          },
-          {
-            value: 0,
-            name: '其他政策提成'
-          }
-        ]
-        this.initCurveChartOpts([
-          {
-            title: '维修台次 / 台次',
-            needInteger: true,
-            needRetract: false
-          },
-          {
-            title: '产值 / 元',
-            needInteger: false,
-            needRetract: true
-          },
-          {
-            title: '工时费 / 元',
-            needInteger: false,
-            needRetract: true
-          },
-          {
-            title: '毛利 / 元',
-            needInteger: false,
-            needRetract: true
-          },
-          {
-            title: '毛利率 / %',
-            needInteger: false,
-            needRetract: false
-          },
-          {
-            title: '保养套餐 / 套',
-            needInteger: true,
-            needRetract: false
-          }
-        ])
       } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) { // D:事故服务顾问
-        this.summarizings = [
-          {
-            progress: 0,
-            title: '接车台次',
-            num: 0,
-            des: '台次'
-          },
-          {
-            progress: 0,
-            title: '总产值',
-            num: 0,
-            des: '元'
-          },
-          {
-            progress: 0,
-            title: '毛利',
-            num: 0,
-            des: '元'
-          },
-          {
-            progress: 0,
-            title: '续保',
-            num: 0,
-            des: '元'
-          }
-        ]
-        this.grjxChartOpt.series[0].data = [
-          {
-            value: 0,
-            name: '工龄工资'
-          },
-          {
-            value: 0,
-            name: '岗位津贴'
-          },
-          {
-            value: 0,
-            name: '台次'
-          },
-          {
-            value: 0,
-            name: '产值'
-          },
-          {
-            value: 0,
-            name: '衍生产品'
-          },
-          {
-            value: 0,
-            name: '续保'
-          },
-          {
-            value: 0,
-            name: '其他政策提成'
-          }
-        ]
-        this.initCurveChartOpts([
-          {
-            title: '接车台次 / 台次',
-            needInteger: true,
-            needRetract: false
-          },
-          {
-            title: '总产值 / 元',
-            needInteger: false,
-            needRetract: true
-          },
-          {
-            title: '毛利 / 元',
-            needInteger: false,
-            needRetract: true
-          },
-          {
-            title: '续保 / 元',
-            needInteger: false,
-            needRetract: true
-          }
-        ])
       }
       if (this.summarizings.length < 5) {
         this.progressBallSpace = 1.4
@@ -1075,7 +591,7 @@ export default {
       }
     },
     scrollPage () {
-      var pageScrollTop = document.querySelector('#page-home').scrollTop
+      var pageScrollTop = document.querySelector('#page-client').scrollTop
       if (pageScrollTop > this.sellTabWrapScrollTop) {
         this.isFixed = true
       } else {
@@ -1529,84 +1045,15 @@ export default {
         endDate: endDate
       }).then((response) => {
         if (response.body.success === '1') {
-          if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sale) { // A 为售前 B:机电服务顾问 C:机电班组 D:事故服务顾问
+          if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sale) { // A 为售前
             this.summarizings[0].progress = !response.body.contrast.personNewcarNum || !response.body.contrast.maxNewcarNum ? 0 : Math.floor(response.body.contrast.personNewcarNum / response.body.contrast.maxNewcarNum * 100)
-            this.summarizings[0].num = response.body.contrast.personNewcarNum || 0
             this.summarizings[1].progress = !response.body.contrast.personAccessorySum || !response.body.contrast.maxAccessorySum ? 0 : Math.floor(response.body.contrast.personAccessorySum / response.body.contrast.maxAccessorySum * 100)
-            this.summarizings[1].num = (response.body.contrast.personAccessorySum || 0) >= 10000 ? Math.floor((response.body.contrast.personAccessorySum || 0) / 10000) : (response.body.contrast.personAccessorySum || 0)
-            this.summarizings[1].des = (response.body.contrast.personAccessorySum || 0) >= 10000 ? '销售额（万元）' : '销售额（元）'
             this.summarizings[2].progress = !response.body.contrast.personFinanceNum || !response.body.contrast.maxFinanceNum ? 0 : Math.floor(response.body.contrast.personFinanceNum / response.body.contrast.maxFinanceNum * 100)
-            this.summarizings[2].num = response.body.contrast.personFinanceNum || 0
             this.summarizings[3].progress = !response.body.contrast.personInsuranceNum || !response.body.contrast.maxInsuranceNum ? 0 : Math.floor(response.body.contrast.personInsuranceNum / response.body.contrast.maxInsuranceNum * 100)
-            this.summarizings[3].num = response.body.contrast.personInsuranceNum || 0
-            this.summarizings[4].progress = !response.body.contrast.personOldcarNum || !response.body.contrast.maxOldcarNum ? 0 : Math.floor(response.body.contrast.personOldcarNum / response.body.contrast.maxOldcarNum * 100)
-            this.summarizings[4].num = response.body.contrast.personOldcarNum || 0
-          } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) {
-            this.summarizings[0].progress = !response.body.result.personNumNum || !response.body.result.maxNumNum ? 0 : Math.floor(response.body.result.personNumNum / response.body.result.maxNumNum * 100)
-            this.summarizings[0].num = response.body.result.personNumNum || 0
-            this.summarizings[1].progress = !response.body.result.personOneprofitNum || !response.body.result.maxOneprofitNum ? 0 : Math.floor(response.body.result.personOneprofitNum / response.body.result.maxOneprofitNum * 100)
-            this.summarizings[1].num = (response.body.result.personOneprofitNum || 0) >= 10000 ? Math.floor((response.body.result.personOneprofitNum || 0) / 10000) : (response.body.result.personOneprofitNum || 0)
-            this.summarizings[1].des = (response.body.result.personOneprofitNum || 0) >= 10000 ? '万元' : '元'
-            this.summarizings[2].progress = !response.body.result.personSumprofitsNum || !response.body.result.maxSumprofitsNum ? 0 : Math.floor(response.body.result.personSumprofitsNum / response.body.result.maxSumprofitsNum * 100)
-            this.summarizings[2].num = (response.body.result.personSumprofitsNum || 0) >= 10000 ? Math.floor((response.body.result.personSumprofitsNum || 0) / 10000) : (response.body.result.personSumprofitsNum || 0)
-            this.summarizings[2].des = (response.body.result.personSumprofitsNum || 0) >= 10000 ? '万元' : '元'
-            this.summarizings[3].progress = !response.body.result.personProfitNum || !response.body.result.maxProfitNum ? 0 : Math.floor(response.body.result.personProfitNum / response.body.result.maxProfitNum * 100)
-            this.summarizings[3].num = (response.body.result.personProfitNum || 0) >= 10000 ? Math.floor((response.body.result.personProfitNum || 0) / 10000) : (response.body.result.personProfitNum || 0)
-            this.summarizings[3].des = (response.body.result.personProfitNum || 0) >= 10000 ? '万元' : '元'
-            this.summarizings[4].progress = !response.body.result.personDeriveNum || !response.body.result.maxDeriveNum ? 0 : Math.floor(response.body.result.personDeriveNum / response.body.result.maxDeriveNum * 100)
-            this.summarizings[4].num = (response.body.result.personDeriveNum || 0) >= 10000 ? Math.floor((response.body.result.personDeriveNum || 0) / 10000) : (response.body.result.personDeriveNum || 0)
-            this.summarizings[4].des = (response.body.result.personDeriveNum || 0) >= 10000 ? '万元' : '元'
-            this.summarizings[5].progress = !response.body.result.personMaintainNum || !response.body.result.maxMaintainNum ? 0 : Math.floor(response.body.result.personMaintainNum / response.body.result.maxMaintainNum * 100)
-            this.summarizings[5].num = response.body.result.personMaintainNum || 0
-            this.summarizings[6].progress = !response.body.result.personNewmemberNum || !response.body.result.maxNewmemberNum ? 0 : Math.floor(response.body.result.personNewmemberNum / response.body.result.maxNewmemberNum * 100)
-            this.summarizings[6].num = response.body.result.personNewmemberNum || 0
-            this.summarizings[7].progress = !response.body.result.personRenewalNum || !response.body.result.maxRenewalNum ? 0 : Math.floor(response.body.result.personRenewalNum / response.body.result.maxRenewalNum * 100)
-            this.summarizings[7].num = (response.body.result.personRenewalNum || 0) >= 10000 ? Math.floor((response.body.result.personRenewalNum || 0) / 10000) : (response.body.result.personRenewalNum || 0)
-            this.summarizings[7].des = (response.body.result.personRenewalNum || 0) >= 10000 ? '万元' : '元'
-          } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) {
-            this.summarizings[0].progress = !response.body.result.personNumNum || !response.body.result.maxNumNum ? 0 : Math.floor(response.body.result.personNumNum / response.body.result.maxNumNum * 100)
-            this.summarizings[0].num = response.body.result.personNumNum || 0
-            this.summarizings[1].progress = !response.body.result.personSumprofitsNum || !response.body.result.maxSumprofitsNum ? 0 : Math.floor(response.body.result.personSumprofitsNum / response.body.result.maxSumprofitsNum * 100)
-            this.summarizings[1].num = (response.body.result.personSumprofitsNum || 0) >= 10000 ? Math.floor((response.body.result.personSumprofitsNum || 0) / 10000) : (response.body.result.personSumprofitsNum || 0)
-            this.summarizings[1].des = (response.body.result.personSumprofitsNum || 0) >= 10000 ? '万元' : '元'
-            this.summarizings[2].progress = !response.body.result.personCostNum || !response.body.result.maxCostNum ? 0 : Math.floor(response.body.result.personCostNum / response.body.result.maxCostNum * 100)
-            this.summarizings[2].num = (response.body.result.personCostNum || 0) >= 10000 ? Math.floor((response.body.result.personCostNum || 0) / 10000) : (response.body.result.personCostNum || 0)
-            this.summarizings[2].des = (response.body.result.personCostNum || 0) >= 10000 ? '万元' : '元'
-            this.summarizings[3].progress = !response.body.result.personProfitNum || !response.body.result.maxProfitNum ? 0 : Math.floor(response.body.result.personProfitNum / response.body.result.maxProfitNum * 100)
-            this.summarizings[3].num = (response.body.result.personProfitNum || 0) >= 10000 ? Math.floor((response.body.result.personProfitNum || 0) / 10000) : (response.body.result.personProfitNum || 0)
-            this.summarizings[3].des = (response.body.result.personProfitNum || 0) >= 10000 ? '万元' : '元'
-            this.summarizings[4].progress = !response.body.result.personProfitrateNum || !response.body.result.maxDeriveNum ? 0 : Math.floor(response.body.result.personProfitrateNum / response.body.result.maxDeriveNum * 100)
-            this.summarizings[4].num = response.body.result.personProfitrateNum || 0
-            this.summarizings[5].progress = !response.body.result.personMaintainNum || !response.body.result.maxMaintainNum ? 0 : Math.floor(response.body.result.personMaintainNum / response.body.result.maxMaintainNum * 100)
-            this.summarizings[5].num = response.body.result.personMaintainNum || 0
-          } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) {
-            this.summarizings[0].progress = !response.body.result.personNumNum || !response.body.result.maxNumNum ? 0 : Math.floor(response.body.result.personNumNum / response.body.result.maxNumNum * 100)
-            this.summarizings[0].num = response.body.result.personNumNum || 0
-            this.summarizings[1].progress = !response.body.result.personSumprofitsNum || !response.body.result.maxSumprofitsNum ? 0 : Math.floor(response.body.result.personSumprofitsNum / response.body.result.maxSumprofitsNum * 100)
-            this.summarizings[1].num = (response.body.result.personSumprofitsNum || 0) >= 10000 ? Math.floor((response.body.result.personSumprofitsNum || 0) / 10000) : (response.body.result.personSumprofitsNum || 0)
-            this.summarizings[1].des = (response.body.result.personSumprofitsNum || 0) >= 10000 ? '万元' : '元'
-            this.summarizings[2].progress = !response.body.result.personProfitNum || !response.body.result.maxProfitNum ? 0 : Math.floor(response.body.result.personProfitNum / response.body.result.maxProfitNum * 100)
-            this.summarizings[2].num = (response.body.result.personProfitNum || 0) >= 10000 ? Math.floor((response.body.result.personProfitNum || 0) / 10000) : (response.body.result.personProfitNum || 0)
-            this.summarizings[2].des = (response.body.result.personProfitNum || 0) >= 10000 ? '万元' : '元'
-            this.summarizings[3].progress = !response.body.result.personRenewalNum || !response.body.result.maxRenewalNum ? 0 : Math.floor(response.body.result.personRenewalNum / response.body.result.maxRenewalNum * 100)
-            this.summarizings[3].num = (response.body.result.personRenewalNum || 0) >= 10000 ? Math.floor((response.body.result.personRenewalNum || 0) / 10000) : (response.body.result.personRenewalNum || 0)
-            this.summarizings[3].des = (response.body.result.personRenewalNum || 0) >= 10000 ? '万元' : '元'
+          } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
+          } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) { // C:机电班组
+          } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) { // D:事故服务顾问
           }
-        }
-        if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sale) {
-          this.$comfun.http_post(this, `data/public/profit/${this.$moment.userInfo.user.id}`, {
-            startDate: startDate,
-            endDate: endDate
-          }).then((response) => {
-            if (response.body.success === '1') {
-              this.mlvChartOpt.title.text = `{money|${response.body.profit.profitSum || 0}}\t\t{unit|元}\n综合毛利`
-              this.mlvChartOpt.series[0].data[0].value = response.body.profit.newcarProfit || 0
-              this.mlvChartOpt.series[0].data[1].value = response.body.profit.insuranceProfit || 0
-              this.mlvChartOpt.series[0].data[2].value = response.body.profit.oldcarProfit || 0
-              this.mlvChartOpt.series[0].data[3].value = response.body.profit.financeProfit || 0
-              this.mlvChartOpt.series[0].data[4].value = response.body.profit.accessoryProfit || 0
-            }
-          })
         }
         var grjxUri = `data/public/perf/${this.$moment.userInfo.user.id}`
         if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
@@ -1623,39 +1070,9 @@ export default {
           this.dateChangeLoading = false
           if (response.body.success === '1') {
             if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sale) {
-              this.grjxChartOpt.title.text = `{money|${response.body.perf.profitSum || 0}}\t\t{unit|元}\n个人绩效`
-              this.grjxChartOpt.series[0].data[0].value = response.body.perf.newcarPerf || 0
-              this.grjxChartOpt.series[0].data[1].value = response.body.perf.insurancePerf || 0
-              this.grjxChartOpt.series[0].data[2].value = response.body.perf.oldcarPerf || 0
-              this.grjxChartOpt.series[0].data[3].value = response.body.perf.financePerf || 0
-              this.grjxChartOpt.series[0].data[4].value = response.body.perf.accessoryPerf || 0
             } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
-              this.grjxChartOpt.title.text = `{money|${response.body.result.sumAll || 0}}\t\t{unit|元}\n个人绩效`
-              this.grjxChartOpt.series[0].data[0].value = response.body.result.hrSenioritypay || 0
-              this.grjxChartOpt.series[0].data[1].value = response.body.result.hrAllowance || 0
-              this.grjxChartOpt.series[0].data[2].value = response.body.result.hrNum || 0
-              this.grjxChartOpt.series[0].data[3].value = response.body.result.hrProfit || 0
-              this.grjxChartOpt.series[0].data[4].value = response.body.result.hrDerive || 0
-              this.grjxChartOpt.series[0].data[5].value = response.body.result.hrRenewal || 0
-              this.grjxChartOpt.series[0].data[6].value = response.body.result.hrOtherroyalty || 0
             } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) { // C:机电班组
-              this.grjxChartOpt.title.text = `{money|${response.body.result.sumAll || 0}}\t\t{unit|元}\n个人绩效`
-              this.grjxChartOpt.series[0].data[0].value = response.body.result.hrNum || 0
-              this.grjxChartOpt.series[0].data[1].value = response.body.result.hrProfit || 0
-              this.grjxChartOpt.series[0].data[2].value = response.body.result.hrManhour || 0
-              this.grjxChartOpt.series[0].data[3].value = response.body.result.hrAdditional || 0
-              this.grjxChartOpt.series[0].data[4].value = response.body.result.hrDerive || 0
-              this.grjxChartOpt.series[0].data[5].value = response.body.result.hrRenewal || 0
-              this.grjxChartOpt.series[0].data[6].value = response.body.result.hrOtherroyalty || 0
             } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) { // D:事故服务顾问
-              this.grjxChartOpt.title.text = `{money|${response.body.result.sumAll || 0}}\t\t{unit|元}\n个人绩效`
-              this.grjxChartOpt.series[0].data[0].value = response.body.result.hrSenioritypay || 0
-              this.grjxChartOpt.series[0].data[1].value = response.body.result.hrAllowance || 0
-              this.grjxChartOpt.series[0].data[2].value = response.body.result.hrNum || 0
-              this.grjxChartOpt.series[0].data[3].value = response.body.result.hrProfit || 0
-              this.grjxChartOpt.series[0].data[4].value = response.body.result.hrDerive || 0
-              this.grjxChartOpt.series[0].data[5].value = response.body.result.hrRenewal || 0
-              this.grjxChartOpt.series[0].data[6].value = response.body.result.hrOtherroyalty || 0
             }
           }
         })
@@ -1680,7 +1097,7 @@ export default {
     getLineChartData (type, startDate, endDate) {
       var chartLimitDate = ''
       if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sale) {
-        // 整车
+        // 成交量
         this.$comfun.http_post(this, `data/public/newcar/curve/${this.$moment.userInfo.user.id}`, {
           type: type,
           startDate: startDate,
@@ -1715,9 +1132,9 @@ export default {
             } else {
               chartLimitDate = xAxisData[0]
             }
-            this.zcChartOpt.xAxis.data = xAxisData
-            this.zcChartOpt.series[0].data = seriesData
-            this.zcChartOpt.dataZoom = [
+            this.cjlChartOpt.xAxis.data = xAxisData
+            this.cjlChartOpt.series[0].data = seriesData
+            this.cjlChartOpt.dataZoom = [
               {
                 startValue: chartLimitDate
               },
@@ -1727,7 +1144,7 @@ export default {
             ]
           }
         })
-        // 二手车
+        // 接待量
         this.$comfun.http_post(this, `data/public/oldcar/curve/${this.$moment.userInfo.user.id}`, {
           type: type,
           startDate: startDate,
@@ -1762,9 +1179,9 @@ export default {
             } else {
               chartLimitDate = xAxisData[0]
             }
-            this.escChartOpt.xAxis.data = xAxisData
-            this.escChartOpt.series[0].data = seriesData
-            this.escChartOpt.dataZoom = [
+            this.jdlChartOpt.xAxis.data = xAxisData
+            this.jdlChartOpt.series[0].data = seriesData
+            this.jdlChartOpt.dataZoom = [
               {
                 startValue: chartLimitDate
               },
@@ -1774,7 +1191,7 @@ export default {
             ]
           }
         })
-        // 保险
+        // 二次到店
         this.$comfun.http_post(this, `data/public/insurance/curve/${this.$moment.userInfo.user.id}`, {
           type: type,
           startDate: startDate,
@@ -1809,9 +1226,9 @@ export default {
             } else {
               chartLimitDate = xAxisData[0]
             }
-            this.bxChartOpt.xAxis.data = xAxisData
-            this.bxChartOpt.series[0].data = seriesData
-            this.bxChartOpt.dataZoom = [
+            this.ecddChartOpt.xAxis.data = xAxisData
+            this.ecddChartOpt.series[0].data = seriesData
+            this.ecddChartOpt.dataZoom = [
               {
                 startValue: chartLimitDate
               },
@@ -1821,7 +1238,7 @@ export default {
             ]
           }
         })
-        // 汽车用品
+        // 留档量
         this.$comfun.http_post(this, `data/public/accessory/curve/${this.$moment.userInfo.user.id}`, {
           type: type,
           startDate: startDate,
@@ -1856,9 +1273,9 @@ export default {
             } else {
               chartLimitDate = xAxisData[0]
             }
-            this.qcypChartOpt.xAxis.data = xAxisData
-            this.qcypChartOpt.series[0].data = seriesData
-            this.qcypChartOpt.dataZoom = [
+            this.ldlChartOpt.xAxis.data = xAxisData
+            this.ldlChartOpt.series[0].data = seriesData
+            this.ldlChartOpt.dataZoom = [
               {
                 startValue: chartLimitDate
               },
@@ -1868,7 +1285,7 @@ export default {
             ]
           }
         })
-        // 金融
+        // 试驾量
         this.$comfun.http_post(this, `data/public/finance/curve/${this.$moment.userInfo.user.id}`, {
           type: type,
           startDate: startDate,
@@ -1903,9 +1320,9 @@ export default {
             } else {
               chartLimitDate = xAxisData[0]
             }
-            this.jrChartOpt.xAxis.data = xAxisData
-            this.jrChartOpt.series[0].data = seriesData
-            this.jrChartOpt.dataZoom = [
+            this.sjlChartOpt.xAxis.data = xAxisData
+            this.sjlChartOpt.series[0].data = seriesData
+            this.sjlChartOpt.dataZoom = [
               {
                 startValue: chartLimitDate
               },
@@ -1991,13 +1408,13 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.page-home {
-  background: #ffffff;
+.page-client {
+  background: #F5F5F5;
   height: 100vh;
 }
 .page-header-wrap {
   position: relative;
-  background-color: #0F4E97;
+  background-color: #1F6EC8;
   color: #ffffff;
   font-size: 0.8rem;
   padding: 0.6rem 0.8rem;
@@ -2120,7 +1537,7 @@ export default {
         font-size: 0.8rem;
         text-align: center;
         padding: 0.4rem 0;
-        color: rgb(67, 140, 223);
+        color: rgb(110, 168, 235);
         transition: all 0.3s ease 0s;
       }
       span.cur {
@@ -2149,7 +1566,7 @@ export default {
         display: inline-block;
         font-size: 0.7rem;
         text-align: center;
-        color: rgb(67, 140, 223);
+        color: rgb(110, 168, 235);
         transition: all 0.3s ease 0s;
         .display-show {
           position: relative;
@@ -2174,7 +1591,7 @@ export default {
   .summarizing-wrap {
     position: relative;
     padding: 0rem 0 2.4rem;
-    height: 8.4rem;
+    height: 5.2rem;
     font-size: 0;
     pointer-events: none;
     div.progress-wrap {
@@ -2199,13 +1616,13 @@ export default {
           border: 4px solid transparent;
         }
         .rightcircle {
-          border-top: 4px solid #0F4E97;
-          border-right: 4px solid #0F4E97;
+          border-top: 4px solid #1F6EC8;
+          border-right: 4px solid #1F6EC8;
           right: -1px;
         }
         .leftcircle {
-          border-bottom: 4px solid #0F4E97;
-          border-left: 4px solid #0F4E97;
+          border-bottom: 4px solid #1F6EC8;
+          border-left: 4px solid #1F6EC8;
           left: -1px;
         }
       }
@@ -2244,7 +1661,7 @@ export default {
           height: 100%;
           border-radius: 38% 42%;
           z-index: 5;
-          background: rgba(6, 139, 213, 0.781);
+          background: rgba(12, 152, 233, 0.781);
           box-shadow: 0 0 10px rgba(93, 62, 129, 0.4);
           transition: bottom 0.4s ease 0s;
           transform-origin: 50% 50%;
@@ -2259,7 +1676,7 @@ export default {
           height: 100%;
           border-radius: 60% 38%;
           z-index: 5;
-          background: rgba(6, 139, 213, 0.568);
+          background: rgba(12, 152, 233, 0.781);
           box-shadow: 0 0 10px rgba(122, 132, 219, 0.3);
           transform-origin: 49% 51%;
           animation: spin 13s infinite linear;
@@ -2273,7 +1690,7 @@ export default {
           height: 110%;
           border-radius: 40% 49%;
           z-index: 5;
-          background: rgba(6, 139, 213, 0.568);
+          background: rgba(12, 152, 233, 0.781);
           box-shadow: 0 0 10px rgba(55, 111, 231, 0.4);
           transform-origin: 51% 49%;
           animation: spin 10s infinite linear;
@@ -2282,7 +1699,7 @@ export default {
     }
     div.progress-des-wrap {
       position: absolute;
-      top: 5.4rem;
+      top: 5.8rem;
       color: #ffffff;
       font-size: 0.8rem;
       overflow: hidden;
@@ -2390,32 +1807,32 @@ export default {
     width: 2rem;
     height: 2rem;
     transform: rotate(45deg);
-    background-color: #F5F5F5;
+    background-color: #FFFFFF;
   }
   .header-data-is-loading {
-    height: 11.64rem;
+    height: 8.44rem;
     padding: 1rem 0;
     text-align: center;
     .loadster {
-      margin: 4rem;
+      margin: 2.8rem;
     }
     .loadster__body::before {
-      background-color: #0F4E97;
+      background-color: #1F6EC8;
     }
     .loadster__mask {
-      background-color: #0F4E97;
+      background-color: #1F6EC8;
     }
     .loadster__mask::before {
-      background-color: #0F4E97;
+      background-color: #1F6EC8;
     }
     .loadster__mask::after {
-      background-color: #0F4E97;
+      background-color: #1F6EC8;
     }
     .loadster__head {
-      background-color: #0F4E97;
+      background-color: #1F6EC8;
     }
     .loadster__bottom {
-      background-color: #0F4E97;
+      background-color: #1F6EC8;
     }
     span.loading-tip {
       position: absolute;
@@ -2423,24 +1840,106 @@ export default {
       font-size: 0.8rem;
       height: 4rem;
       line-height: 4rem;
-      top: 11rem;
+      top: 9.8rem;
     }
   }
 }
 .header-date-data-des {
   position: relative;
   transition: all 0.6s ease 0s;
-  max-height: 32rem;
+  max-height: 10rem;
   overflow: hidden;
-}
-.mlv-chart {
-  background-color: #F5F5F5;
-  height: 16rem;
-}
-.gejx-chart {
-  background-color: #F5F5F5;
-  height: 16rem;
-  margin-top: -3rem;
+  margin-bottom: 0.6rem;
+  background: #ffffff;
+  font-size: 0;
+  .all-data-wrap {
+    position: relative;
+    padding: 0.8rem 0.6rem;
+  }
+  .main-data-wrap {
+    position: relative;
+    display: inline-block;
+    font-size: 0.6rem;
+    width: 8rem;
+    vertical-align: top;
+    div:nth-of-type(1) {
+      position: relative;
+      display: block;
+      span {
+        display: block;
+        color: #8d8d8d;
+        i {
+          font-style: normal;
+          font-size: 1.2rem;
+          color:rgb(66, 66, 66);
+        }
+      }
+      span:nth-of-type(2) {
+        margin-top: 0.6rem;
+      }
+    }
+    div:nth-of-type(2) {
+      position: relative;
+      display: block;
+      margin-top: 1.6rem;
+      color:rgb(66, 66, 66);
+      span {
+        display: block;
+        i {
+          font-style: normal;
+        }
+      }
+    }
+  }
+  .second-data-wrap {
+    position: relative;
+    display: inline-block;
+    width: calc(100% - 8rem);
+    vertical-align: top;
+    .line-one {
+      position: relative;
+      display: flex;
+      display: -webkit-flex; /* Safari */
+      width: 100%;
+      font-size: 0;
+      div {
+        display: inline-block;
+        width: 50%;
+        font-size: 0.6rem;
+        span {
+          display: block;
+          color: #8d8d8d;
+        }
+        span:nth-of-type(2) {
+          margin-top: 0.6rem;
+          color:rgb(66, 66, 66);
+          font-size: 0.8rem;
+        }
+      }
+    }
+    .line-two {
+      position: relative;
+      display: flex;
+      display: -webkit-flex; /* Safari */
+      margin-top: 1.2rem;
+      width: 100%;
+      font-size: 0;
+      div {
+        display: inline-block;
+        width: 50%;
+        font-size: 0.6rem;
+        span {
+          display: block;
+          color: #8d8d8d;
+        }
+        span:nth-of-type(2) {
+          margin-top: 0.6rem;
+          color:rgb(66, 66, 66);
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
 }
 .sell-chart-wrap {
   background-color: rgb(255, 255, 255);
