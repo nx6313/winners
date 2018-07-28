@@ -214,7 +214,9 @@ router.beforeEach((to, from, next) => {
       })
     }, 10)
     window['app'] = router.app
-    android.callAndroid('saveUserInfoForAndroid', '')
+    if (android) {
+      android.callAndroid('saveUserInfoForAndroid', '')
+    }
     next()
   } else {
     router.app.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {
