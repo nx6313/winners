@@ -192,6 +192,14 @@ var router = new Router({
       meta: {
         title: '潜客录入'
       }
+    },
+    {
+      path: '/app-client-follow',
+      name: 'AppClientFollow',
+      component: resolve => require(['@/components/app/ClientFollow'], resolve),
+      meta: {
+        title: '潜客跟进'
+      }
     }
   ]
 })
