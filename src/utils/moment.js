@@ -2,6 +2,8 @@ var HttpIp = ''
 var HttpPort = ''
 // var HttpAddress = 'http://172.18.168.222:8080/'
 var HttpAddress = 'http://wx.dcsc520.cn/lhp/'
+var AppHttpAddress = 'http://172.18.168.202:8080/'
+// var AppHttpAddress = 'http://wx.dcsc520.cn/lhp/'
 var HttpAddressRoot = 'http://wx.dcsc520.cn/'
 var localforage = require('localforage')
 
@@ -23,6 +25,7 @@ export default {
         }
         return returnServer
       },
+      appServer: AppHttpAddress,
       // 是否开启调试模式
       debug: true,
       HttpAddress_root: HttpAddressRoot,

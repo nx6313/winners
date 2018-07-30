@@ -12,17 +12,19 @@ export default {
               callUrl = url
             }
             context.$http.get(callUrl).then(response => {
-              console.log('接口访问完成：url【' + url + '】', {
+              console.log(JSON.stringify({
+                '请求结果': '接口访问完成：url【' + url + '】',
                 '链接': callUrl,
                 '请求返回': response
-              })
+              }))
               context.$dialog_close_loading()
               resolve(response)
             }, response => {
-              console.log('接口访问出错：url【' + url + '】', {
+              console.log(JSON.stringify({
+                '请求结果': '接口访问出错：url【' + url + '】',
                 '链接': callUrl,
                 '请求返回': response
-              })
+              }))
               context.$dialog_close_loading()
               reject(response)
             })
@@ -44,19 +46,21 @@ export default {
               callUrl = url
             }
             context.$http.post(callUrl, paramsData).then(response => {
-              console.log('接口访问完成：url【' + url + '】', {
+              console.log(JSON.stringify({
+                '请求结果': '接口访问完成：url【' + url + '】',
                 '链接': callUrl,
                 '请求返回': response,
                 '相关参数': paramsData
-              })
+              }))
               context.$dialog_close_loading()
               resolve(response)
             }, response => {
-              console.log('接口访问出错：url【' + url + '】', {
+              console.log(JSON.stringify({
+                '请求结果': '接口访问出错：url【' + url + '】',
                 '链接': callUrl,
                 '请求返回': response,
                 '相关参数': paramsData
-              })
+              }))
               context.$dialog_close_loading()
               reject(response)
             })

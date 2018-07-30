@@ -25,12 +25,25 @@
             <template v-if="doBtn === 'delete'">删除</template>
           </span>
         </div>
-        <div class="data-wrap" @touchstart.prevent="dataItemTouchStart(dataIndex, data.dos.length)" @touchmove.prevent="dataItemTouchMove(dataIndex, data.dos.length)" @touchend.prevent="dataItemTouchEnd(dataIndex, data.dos.length)">
-          <div class="data-head-wrap">
-            <span>{{data.userName}}</span>
-            <span class="btn-follow">立即回访</span>
+        <div class="data-wrap" @touchstart="dataItemTouchStart(dataIndex, data.dos.length)" @touchmove="dataItemTouchMove(dataIndex, data.dos.length)" @touchend="dataItemTouchEnd(dataIndex, data.dos.length)">
+          <div class="data-head-wrap flex-r flex-b">
+            <span class="user-name">{{data.userName}}</span>
+            <span class="btn-follow">立即回访<i class="iconfont icon-right"></i></span>
           </div>
-          <div class="data-content-wrap"></div>
+          <div class="data-content-wrap flex-r flex-b">
+            <div>
+              <span>意向车型</span>
+              <span>{{data.intentionCarModel ? data.intentionCarModel : '未填写'}}</span>
+            </div>
+            <div>
+              <span>来访时间</span>
+              <span>{{data.comeinDate ? data.intentionCarModel : '未填写'}}</span>
+            </div>
+            <div>
+              <span>跟进次数</span>
+              <span>1次</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -38,6 +51,8 @@
 </template>
 
 <script>
+import android from '@/utils/app.js'
+
 export default {
   name: 'AppClientFollow',
   data () {
@@ -104,15 +119,21 @@ export default {
           ]
         }
       ],
-      datas: [
-        {
-          userName: '刘德华',
-          dos: [ 'delete' ]
-        }
-      ],
+      datas: [],
       dataItemMoveStartX: -1,
       dataItemMoveDistance: -1
     }
+  },
+  mounted () {
+    this.$comfun.http_get(this, this.$moment.appServer + '/customerManager/findAll').then((response) => {
+      this.datas = []
+      for (let c = 0; c < response.body.length; c++) {
+        this.datas.push({
+          userName: '刘德华',
+          dos: [ 'delete' ]
+        })
+      }
+    })
   },
   methods: {
     searchClick () {
@@ -191,9 +212,9 @@ export default {
       this.$refs['data-item-wrap-' + dataIndex][0].getElementsByClassName('data-wrap')[0].style['transition-duration'] = '0s'
       this.dataItemMoveStartX = event.touches[0].pageX
       if (event.target.classList.contains('btn-follow')) {
-        this.$dialog_msg({
-          msg: 'Go To 立即回访'
-        })
+        if (android) {
+          android.callAndroid('callPhone', this.datas[dataIndex]['mobile'])
+        }
       }
     },
     dataItemTouchMove (dataIndex, doCount) {
@@ -305,6 +326,7 @@ export default {
       right: 0;
       height: 100vh;
       z-index: 2;
+      background-color: rgba(30, 30, 30, .4);
       display: none;
     }
     .shade-show {
@@ -362,10 +384,10 @@ export default {
       opacity: 1;
     }
     .filter-content-open-0 {
-      transform: translateY(101.4%);
+      transform: translateY(101.2%);
     }
     .filter-content-open-1 {
-      transform: translateY(101.8%);
+      transform: translateY(101.6%);
     }
   }
   .header-wrap::after {
@@ -374,7 +396,7 @@ export default {
     left: 0;
     right: 0;
     bottom: -0.2rem;
-    border-bottom: 1px solid #f7f7f7;
+    border-bottom: 1px solid #ebebeb;
     z-index: 9;
   }
   .filter-select-wrap {
@@ -405,14 +427,14 @@ export default {
   .data-items-wrap {
     position: relative;
     height: calc(100% - 6.2rem);
-    margin-top: 0.2rem;
+    margin-top: 0rem;
     padding: 0.1rem 0;
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     .data-item-wrap {
       position: relative;
-      height: 6rem;
+      height: 9.6rem;
       background-color: #ffffff;
       .do-wrap {
         position: absolute;
@@ -420,7 +442,7 @@ export default {
         top: 0;
         right: 0;
         height: 100%;
-        padding: 0.6rem 0;
+        padding: 0.2rem 0;
         background-color: #fd4646;
         color: #ffffff;
         font-size: 0.8rem;
@@ -428,7 +450,7 @@ export default {
           display: inline-block;
           width: 5rem;
           height: 100%;
-          line-height: 6rem;
+          line-height: 9.6rem;
           text-align: center;
         }
       }
@@ -441,12 +463,75 @@ export default {
         transition: all 0.2s ease 0s;
         .data-head-wrap {
           position: relative;
+          padding: 1rem 0 0.9rem;
+          span.user-name {
+            position: relative;
+            display: inline-block;
+            font-size: 1.1rem;
+            color: #2c2c2c;
+            pointer-events: none;
+          }
+          span.btn-follow {
+            position: relative;
+            display: inline-block;
+            font-size: 0.8rem;
+            color: #0165d8;
+            i {
+              position: relative;
+              display: inline-block;
+              font-size: 0.8rem;
+              margin-left: 0.4rem;
+              color: rgb(168, 168, 168);
+              pointer-events: none;
+            }
+          }
+        }
+        .data-head-wrap::after {
+          content: '';
+          position: absolute;
+          left: 0.2rem;
+          right: 0.2rem;
+          bottom: 0;
+          border-bottom: 1px solid #e9e9e9;
         }
         .data-content-wrap {
           position: relative;
+          padding: 1.2rem 0;
           pointer-events: none;
+          div {
+            position: relative;
+            span {
+              display: block;
+            }
+            span:nth-of-type(1) {
+              font-size: 0.7rem;
+              color: #818181;
+              margin-bottom: 1rem;
+            }
+            span:nth-of-type(2) {
+              font-size: 1rem;
+              color: #303030;
+            }
+          }
+          div:nth-of-type(1) {
+            text-align: left;
+          }
+          div:nth-of-type(2) {
+            text-align: center;
+          }
+          div:nth-of-type(3) {
+            text-align: right;
+          }
         }
       }
+    }
+    .data-item-wrap:nth-of-type(n + 2)::after {
+      content: '';
+      position: absolute;
+      left: 0.1rem;
+      right: 0.1rem;
+      top: 0;
+      border-top: 1px solid #e9e9e9;
     }
   }
   .data-items-wrap-has-filter {

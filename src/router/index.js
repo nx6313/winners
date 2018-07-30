@@ -200,6 +200,14 @@ var router = new Router({
       meta: {
         title: '潜客跟进'
       }
+    },
+    {
+      path: '/app-advance',
+      name: 'AppAdvance',
+      component: resolve => require(['@/components/app/Advance'], resolve),
+      meta: {
+        title: '闯关晋星'
+      }
     }
   ]
 })

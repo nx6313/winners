@@ -8,19 +8,25 @@
         <div v-for="(item, itemIndex) in formBlock.items" :key="itemIndex" class="form-item-wrap">
           <template v-if="item.type === 'input'">
             <div class="form-item-input-wrap">
-              <div :class="['tip', item.require === true ? 'tip-require' : 'tip-no-require']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span></div>
+              <div :class="['tip', item.require === true ? 'tip-require' : 'tip-no-require', item.inputing ? 'tip-inputing' : '']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span></div>
               <input type="text" name="" :placeholder="item.inputing === true ? item.placeholder : ''" v-model="item.model" @click="inputClick($event, item.type, formBlockIndex, itemIndex)" @blur="inputBlur($event, formBlockIndex, itemIndex)">
             </div>
           </template>
           <template v-if="item.type === 'number'">
             <div class="form-item-input-wrap">
-              <div :class="['tip', item.require === true ? 'tip-require' : 'tip-no-require']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span></div>
+              <div :class="['tip', item.require === true ? 'tip-require' : 'tip-no-require', item.inputing ? 'tip-inputing' : '']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span></div>
               <input type="text" name="" :placeholder="item.inputing === true ? item.placeholder : ''" v-model="item.model" @click="inputClick($event, item.type, formBlockIndex, itemIndex)" @blur="inputBlur($event, formBlockIndex, itemIndex)" @input="numberInput($event, item.type, formBlockIndex, itemIndex)" @afterpaste="numberInput($event, item.type, formBlockIndex, itemIndex)">
+            </div>
+          </template>
+          <template v-if="item.type === 'time'">
+            <div class="form-item-input-wrap">
+              <div :class="['tip', 'time-tip', item.require === true ? 'tip-require' : 'tip-no-require', item.inputing ? 'tip-inputing' : '']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span> <i :class="['tip-icon', 'iconfont', item.tipIcon !== undefined ? item.tipIcon : 'icon-time-s']"></i> </div>
+              <input type="text" name="" readonly :placeholder="item.inputing === true ? item.placeholder : ''" v-model="item.model" @click="inputClick($event, item.type, formBlockIndex, itemIndex)" @blur="inputBlur($event, formBlockIndex, itemIndex)">
             </div>
           </template>
           <template v-if="item.type === 'money'">
             <div class="form-item-input-wrap">
-              <div :class="['tip', item.require === true ? 'tip-require' : 'tip-no-require']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span></div>
+              <div :class="['tip', item.require === true ? 'tip-require' : 'tip-no-require', item.inputing ? 'tip-inputing' : '']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span></div>
               <input type="text" name="" :placeholder="item.inputing === true ? item.placeholder : ''" v-model="item.model" @click="inputClick($event, item.type, formBlockIndex, itemIndex)" @blur="inputBlur($event, formBlockIndex, itemIndex)" @input="moneyInput($event, item.type, formBlockIndex, itemIndex)" @afterpaste="moneyInput($event, item.type, formBlockIndex, itemIndex)">
             </div>
           </template>
@@ -40,13 +46,13 @@
             <div :class="['line-form-wrap', 'line-form-item-' + lineItemIndex]" :style="{ 'width': `calc(100% / ${item.length})` }" v-for="(lineItem, lineItemIndex) in item" :key="lineItemIndex">
               <template v-if="lineItem.type === 'input'">
                 <div class="form-item-input-wrap">
-                  <div :class="['tip', lineItem.require === true ? 'tip-require' : 'tip-no-require']"><i v-if="lineItem.require === true" class="form-item-require">*</i>{{lineItem.tip}}<span class="min-tip" v-if="lineItem.minTip">{{lineItem.minTip}}</span></div>
+                  <div :class="['tip', lineItem.require === true ? 'tip-require' : 'tip-no-require', lineItem.inputing ? 'tip-inputing' : '']"><i v-if="lineItem.require === true" class="form-item-require">*</i>{{lineItem.tip}}<span class="min-tip" v-if="lineItem.minTip">{{lineItem.minTip}}</span></div>
                   <input type="text" name="" :placeholder="lineItem.inputing === true ? lineItem.placeholder : ''" v-model="lineItem.model" @click="inputClick($event, lineItem.type, formBlockIndex, itemIndex, lineItemIndex)" @blur="inputBlur($event, formBlockIndex, itemIndex, lineItemIndex)">
                 </div>
               </template>
               <template v-if="lineItem.type === 'time'">
                 <div class="form-item-input-wrap">
-                  <div :class="['tip', 'time-tip', lineItem.require === true ? 'tip-require' : 'tip-no-require']"><i v-if="lineItem.require === true" class="form-item-require">*</i>{{lineItem.tip}}<span class="min-tip" v-if="lineItem.minTip">{{lineItem.minTip}}</span> <i :class="['tip-icon', 'iconfont', lineItem.tipIcon !== undefined ? lineItem.tipIcon : 'icon-time-s']"></i> </div>
+                  <div :class="['tip', 'time-tip', lineItem.require === true ? 'tip-require' : 'tip-no-require', lineItem.inputing ? 'tip-inputing' : '']"><i v-if="lineItem.require === true" class="form-item-require">*</i>{{lineItem.tip}}<span class="min-tip" v-if="lineItem.minTip">{{lineItem.minTip}}</span> <i :class="['tip-icon', 'iconfont', lineItem.tipIcon !== undefined ? lineItem.tipIcon : 'icon-time-s']"></i> </div>
                   <input type="text" name="" readonly :placeholder="lineItem.inputing === true ? lineItem.placeholder : ''" v-model="lineItem.model" @click="inputClick($event, lineItem.type, formBlockIndex, itemIndex, lineItemIndex)" @blur="inputBlur($event, formBlockIndex, itemIndex, lineItemIndex)">
                 </div>
               </template>
@@ -66,13 +72,13 @@
               <div :class="['tip', item.require === true ? 'tip-require' : 'tip-no-require']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span></div>
               <div class="radio-wrap">
                 <input type="hidden" v-model="item.model">
-                <span :class="['checkbox-ceil-wrap', item.model ? 'is-checked' : '']" @click="selectCheck($event, formBlockIndex, itemIndex)"><i class="checkbox-point"></i></span>
+                <span :class="['checkbox-ceil-wrap', item.model === 1 ? 'is-checked' : '']" @click="selectCheck($event, formBlockIndex, itemIndex)"><i class="checkbox-point"></i></span>
               </div>
             </div>
           </template>
           <template v-if="item.type === 'picker'">
             <div class="form-item-input-wrap">
-              <div :class="['tip', item.require === true ? 'tip-require' : 'tip-no-require']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span></div>
+              <div :class="['tip', item.require === true ? 'tip-require' : 'tip-no-require', item.inputing ? 'tip-inputing' : '']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span></div>
               <input type="text" name="" readonly :placeholder="item.inputing === true ? item.placeholder : ''" v-model="item.model" @click="inputClick($event, item.type, formBlockIndex, itemIndex)" @blur="inputBlur($event, formBlockIndex, itemIndex)">
               <i class="picker-to iconfont icon-right"></i>
             </div>
@@ -88,18 +94,20 @@
           </template>
           <template v-if="item.type === 'textarea'">
             <div class="form-item-input-wrap">
-              <div :class="['tip', item.require === true ? 'tip-require' : 'tip-no-require']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span></div>
+              <div :class="['tip', item.require === true ? 'tip-require' : 'tip-no-require', item.inputing ? 'tip-inputing' : '']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span></div>
               <textarea name="" :placeholder="item.inputing === true ? item.placeholder : ''" v-model="item.model" @click="inputClick($event, item.type, formBlockIndex, itemIndex)" @blur="inputBlur($event, formBlockIndex, itemIndex)"></textarea>
             </div>
           </template>
         </div>
       </div>
     </div>
-    <div class="submit-btn">提交</div>
+    <div class="submit-btn" @click="formSubmit">提交</div>
   </div>
 </template>
 
 <script>
+import android from '@/utils/app.js'
+
 export default {
   name: 'AppClientIn',
   data () {
@@ -112,6 +120,7 @@ export default {
               type: 'input',
               tip: '客户姓名',
               placeholder: '请输入',
+              name: 'custoName',
               model: '',
               inputing: false,
               require: true
@@ -119,6 +128,7 @@ export default {
             {
               type: 'radio',
               tip: '客户性别',
+              name: 'custoSex',
               model: '',
               require: true,
               radios: [
@@ -136,6 +146,7 @@ export default {
               type: 'number',
               tip: '手机号码',
               placeholder: '请输入',
+              name: 'mobile',
               model: '',
               inputing: false,
               require: true
@@ -144,7 +155,40 @@ export default {
               type: 'picker',
               tip: '客户级别',
               placeholder: '请选择客户级别',
+              name: 'custoLevel',
+              modelKey: '',
               model: '',
+              event: 'clientType',
+              items: [
+                {
+                  key: 1,
+                  val: 'H 级（三天内成交）'
+                },
+                {
+                  key: 2,
+                  val: 'A 级（7 天内成交）'
+                },
+                {
+                  key: 3,
+                  val: 'B 级（30 天内成交）'
+                },
+                {
+                  key: 4,
+                  val: 'C 级（30 天以上成交）'
+                },
+                {
+                  key: 5,
+                  val: 'O 级（订车客户）'
+                },
+                {
+                  key: 6,
+                  val: 'D 级（成交客户）'
+                },
+                {
+                  key: 7,
+                  val: 'F 级（战败）'
+                }
+              ],
               inputing: false,
               require: true
             },
@@ -152,6 +196,7 @@ export default {
               type: 'number',
               tip: '来访人数',
               placeholder: '请输入',
+              name: 'visitorNumber',
               model: '',
               inputing: false
             },
@@ -160,6 +205,8 @@ export default {
                 type: 'time',
                 tip: '来访时间',
                 placeholder: '请选择来访时间',
+                name: 'comeinDate',
+                event: 'inTime',
                 model: '',
                 inputing: false
               },
@@ -168,6 +215,8 @@ export default {
                 tip: '离店时间',
                 tipIcon: 'icon-time-e',
                 placeholder: '请选择离店时间',
+                name: 'leaveDate',
+                event: 'outTime',
                 model: '',
                 inputing: false
               }
@@ -176,6 +225,8 @@ export default {
               type: 'picture',
               tip: '上传客户照片',
               placeholder: '最多上传三张图',
+              name: 'imgurl',
+              event: 'clientPicture',
               max: 3,
               model: []
             }
@@ -185,29 +236,33 @@ export default {
           title: '购车信息',
           items: [
             {
-              type: 'picker',
+              type: 'input',
               tip: '意向车型',
-              placeholder: '请选择意向车型',
+              placeholder: '请输入意向车型',
+              name: 'likeCarType',
               model: '',
               inputing: false
             },
             {
               type: 'input',
               tip: '竞品车型',
-              placeholder: '请输入',
+              placeholder: '请输入竞品车型',
+              name: 'compeCarModel',
               model: '',
               inputing: false
             },
             {
               type: 'checkbox',
               tip: '是否试驾',
-              model: false
+              name: 'driveFlag',
+              model: 1
             },
             {
               type: 'money',
               tip: '购车预算',
               minTip: '（元）',
               placeholder: '请输入购车预算金额',
+              name: 'budget',
               model: '',
               inputing: false
             },
@@ -215,6 +270,7 @@ export default {
               type: 'input',
               tip: '要求颜色',
               placeholder: '请输入要求颜色',
+              name: 'colour',
               model: '',
               inputing: false
             },
@@ -222,6 +278,7 @@ export default {
               type: 'input',
               tip: '购车用途',
               placeholder: '请输入购车用途',
+              name: 'use',
               model: '',
               inputing: false
             },
@@ -229,6 +286,7 @@ export default {
               type: 'input',
               tip: '用车经历',
               placeholder: '请输入用车经历',
+              name: 'jingli',
               model: '',
               inputing: false
             },
@@ -236,12 +294,14 @@ export default {
               type: 'input',
               tip: '购车动机',
               placeholder: '请输入购车动机',
+              name: 'dongji',
               model: '',
               inputing: false
             },
             {
               type: 'radio',
               tip: '二手车置换',
+              name: 'ershou',
               model: '',
               radios: [
                 {
@@ -257,6 +317,7 @@ export default {
             {
               type: 'select',
               tip: '关注点',
+              name: 'guanzhud',
               model: [],
               selects: [
                 {
@@ -289,6 +350,7 @@ export default {
               type: 'textarea',
               tip: '客户描述',
               placeholder: '请输入客户描述信息',
+              name: 'custoDescribe',
               model: '',
               inputing: false
             }
@@ -298,9 +360,11 @@ export default {
           title: '再次回访信息',
           items: [
             {
-              type: 'picker',
+              type: 'time',
               tip: '预计回访时间',
               placeholder: '请选择回访时间',
+              name: 'nextvisitDate',
+              event: 'orderBackTime',
               model: '',
               inputing: false
             },
@@ -308,13 +372,67 @@ export default {
               type: 'picker',
               tip: '回访方式',
               placeholder: '请选择回访方式',
+              name: 'nextvisitType',
+              modelKey: '',
               model: '',
+              event: 'payType',
+              items: [
+                {
+                  key: 1,
+                  val: '电话'
+                },
+                {
+                  key: 2,
+                  val: '短信'
+                },
+                {
+                  key: 3,
+                  val: '微信'
+                }
+              ],
               inputing: false
             }
           ]
         }
       ]
     }
+  },
+  mounted () {
+    this.$root.eventHub.$on('clientType', (data) => {
+      this.formItems[0].items[3].modelKey = this.formItems[0].items[3].items[data['index1']].key
+      this.formItems[0].items[3].model = this.formItems[0].items[3].items[data['index1']].val
+      this.formItems[0].items[3].inputing = true
+    })
+    this.$root.eventHub.$on('inTime', (data) => {
+      this.formItems[0].items[5][0].model = this.$comfun.formatDate(new Date(Number(data)), 'yyyy-MM-dd hh:mm:ss')
+      this.formItems[0].items[5][0].inputing = true
+    })
+    this.$root.eventHub.$on('outTime', (data) => {
+      this.formItems[0].items[5][1].model = this.$comfun.formatDate(new Date(Number(data)), 'yyyy-MM-dd hh:mm:ss')
+      this.formItems[0].items[5][1].inputing = true
+    })
+    this.$root.eventHub.$on('clientPicture', (data) => {
+      alert(data)
+      // this.formItems[0]
+    })
+    this.$root.eventHub.$on('orderBackTime', (data) => {
+      this.formItems[2].items[0].model = this.$comfun.formatDate(new Date(Number(data)), 'yyyy-MM-dd hh:mm:ss')
+      this.formItems[2].items[0].inputing = true
+    })
+    this.$root.eventHub.$on('payType', (data) => {
+      this.formItems[2].items[1].modelKey = this.formItems[2].items[1].items[data['index1']].key
+      this.formItems[2].items[1].model = this.formItems[2].items[1].items[data['index1']].val
+      this.formItems[2].items[1].inputing = true
+    })
+    this.$comfun.http_get(this, this.$moment.appServer + '/bsCustoLevelManager/getAllCustomerLevel').then((response) => {
+      this.formItems[0].items[3].items = []
+      for (let l = 0; l < response.body.length; l++) {
+        this.formItems[0].items[3].items.push({
+          key: response.body[l].customerLevelId,
+          val: response.body[l].customerLevelValue
+        })
+      }
+    })
   },
   methods: {
     inputClick (event, type, formBlockIndex, formItemIndex, lineItemIndex) {
@@ -324,37 +442,46 @@ export default {
       }
       if (type === 'input') {
         if (clickItemData.inputing === false) {
-          event.target.parentNode.getElementsByClassName('tip')[0].classList.add('tip-inputing')
           clickItemData.inputing = true
         }
       }
       if (type === 'number') {
         if (clickItemData.inputing === false) {
-          event.target.parentNode.getElementsByClassName('tip')[0].classList.add('tip-inputing')
           clickItemData.inputing = true
         }
       }
       if (type === 'money') {
         if (clickItemData.inputing === false) {
-          event.target.parentNode.getElementsByClassName('tip')[0].classList.add('tip-inputing')
           clickItemData.inputing = true
         }
       }
       if (type === 'time') {
         if (clickItemData.inputing === false) {
-          event.target.parentNode.getElementsByClassName('tip')[0].classList.add('tip-inputing')
           clickItemData.inputing = true
+        }
+        if (android) {
+          android.callAndroid('pickerView', JSON.stringify({
+            event: clickItemData.event,
+            type: 'time',
+            title: clickItemData.tip
+          }))
         }
       }
       if (type === 'picker') {
         if (clickItemData.inputing === false) {
-          event.target.parentNode.getElementsByClassName('tip')[0].classList.add('tip-inputing')
           clickItemData.inputing = true
+        }
+        if (android) {
+          android.callAndroid('pickerView', JSON.stringify({
+            event: clickItemData.event,
+            type: 'option',
+            title: clickItemData.tip,
+            items: clickItemData.items
+          }))
         }
       }
       if (type === 'textarea') {
         if (clickItemData.inputing === false) {
-          event.target.parentNode.getElementsByClassName('tip')[0].classList.add('tip-inputing')
           clickItemData.inputing = true
         }
       }
@@ -367,7 +494,6 @@ export default {
         }
         clickItemData.inputing = false
         event.target.value = ''
-        event.target.parentNode.getElementsByClassName('tip')[0].classList.remove('tip-inputing')
       }
     },
     selectRadio (event, formBlockIndex, formItemIndex, radioIndex, lineItemIndex) {
@@ -387,7 +513,7 @@ export default {
       if (lineItemIndex !== undefined) {
         clickItemData = this.formItems[formBlockIndex].items[formItemIndex][lineItemIndex]
       }
-      clickItemData.model = !clickItemData.model
+      clickItemData.model = clickItemData.model === 1 ? 0 : 1
     },
     numberInput (event, type, formBlockIndex, formItemIndex, lineItemIndex) {
       this.inputClick(event, type, formBlockIndex, formItemIndex, lineItemIndex)
@@ -433,7 +559,76 @@ export default {
       if (lineItemIndex !== undefined) {
         clickItemData = this.formItems[formBlockIndex].items[formItemIndex][lineItemIndex]
       }
-      clickItemData.model.push('http://www.wallcoo.com/flower/Amazing_Color_Flowers_2560x1600_III/wallpapers/2560x1600/Flowers_Wallpapers_91.jpg')
+      if (android) {
+        android.callAndroid('pickerView', JSON.stringify({
+          event: clickItemData.event,
+          type: 'picture',
+          title: clickItemData.tip
+        }))
+      }
+      // clickItemData.model.push('http://www.wallcoo.com/flower/Amazing_Color_Flowers_2560x1600_III/wallpapers/2560x1600/Flowers_Wallpapers_91.jpg')
+    },
+    formSubmit () {
+      var formData = {}
+      for (let f = 0; f < this.formItems.length; f++) {
+        for (let i = 0; i < this.formItems[f].items.length; i++) {
+          if (this.formItems[f].items[i].length > 1) {
+            for (let c = 0; c < this.formItems[f].items[i].length; c++) {
+              if ((this.formItems[f].items[i][c].require === true && this.formItems[f].items[i][c].model !== '') || this.formItems[f].items[i][c].require !== true) {
+                let itemKey = this.formItems[f].items[i][c].modelKey
+                let itemVal = this.formItems[f].items[i][c].model
+                if ((!this.$comfun.isJsonOrArr(itemVal) && itemVal !== '') || (this.$comfun.isJsonOrArr(itemVal) && itemVal.length > 0)) {
+                  if ((itemKey !== undefined && !this.$comfun.isJsonOrArr(itemKey)) || (itemKey !== undefined && this.$comfun.isJsonOrArr(itemKey) && itemKey.length > 0)) {
+                    formData[this.formItems[f].items[i][c].name] = itemKey
+                  } else {
+                    formData[this.formItems[f].items[i][c].name] = itemVal
+                  }
+                }
+              } else {
+                this.$dialog_msg({
+                  msg: this.formItems[f].items[i][c].tip + '不能为空'
+                })
+                return false
+              }
+            }
+          } else {
+            if ((this.formItems[f].items[i].require === true && this.formItems[f].items[i].model !== '') || this.formItems[f].items[i].require !== true) {
+              let itemKey = this.formItems[f].items[i].modelKey
+              let itemVal = this.formItems[f].items[i].model
+              if ((!this.$comfun.isJsonOrArr(itemVal) && itemVal !== '') || (this.$comfun.isJsonOrArr(itemVal) && itemVal.length > 0)) {
+                if ((itemKey !== undefined && !this.$comfun.isJsonOrArr(itemKey)) || (itemKey !== undefined && this.$comfun.isJsonOrArr(itemKey) && itemKey.length > 0)) {
+                  formData[this.formItems[f].items[i].name] = itemKey
+                } else {
+                  formData[this.formItems[f].items[i].name] = itemVal
+                }
+              }
+            } else {
+              this.$dialog_msg({
+                msg: this.formItems[f].items[i].tip + '不能为空'
+              })
+              return false
+            }
+          }
+        }
+      }
+      this.$dialog_loading({
+        tip: '数据提交中，请稍后'
+      })
+      this.$comfun.http_post(this, this.$moment.appServer + '/customerManager/add', formData).then((response) => {
+        this.$dialog_close_loading()
+        if (response.body.code === '1') {
+          this.$dialog_msg({
+            msg: '提交成功'
+          })
+          if (android) {
+            android.callAndroid('back', '')
+          }
+        } else {
+          this.$dialog_msg({
+            msg: '提交失败，' + response.body.message
+          })
+        }
+      })
     }
   }
 }

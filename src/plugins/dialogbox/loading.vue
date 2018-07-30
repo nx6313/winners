@@ -22,7 +22,7 @@
         </div>
       </div>
       <span :class="['loading-tip', progress ? 'isProgress' : '']">{{tip}}</span>
-      <div id="loading-progress-wrap" class="loading-progress-wrap" ref="loading-progress-wrap">
+      <div id="loading-progress-wrap" class="loading-progress-wrap" ref="loading-progress-wrap" v-if="progress">
         <div id="loading-progress-current" class="loading-progress-current" ref="loading-progress-current"></div>
         <div class="loading-progress-animate"></div>
       </div>
