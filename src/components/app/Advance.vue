@@ -3,7 +3,7 @@
     <div class="star-wrap">
       <div class="star-light-bg"></div>
       <div class="star-light"></div>
-      <div class="star-show" :style="userLevel ? { 'background-image': `url(${userLevel.icon})` } : {}"></div>
+      <div class="star-show" :style="userLevel ? (userLevel.level <= curMoveToLevelIndex ? { 'background-image': `url(${userLevel.iconNo})` } : { 'background-image': `url(${userLevel.icon})` }) : {}"></div>
       <div class="user-empirical"><span>{{userEmpiricalVal}}</span>经验值</div>
     </div>
     <div class="empirical-wrap" ref="empirical-wrap" :style="{ 'width': `${getEmpiricalWrapWidth()}px` }">
@@ -44,43 +44,50 @@ export default {
           level: 1,
           txt: 'LV.1',
           getEmpiricalVal: 100,
-          icon: require('@/assets/xj.png')
+          icon: require('@/assets/xj.png'),
+          iconNo: require('@/assets/dc-logo.png')
         },
         {
           level: 2,
           txt: 'LV.2',
           getEmpiricalVal: 300,
-          icon: require('@/assets/xj.png')
+          icon: require('@/assets/xj.png'),
+          iconNo: require('@/assets/dc-logo.png')
         },
         {
           level: 3,
           txt: 'LV.3',
           getEmpiricalVal: 600,
-          icon: require('@/assets/xj.png')
+          icon: require('@/assets/xj.png'),
+          iconNo: require('@/assets/dc-logo.png')
         },
         {
           level: 4,
           txt: 'LV.4',
           getEmpiricalVal: 1000,
-          icon: require('@/assets/xj.png')
+          icon: require('@/assets/xj.png'),
+          iconNo: require('@/assets/dc-logo.png')
         },
         {
           level: 5,
           txt: 'LV.5',
           getEmpiricalVal: 1500,
-          icon: require('@/assets/xj.png')
+          icon: require('@/assets/xj.png'),
+          iconNo: require('@/assets/dc-logo.png')
         },
         {
           level: 6,
           txt: 'LV.6',
           getEmpiricalVal: 2100,
-          icon: require('@/assets/xj.png')
+          icon: require('@/assets/xj.png'),
+          iconNo: require('@/assets/dc-logo.png')
         },
         {
           level: 7,
           txt: 'LV.7',
           getEmpiricalVal: 2800,
-          icon: require('@/assets/xj.png')
+          icon: require('@/assets/xj.png'),
+          iconNo: require('@/assets/dc-logo.png')
         }
       ],
       maxEmpiricalVal: 4000,
@@ -109,7 +116,9 @@ export default {
       return totalWidth
     },
     getUserCurEmpiricalWidth () {
-      this.getUserLevel()
+      if (this.userLevel === null) {
+        this.getUserLevel()
+      }
       return this.scal * this.userEmpiricalVal + this.userLevel.level * this.levelIconWidth * 16
     },
     getLevelPointLeft (targetEmpirical, levelIndex) {
