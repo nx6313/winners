@@ -239,7 +239,7 @@ export default {
               type: 'input',
               tip: '意向车型',
               placeholder: '请输入意向车型',
-              name: 'likeCarType',
+              name: 'intentionCarModel',
               model: '',
               inputing: false
             },
@@ -278,7 +278,7 @@ export default {
               type: 'input',
               tip: '购车用途',
               placeholder: '请输入购车用途',
-              name: 'use',
+              name: 'purpose',
               model: '',
               inputing: false
             },
@@ -286,7 +286,7 @@ export default {
               type: 'input',
               tip: '用车经历',
               placeholder: '请输入用车经历',
-              name: 'jingli',
+              name: 'experience',
               model: '',
               inputing: false
             },
@@ -294,14 +294,14 @@ export default {
               type: 'input',
               tip: '购车动机',
               placeholder: '请输入购车动机',
-              name: 'dongji',
+              name: 'motive',
               model: '',
               inputing: false
             },
             {
               type: 'radio',
               tip: '二手车置换',
-              name: 'ershou',
+              name: 'secondChange',
               model: '',
               radios: [
                 {
@@ -317,7 +317,7 @@ export default {
             {
               type: 'select',
               tip: '关注点',
-              name: 'guanzhud',
+              name: 'focus',
               model: [],
               selects: [
                 {
@@ -412,8 +412,9 @@ export default {
       this.formItems[0].items[5][1].inputing = true
     })
     this.$root.eventHub.$on('clientPicture', (data) => {
-      alert(data)
-      // this.formItems[0]
+      for (let url in data) {
+        this.formItems[0].items[6].model.push(url)
+      }
     })
     this.$root.eventHub.$on('orderBackTime', (data) => {
       this.formItems[2].items[0].model = this.$comfun.formatDate(new Date(Number(data)), 'yyyy-MM-dd hh:mm:ss')
@@ -563,7 +564,9 @@ export default {
         android.callAndroid('pickerView', JSON.stringify({
           event: clickItemData.event,
           type: 'picture',
-          title: clickItemData.tip
+          title: clickItemData.tip,
+          has: clickItemData.model.length,
+          max: clickItemData.max
         }))
       }
       // clickItemData.model.push('http://www.wallcoo.com/flower/Amazing_Color_Flowers_2560x1600_III/wallpapers/2560x1600/Flowers_Wallpapers_91.jpg')

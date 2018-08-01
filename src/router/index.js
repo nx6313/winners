@@ -4,10 +4,12 @@ import VueResource from 'vue-resource'
 import ECharts from 'vue-echarts/components/ECharts'
 import 'echarts/lib/chart/pie'
 import 'echarts/lib/chart/line'
+import 'echarts/lib/chart/radar'
 import 'echarts/lib/component/title'
 import 'echarts/lib/component/tooltip'
 import 'echarts/lib/component/dataZoom'
 import 'echarts/lib/component/dataZoomInside'
+import 'echarts/lib/component/radar'
 import Moment from '@/utils/moment.js'
 import ComFun from '@/utils/comfun.js'
 import Directives from '@/plugins/directives.js'
@@ -207,6 +209,30 @@ var router = new Router({
       component: resolve => require(['@/components/app/Advance'], resolve),
       meta: {
         title: '闯关晋星'
+      }
+    },
+    {
+      path: '/app-badge',
+      name: 'AppBadge',
+      component: resolve => require(['@/components/app/Badge'], resolve),
+      meta: {
+        title: '评优选拔'
+      }
+    },
+    {
+      path: '/app-just-now-performance',
+      name: 'AppJustNowPerformance',
+      component: resolve => require(['@/components/app/JustNowPerformance'], resolve),
+      meta: {
+        title: '即时绩效'
+      }
+    },
+    {
+      path: '/app-goal-get',
+      name: 'AppGoalGet',
+      component: resolve => require(['@/components/app/GoalGet'], resolve),
+      meta: {
+        title: '目标达成'
       }
     }
   ]

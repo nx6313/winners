@@ -223,7 +223,7 @@ export default {
     initPageData () {
       this.initPageByScope()
       this.userGrade = Number(this.$moment.userInfo.user.grade)
-      if (this.$moment.userInfo.user.photo !== null) {
+      if (this.$moment.userInfo.user && this.$moment.userInfo.user.photo !== null) {
         this.$set(this.userSaleInfos[0], 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)
         this.$set(this.userSaleInfos[1], 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)
         this.$set(this.userSaleInfos[2], 'userHead', this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`)

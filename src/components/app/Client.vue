@@ -502,7 +502,7 @@ export default {
   },
   methods: {
     initPageData () {
-      if (this.$moment.userInfo.user.photo !== null) {
+      if (this.$moment.userInfo.user && this.$moment.userInfo.user.photo !== null) {
         this.userHead = this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`
       }
       this.userScrope = this.$moment.userInfo.user.scope

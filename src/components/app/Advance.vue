@@ -3,7 +3,7 @@
     <div class="star-wrap">
       <div class="star-light-bg"></div>
       <div class="star-light"></div>
-      <div class="star-show" :style="userLevel ? (userLevel.level <= curMoveToLevelIndex ? { 'background-image': `url(${userLevel.iconNo})` } : { 'background-image': `url(${userLevel.icon})` }) : {}"></div>
+      <div class="star-show" :style="userLevel ? (userLevel.level <= curMoveToLevelIndex ? { 'background-image': `url(${levels[curMoveToLevelIndex].iconNo})` } : { 'background-image': `url(${levels[curMoveToLevelIndex].icon})` }) : {}"></div>
       <div class="user-empirical"><span>{{userEmpiricalVal}}</span>经验值</div>
     </div>
     <div class="empirical-wrap" ref="empirical-wrap" :style="{ 'width': `${getEmpiricalWrapWidth()}px` }">
@@ -23,6 +23,7 @@
               </div>
               <div>升级报告</div>
             </div>
+            <img class="content-img" :src="require('@/assets/temp-1.png')">
           </div>
           <div class="level-footer" v-if="userLevel.level - 1 >= levelIndex">-2017/02/05达到该等级-</div>
         </div>
@@ -44,50 +45,71 @@ export default {
           level: 1,
           txt: 'LV.1',
           getEmpiricalVal: 100,
-          icon: require('@/assets/xj.png'),
-          iconNo: require('@/assets/dc-logo.png')
+          icon: require('@/assets/1.png'),
+          iconNo: require('@/assets/1-1.png')
         },
         {
           level: 2,
           txt: 'LV.2',
           getEmpiricalVal: 300,
-          icon: require('@/assets/xj.png'),
-          iconNo: require('@/assets/dc-logo.png')
+          icon: require('@/assets/2.png'),
+          iconNo: require('@/assets/2-2.png')
         },
         {
           level: 3,
           txt: 'LV.3',
           getEmpiricalVal: 600,
-          icon: require('@/assets/xj.png'),
-          iconNo: require('@/assets/dc-logo.png')
+          icon: require('@/assets/3.png'),
+          iconNo: require('@/assets/3-3.png')
         },
         {
           level: 4,
           txt: 'LV.4',
           getEmpiricalVal: 1000,
-          icon: require('@/assets/xj.png'),
-          iconNo: require('@/assets/dc-logo.png')
+          icon: require('@/assets/4.png'),
+          iconNo: require('@/assets/4-4.png')
         },
         {
           level: 5,
           txt: 'LV.5',
           getEmpiricalVal: 1500,
-          icon: require('@/assets/xj.png'),
-          iconNo: require('@/assets/dc-logo.png')
+          icon: require('@/assets/5.png'),
+          iconNo: require('@/assets/5-5.png')
         },
         {
           level: 6,
           txt: 'LV.6',
           getEmpiricalVal: 2100,
-          icon: require('@/assets/xj.png'),
-          iconNo: require('@/assets/dc-logo.png')
+          icon: require('@/assets/6.png'),
+          iconNo: require('@/assets/6-6.png')
         },
         {
           level: 7,
           txt: 'LV.7',
           getEmpiricalVal: 2800,
-          icon: require('@/assets/xj.png'),
-          iconNo: require('@/assets/dc-logo.png')
+          icon: require('@/assets/7.png'),
+          iconNo: require('@/assets/7-7.png')
+        },
+        {
+          level: 8,
+          txt: 'LV.8',
+          getEmpiricalVal: 3000,
+          icon: require('@/assets/8.png'),
+          iconNo: require('@/assets/8-8.png')
+        },
+        {
+          level: 9,
+          txt: 'LV.9',
+          getEmpiricalVal: 3400,
+          icon: require('@/assets/9.png'),
+          iconNo: require('@/assets/9-9.png')
+        },
+        {
+          level: 10,
+          txt: 'LV.10',
+          getEmpiricalVal: 3800,
+          icon: require('@/assets/10.png'),
+          iconNo: require('@/assets/10-10.png')
         }
       ],
       maxEmpiricalVal: 4000,
@@ -202,9 +224,9 @@ export default {
     .star-show {
       position: relative;
       display: inline-block;
-      width: 7rem;
-      height: 7rem;
-      top: 4rem;
+      width: 6.4rem;
+      height: 6.4rem;
+      top: 4.6rem;
       background-repeat: no-repeat;
       background-position: center;
       background-size: cover;
@@ -328,6 +350,11 @@ export default {
             right: 0;
             bottom: 0;
             border-bottom: 1px solid #f1f1f1;
+          }
+          .content-img {
+            position: relative;
+            width: calc(100% - 0.8rem);
+            padding: 0 0.4rem;
           }
         }
         .level-footer {
