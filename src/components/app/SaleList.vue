@@ -99,8 +99,6 @@
 </template>
 
 <script>
-import android from '@/utils/app.js'
-
 export default {
   name: 'AppSaleList',
   data () {
@@ -671,7 +669,7 @@ export default {
       })
     },
     toUserData (userId) {
-      android.callAndroid('updateTitleBar', JSON.stringify({
+      this.call('updateTitleBar', JSON.stringify({
         title: '个人信息',
         back: true
       }))

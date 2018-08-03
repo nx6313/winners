@@ -94,8 +94,6 @@
 </template>
 
 <script>
-import android from '@/utils/app.js'
-
 export default {
   name: 'AppJustNowPerformance',
   data () {
@@ -271,7 +269,7 @@ export default {
       this.resetDateEvery(this.dateTabs[0].id)
 
       this.userName = this.$moment.userInfo.user.name
-      android.setTimeOut('initGetCobwebData', 400)
+      this.$setTimeOut('initGetCobwebData', 400)
     },
     initPageByScope () {
       if (this.$moment.userInfo.user) {
@@ -320,7 +318,7 @@ export default {
       this.dateEveryRailTrans = -document.body.clientWidth
       this.$nextTick().then(() => {
         this.$refs['date-every-rail'].style.transform = `translateX(-100%)`
-        android.setTimeOut('loadHeaderAfterDateSection', 1000)
+        this.$setTimeOut('loadHeaderAfterDateSection', 1000)
       })
     },
     getDateSection (min, type, format) {

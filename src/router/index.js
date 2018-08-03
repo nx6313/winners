@@ -16,7 +16,7 @@ import Directives from '@/plugins/directives.js'
 import Dialogbox from '@/plugins/dialogbox/dialogbox.js'
 import FireParticle from '@/plugins/canvas/fire-particle.js'
 import Cvsbg from '@/plugins/canvas/cvsbg.js'
-import android from '@/utils/app.js'
+import App from '@/utils/app.js'
 import '@/plugins/comm.css'
 import '@/plugins/animate.css'
 import '@/assets/fonts/iconfont.css'
@@ -39,6 +39,7 @@ Vue.use(VueResource)
 Vue.component('chart', ECharts)
 Vue.use(Moment)
 Vue.use(ComFun)
+Vue.use(App)
 Vue.use(Directives)
 Vue.use(Dialogbox)
 Vue.use(FireParticle)
@@ -234,6 +235,14 @@ var router = new Router({
       meta: {
         title: '目标达成'
       }
+    },
+    {
+      path: '/app-client-follow-detail',
+      name: 'AppClientFollowDetail',
+      component: resolve => require(['@/components/app/ClientFollowDetail'], resolve),
+      meta: {
+        title: '潜客详情'
+      }
     }
   ]
 })
@@ -244,6 +253,7 @@ router.beforeEach((to, from, next) => {
     document.title = document.querySelector('meta[name="web-describe"]').getAttribute('content')
   }
   if (router.app.$comfun.getRequest('deviceType') === 'android' || router.app.$comfun.getRequest('deviceType') === 'ios') {
+    window['deviceType'] = router.app.$comfun.getRequest('deviceType')
     setTimeout(() => {
       router.app.$root.eventHub.$on('webActivated', (userData) => {
         router.app.$moment.userInfo = userData
@@ -256,9 +266,7 @@ router.beforeEach((to, from, next) => {
       })
     }, 10)
     window['app'] = router.app
-    if (android) {
-      android.callAndroid('saveUserInfoForAndroid', '')
-    }
+    router.app.$call('saveUserInfo', '')
     next()
   } else {
     router.app.$moment.localforage.getItem('userLoginInfo').then((loginInfo) => {

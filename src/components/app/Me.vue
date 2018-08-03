@@ -27,8 +27,6 @@
 </template>
 
 <script>
-import android from '@/utils/app.js'
-
 export default {
   name: 'AppMe',
   data () {
@@ -80,14 +78,10 @@ export default {
       this.$dialog_pic({
         custom: true,
         selectPhoto: () => {
-          if (android) {
-            android.callAndroid('selectPhoto', '')
-          }
+          this.$call('selectPhoto', '')
         },
         selectPic: () => {
-          if (android) {
-            android.callAndroid('selectPic', '')
-          }
+          this.$call('selectPic', '')
         }
       })
     }

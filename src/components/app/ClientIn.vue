@@ -18,6 +18,13 @@
               <input type="text" name="" :placeholder="item.inputing === true ? item.placeholder : ''" v-model="item.model" @click="inputClick($event, item.type, formBlockIndex, itemIndex)" @blur="inputBlur($event, formBlockIndex, itemIndex)" @input="numberInput($event, item.type, formBlockIndex, itemIndex)" @afterpaste="numberInput($event, item.type, formBlockIndex, itemIndex)">
             </div>
           </template>
+          <template v-if="item.type === 'phone'">
+            <div class="form-item-input-wrap">
+              <div :class="['tip', item.require === true ? 'tip-require' : 'tip-no-require', item.inputing ? 'tip-inputing' : '']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span></div>
+              <input type="text" name="" :placeholder="item.inputing === true ? item.placeholder : ''" v-model="item.model" @click="inputClick($event, item.type, formBlockIndex, itemIndex)" @blur="inputBlur($event, formBlockIndex, itemIndex)" @input="numberInput($event, item.type, formBlockIndex, itemIndex)" @afterpaste="numberInput($event, item.type, formBlockIndex, itemIndex)">
+              <i class="phone-ok iconfont icon-select"></i>
+            </div>
+          </template>
           <template v-if="item.type === 'time'">
             <div class="form-item-input-wrap">
               <div :class="['tip', 'time-tip', item.require === true ? 'tip-require' : 'tip-no-require', item.inputing ? 'tip-inputing' : '']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span> <i :class="['tip-icon', 'iconfont', item.tipIcon !== undefined ? item.tipIcon : 'icon-time-s']"></i> </div>
@@ -106,12 +113,11 @@
 </template>
 
 <script>
-import android from '@/utils/app.js'
-
 export default {
   name: 'AppClientIn',
   data () {
     return {
+      phoneOk: false,
       formItems: [
         {
           title: '客户详情',
@@ -143,7 +149,7 @@ export default {
               ]
             },
             {
-              type: 'number',
+              type: 'phone',
               tip: '手机号码',
               placeholder: '请输入',
               name: 'mobile',
@@ -412,8 +418,8 @@ export default {
       this.formItems[0].items[5][1].inputing = true
     })
     this.$root.eventHub.$on('clientPicture', (data) => {
-      for (let url in data) {
-        this.formItems[0].items[6].model.push(url)
+      for (let index in data) {
+        this.formItems[0].items[6].model.push(data[index])
       }
     })
     this.$root.eventHub.$on('orderBackTime', (data) => {
@@ -451,6 +457,11 @@ export default {
           clickItemData.inputing = true
         }
       }
+      if (type === 'phone') {
+        if (clickItemData.inputing === false) {
+          clickItemData.inputing = true
+        }
+      }
       if (type === 'money') {
         if (clickItemData.inputing === false) {
           clickItemData.inputing = true
@@ -460,26 +471,22 @@ export default {
         if (clickItemData.inputing === false) {
           clickItemData.inputing = true
         }
-        if (android) {
-          android.callAndroid('pickerView', JSON.stringify({
-            event: clickItemData.event,
-            type: 'time',
-            title: clickItemData.tip
-          }))
-        }
+        this.$call('pickerView', JSON.stringify({
+          event: clickItemData.event,
+          type: 'time',
+          title: clickItemData.tip
+        }))
       }
       if (type === 'picker') {
         if (clickItemData.inputing === false) {
           clickItemData.inputing = true
         }
-        if (android) {
-          android.callAndroid('pickerView', JSON.stringify({
-            event: clickItemData.event,
-            type: 'option',
-            title: clickItemData.tip,
-            items: clickItemData.items
-          }))
-        }
+        this.$call('pickerView', JSON.stringify({
+          event: clickItemData.event,
+          type: 'option',
+          title: clickItemData.tip,
+          items: clickItemData.items
+        }))
       }
       if (type === 'textarea') {
         if (clickItemData.inputing === false) {
@@ -523,6 +530,27 @@ export default {
         clickItemData = this.formItems[formBlockIndex].items[formItemIndex][lineItemIndex]
       }
       clickItemData.model = event.target.value.replace(/\D/g, '').trim()
+      if (type === 'phone') {
+        var phoneOkIcon = event.target.parentNode.getElementsByClassName('phone-ok')[0]
+        if (clickItemData.model.length >= 11) {
+          this.$comfun.http_get(this, this.$moment.appServer + `paramCheck/checkPhoneNum/${clickItemData.model}`).then((response) => {
+            if (response.body.code === '1') {
+              this.phoneOk = true
+              phoneOkIcon.classList.remove('icon-shanchu')
+              phoneOkIcon.classList.add('icon-select')
+              phoneOkIcon.style.display = 'block'
+            } else {
+              this.phoneOk = false
+              phoneOkIcon.classList.remove('icon-select')
+              phoneOkIcon.classList.add('icon-shanchu')
+              phoneOkIcon.style.display = 'block'
+            }
+          })
+        } else {
+          this.phoneOk = false
+          phoneOkIcon.style.display = 'none'
+        }
+      }
     },
     moneyInput (event, type, formBlockIndex, formItemIndex, lineItemIndex) {
       this.inputClick(event, type, formBlockIndex, formItemIndex, lineItemIndex)
@@ -560,15 +588,13 @@ export default {
       if (lineItemIndex !== undefined) {
         clickItemData = this.formItems[formBlockIndex].items[formItemIndex][lineItemIndex]
       }
-      if (android) {
-        android.callAndroid('pickerView', JSON.stringify({
-          event: clickItemData.event,
-          type: 'picture',
-          title: clickItemData.tip,
-          has: clickItemData.model.length,
-          max: clickItemData.max
-        }))
-      }
+      this.$call('pickerView', JSON.stringify({
+        event: clickItemData.event,
+        type: 'picture',
+        title: clickItemData.tip,
+        has: clickItemData.model.length,
+        max: clickItemData.max
+      }))
       // clickItemData.model.push('http://www.wallcoo.com/flower/Amazing_Color_Flowers_2560x1600_III/wallpapers/2560x1600/Flowers_Wallpapers_91.jpg')
     },
     formSubmit () {
@@ -583,8 +609,28 @@ export default {
                 if ((!this.$comfun.isJsonOrArr(itemVal) && itemVal !== '') || (this.$comfun.isJsonOrArr(itemVal) && itemVal.length > 0)) {
                   if ((itemKey !== undefined && !this.$comfun.isJsonOrArr(itemKey)) || (itemKey !== undefined && this.$comfun.isJsonOrArr(itemKey) && itemKey.length > 0)) {
                     formData[this.formItems[f].items[i][c].name] = itemKey
+                    if (this.$comfun.isArr(itemKey)) {
+                      let arrStr = ''
+                      for (let i in itemKey) {
+                        arrStr += itemKey[i]
+                        if (i < itemKey.length - 1) {
+                          arrStr += ','
+                        }
+                      }
+                      formData[this.formItems[f].items[i][c].name] = arrStr
+                    }
                   } else {
                     formData[this.formItems[f].items[i][c].name] = itemVal
+                    if (this.$comfun.isArr(itemVal)) {
+                      let arrStr = ''
+                      for (let i in itemVal) {
+                        arrStr += itemVal[i]
+                        if (i < itemVal.length - 1) {
+                          arrStr += ','
+                        }
+                      }
+                      formData[this.formItems[f].items[i][c].name] = arrStr
+                    }
                   }
                 }
               } else {
@@ -601,8 +647,28 @@ export default {
               if ((!this.$comfun.isJsonOrArr(itemVal) && itemVal !== '') || (this.$comfun.isJsonOrArr(itemVal) && itemVal.length > 0)) {
                 if ((itemKey !== undefined && !this.$comfun.isJsonOrArr(itemKey)) || (itemKey !== undefined && this.$comfun.isJsonOrArr(itemKey) && itemKey.length > 0)) {
                   formData[this.formItems[f].items[i].name] = itemKey
+                  if (this.$comfun.isArr(itemKey)) {
+                    let arrStr = ''
+                    for (let i in itemKey) {
+                      arrStr += itemKey[i]
+                      if (i < itemKey.length - 1) {
+                        arrStr += ','
+                      }
+                    }
+                    formData[this.formItems[f].items[i].name] = arrStr
+                  }
                 } else {
                   formData[this.formItems[f].items[i].name] = itemVal
+                  if (this.$comfun.isArr(itemVal)) {
+                    let arrStr = ''
+                    for (let i in itemVal) {
+                      arrStr += itemVal[i]
+                      if (i < itemVal.length - 1) {
+                        arrStr += ','
+                      }
+                    }
+                    formData[this.formItems[f].items[i].name] = arrStr
+                  }
                 }
               }
             } else {
@@ -614,18 +680,23 @@ export default {
           }
         }
       }
+      if (!this.phoneOk) {
+        this.$dialog_msg({
+          msg: '手机号码有误，请核对'
+        })
+        return false
+      }
       this.$dialog_loading({
         tip: '数据提交中，请稍后'
       })
+      formData.createBy = this.$moment.userInfo.user.id
       this.$comfun.http_post(this, this.$moment.appServer + '/customerManager/add', formData).then((response) => {
         this.$dialog_close_loading()
         if (response.body.code === '1') {
           this.$dialog_msg({
             msg: '提交成功'
           })
-          if (android) {
-            android.callAndroid('back', '')
-          }
+          this.$call('back', '')
         } else {
           this.$dialog_msg({
             msg: '提交失败，' + response.body.message
@@ -821,6 +892,25 @@ export default {
             color: rgb(204, 204, 204);
             pointer-events: none;
             z-index: 9;
+          }
+          .phone-ok {
+            position: absolute;
+            height: 0.7rem;
+            font-size: 1rem;
+            top: 0;
+            bottom: 0;
+            margin: auto 0;
+            right: 1.4rem;
+            pointer-events: none;
+            z-index: 9;
+            display: none;
+            transition: all 0.4s ease 0s;
+          }
+          .icon-select {
+            color: rgb(0, 161, 22);
+          }
+          .icon-shanchu {
+            color: rgb(206, 32, 1);
           }
         }
         .form-item-radio-wrap {

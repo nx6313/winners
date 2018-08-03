@@ -116,8 +116,6 @@
 </template>
 
 <script>
-import android from '@/utils/app.js'
-
 export default {
   name: 'AppHome',
   data () {
@@ -701,7 +699,7 @@ export default {
       this.resetDateEvery(this.dateTabs[0].id)
 
       this.userName = this.$moment.userInfo.user.name
-      android.setTimeOut('initGetLineChartData', 400)
+      this.$setTimeOut('initGetLineChartData', 400)
     },
     initPageByScope () {
       if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
@@ -1121,7 +1119,7 @@ export default {
       this.dateEveryRailTrans = -document.body.clientWidth
       this.$nextTick().then(() => {
         this.$refs['date-every-rail'].style.transform = `translateX(-100%)`
-        android.setTimeOut('loadHeaderAfterDateSection', 1000)
+        this.$setTimeOut('loadHeaderAfterDateSection', 1000)
       })
     },
     getDateSection (min, type, format) {

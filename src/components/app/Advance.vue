@@ -3,7 +3,9 @@
     <div class="star-wrap">
       <div class="star-light-bg"></div>
       <div class="star-light"></div>
-      <div class="star-show" :style="userLevel ? (userLevel.level <= curMoveToLevelIndex ? { 'background-image': `url(${levels[curMoveToLevelIndex].iconNo})` } : { 'background-image': `url(${levels[curMoveToLevelIndex].icon})` }) : {}"></div>
+      <transition name="fade" mode="out-in">
+        <div v-if="showStarDisplay" class="star-show" :style="userLevel ? (userLevel.level <= curMoveToLevelIndex ? { 'background-image': `url(${levels[curMoveToLevelIndex].iconNo})` } : { 'background-image': `url(${levels[curMoveToLevelIndex].icon})` }) : {}"></div>
+      </transition>
       <div class="user-empirical"><span>{{userEmpiricalVal}}</span>经验值</div>
     </div>
     <div class="empirical-wrap" ref="empirical-wrap" :style="{ 'width': `${getEmpiricalWrapWidth()}px` }">
@@ -37,6 +39,7 @@ export default {
   name: 'AppAdvance',
   data () {
     return {
+      showStarDisplay: false,
       levelTouchStartX: -1,
       levelMoveDistance: -1,
       curMoveToLevelIndex: -1,
@@ -132,6 +135,7 @@ export default {
       }
       this.userLevel = userLevelData
       this.curMoveToLevelIndex = this.userLevel.level - 1
+      this.showStarDisplay = true
     },
     getEmpiricalWrapWidth () {
       var totalWidth = this.maxEmpiricalVal * this.scal + this.levels.length * this.levelIconWidth * 16 + 200
@@ -160,17 +164,23 @@ export default {
     levelTouchEnd () {
       this.$refs['level-rail-wrap'].style['transition-duration'] = '0.3s'
       if (Math.abs(this.levelMoveDistance) > document.body.clientWidth * 1 / 16) {
+        this.showStarDisplay = false
         if (this.levelMoveDistance > 0) {
           this.curMoveToLevelIndex -= 1
         } else {
           this.curMoveToLevelIndex += 1
         }
         if (this.curMoveToLevelIndex < 0) {
+          this.showStarDisplay = true
           this.curMoveToLevelIndex = 0
         }
         if (this.curMoveToLevelIndex > this.levels.length - 1) {
+          this.showStarDisplay = true
           this.curMoveToLevelIndex = this.levels.length - 1
         }
+        setTimeout(() => {
+          this.showStarDisplay = true
+        }, 0)
       }
       this.$refs['level-rail-wrap'].style.transform = `translateX(calc((3rem - 100vw - 0.8rem) * ${this.curMoveToLevelIndex}))`
       var empiricalWrapTsX = (document.body.clientWidth / 2) - (this.scal * this.levels[this.curMoveToLevelIndex].getEmpiricalVal + this.curMoveToLevelIndex * this.levelIconWidth * 16) - this.levelIconWidth * 16 / 2
@@ -386,5 +396,16 @@ export default {
       }
     }
   }
+}
+
+.fade-enter-active {
+  transition: all .4s ease;
+}
+.fade-leave-active {
+  transition: all .4s ease;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  transform: translateY(2px);
+  opacity: 0;
 }
 </style>

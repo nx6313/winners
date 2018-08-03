@@ -12,19 +12,35 @@ export default {
               callUrl = url
             }
             context.$http.get(callUrl).then(response => {
-              console.log(JSON.stringify({
-                '请求结果': '接口访问完成：url【' + url + '】',
-                '链接': callUrl,
-                '请求返回': response
-              }))
+              if (this.isAndroidIos().isMobile) {
+                console.log(JSON.stringify({
+                  '请求结果': '接口访问完成：url【' + url + '】',
+                  '链接': callUrl,
+                  '请求返回': response
+                }))
+              } else {
+                console.log({
+                  '请求结果': '接口访问完成：url【' + url + '】',
+                  '链接': callUrl,
+                  '请求返回': response
+                })
+              }
               context.$dialog_close_loading()
               resolve(response)
             }, response => {
-              console.log(JSON.stringify({
-                '请求结果': '接口访问出错：url【' + url + '】',
-                '链接': callUrl,
-                '请求返回': response
-              }))
+              if (this.isAndroidIos().isMobile) {
+                console.log(JSON.stringify({
+                  '请求结果': '接口访问出错：url【' + url + '】',
+                  '链接': callUrl,
+                  '请求返回': response
+                }))
+              } else {
+                console.log({
+                  '请求结果': '接口访问出错：url【' + url + '】',
+                  '链接': callUrl,
+                  '请求返回': response
+                })
+              }
               context.$dialog_close_loading()
               reject(response)
             })
@@ -46,21 +62,39 @@ export default {
               callUrl = url
             }
             context.$http.post(callUrl, paramsData).then(response => {
-              console.log(JSON.stringify({
-                '请求结果': '接口访问完成：url【' + url + '】',
-                '链接': callUrl,
-                '请求返回': response,
-                '相关参数': paramsData
-              }))
+              if (this.isAndroidIos().isMobile) {
+                console.log(JSON.stringify({
+                  '请求结果': '接口访问完成：url【' + url + '】',
+                  '链接': callUrl,
+                  '请求返回': response,
+                  '相关参数': paramsData
+                }))
+              } else {
+                console.log({
+                  '请求结果': '接口访问完成：url【' + url + '】',
+                  '链接': callUrl,
+                  '请求返回': response,
+                  '相关参数': paramsData
+                })
+              }
               context.$dialog_close_loading()
               resolve(response)
             }, response => {
-              console.log(JSON.stringify({
-                '请求结果': '接口访问出错：url【' + url + '】',
-                '链接': callUrl,
-                '请求返回': response,
-                '相关参数': paramsData
-              }))
+              if (this.isAndroidIos().isMobile) {
+                console.log(JSON.stringify({
+                  '请求结果': '接口访问出错：url【' + url + '】',
+                  '链接': callUrl,
+                  '请求返回': response,
+                  '相关参数': paramsData
+                }))
+              } else {
+                console.log({
+                  '请求结果': '接口访问出错：url【' + url + '】',
+                  '链接': callUrl,
+                  '请求返回': response,
+                  '相关参数': paramsData
+                })
+              }
               context.$dialog_close_loading()
               reject(response)
             })
@@ -130,6 +164,11 @@ export default {
         var isjson = typeof obj === 'object' && (Object.prototype.toString.call(obj).toLowerCase() === '[object object]' || Object.prototype.toString.call(obj).toLowerCase() === '[object array]' || Object.prototype.toString.call(obj).toLowerCase() === '[object file]')
         return isjson
       },
+      // 判断obj是否为数组
+      isArr (obj) {
+        var isArr = typeof obj === 'object' && Object.prototype.toString.call(obj).toLowerCase() === '[object array]'
+        return isArr
+      },
       // 判断obj是否为数字
       isNumber (obj) {
         if (obj === '' || obj === null || obj === undefined) {
@@ -148,24 +187,27 @@ export default {
       // (new Date()).format("yyyy-MM-dd hh:mm:ss.S") ==> 2006-07-02 08:09:04.423
       // (new Date()).format("yyyy-M-d h:m:s.S") ==> 2006-7-2 8:9:4.18
       formatDate: function (date, fmt) {
-        var o = {
-          'M+': date.getMonth() + 1, // 月份
-          'd+': date.getDate(), // 日
-          'h+': date.getHours(), // 小时
-          'm+': date.getMinutes(), // 分
-          's+': date.getSeconds(), // 秒
-          'q+': Math.floor((date.getMonth() + 3) / 3), // 季度
-          'S': date.getMilliseconds() // 毫秒
-        }
-        if (/(y+)/.test(fmt)) {
-          fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length))
-        }
-        for (var k in o) {
-          if (new RegExp('(' + k + ')').test(fmt)) {
-            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (('00' + o[k]).substr(('' + o[k]).length)))
+        if (date) {
+          var o = {
+            'M+': date.getMonth() + 1, // 月份
+            'd+': date.getDate(), // 日
+            'h+': date.getHours(), // 小时
+            'm+': date.getMinutes(), // 分
+            's+': date.getSeconds(), // 秒
+            'q+': Math.floor((date.getMonth() + 3) / 3), // 季度
+            'S': date.getMilliseconds() // 毫秒
           }
+          if (/(y+)/.test(fmt)) {
+            fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length))
+          }
+          for (var k in o) {
+            if (new RegExp('(' + k + ')').test(fmt)) {
+              fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (('00' + o[k]).substr(('' + o[k]).length)))
+            }
+          }
+          return fmt
         }
-        return fmt
+        return null
       },
       // 获取指定日期几天前或几天后的日期，未指定日期按照当前日期计算
       getTargetDate (diff, date) {
@@ -274,6 +316,21 @@ export default {
           returnVal = second + ' 秒 '
         }
         return returnVal
+      },
+      // 判断设备类型
+      isAndroidIos: function () {
+        var p = navigator.platform
+        var u = navigator.userAgent
+        var app = navigator.appVersion
+        var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1 // android终端或者uc浏览器
+        var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/) // ios终端
+        return {
+          isAndroid: isAndroid,
+          isiOS: isiOS,
+          platform: p,
+          isMobile: !(p.toLowerCase().indexOf('win') >= 0 || p.toLowerCase().indexOf('mac') >= 0),
+          deviceInfo: app
+        }
       },
       // 获取网址中的参数
       getRequest: function (key) {

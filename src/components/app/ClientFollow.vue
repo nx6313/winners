@@ -28,7 +28,7 @@
         <div class="data-wrap" @touchstart="dataItemTouchStart(dataIndex, data.dos.length)" @touchmove="dataItemTouchMove(dataIndex, data.dos.length)" @touchend="dataItemTouchEnd(dataIndex, data.dos.length)">
           <div class="data-head-wrap flex-r flex-b">
             <span class="user-name">{{data.userName}}</span>
-            <span class="btn-follow">立即回访<i class="iconfont icon-right"></i></span>
+            <span class="btn-follow"><i class="iconfont icon-phone"></i>立即回访<i class="iconfont icon-right"></i></span>
           </div>
           <div class="data-content-wrap flex-r flex-b">
             <div>
@@ -51,12 +51,12 @@
 </template>
 
 <script>
-import android from '@/utils/app.js'
-
 export default {
   name: 'AppClientFollow',
   data () {
     return {
+      holdTimer: null,
+      holdTime: 0,
       searchVal: '',
       hasFilter: false,
       filterKeys: [],
@@ -125,17 +125,27 @@ export default {
     }
   },
   mounted () {
-    this.$comfun.http_get(this, this.$moment.appServer + '/customerManager/findAll').then((response) => {
-      this.datas = []
-      for (let c = 0; c < response.body.length; c++) {
-        this.datas.push({
-          userName: '刘德华',
-          dos: [ 'delete' ]
-        })
-      }
+    this.$root.eventHub.$on('app-has-save-user-info', () => {
+      this.initPageData()
     })
+    this.initPageData()
   },
   methods: {
+    initPageData () {
+      // if (this.$moment.userInfo.user) {
+      this.$comfun.http_post(this, this.$moment.appServer + '/customerManager/searchByBsSubCusto', {
+        'createBy': 259
+      }).then((response) => {
+        this.datas = []
+        for (let c = 0; c < response.body.list.length; c++) {
+          this.datas.push({
+            userName: response.body.list[c].custoName,
+            dos: [ 'delete' ]
+          })
+        }
+      })
+      // }
+    },
     searchClick () {
       this.filterClose()
     },
@@ -212,12 +222,23 @@ export default {
       this.$refs['data-item-wrap-' + dataIndex][0].getElementsByClassName('data-wrap')[0].style['transition-duration'] = '0s'
       this.dataItemMoveStartX = event.touches[0].pageX
       if (event.target.classList.contains('btn-follow')) {
-        if (android) {
-          android.callAndroid('callPhone', this.datas[dataIndex]['mobile'])
-        }
+        this.$call('callPhone', this.datas[dataIndex]['mobile'])
       }
+      clearInterval(this.holdTimer)
+      this.holdTimer = setInterval(() => {
+        this.holdTime++
+        if (this.holdTime > 60) {
+          clearInterval(this.holdTimer)
+          this.holdTime = 0
+          this.$call('skipPage', {
+            path: 'app-client-follow-detail',
+            title: '潜客详情'
+          })
+        }
+      }, 10)
     },
     dataItemTouchMove (dataIndex, doCount) {
+      clearInterval(this.holdTimer)
       if (this.dataItemMoveStartX < 0) {
         this.dataItemMoveStartX = event.touches[0].pageX
       }
@@ -483,6 +504,10 @@ export default {
               margin-left: 0.4rem;
               color: rgb(168, 168, 168);
               pointer-events: none;
+            }
+            i:first-of-type {
+              margin-right: 0.2rem;
+              color: #0165d8;
             }
           }
         }

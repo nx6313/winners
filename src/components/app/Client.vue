@@ -147,8 +147,6 @@
 </template>
 
 <script>
-import android from '@/utils/app.js'
-
 export default {
   name: 'AppClient',
   data () {
@@ -504,8 +502,9 @@ export default {
     initPageData () {
       if (this.$moment.userInfo.user && this.$moment.userInfo.user.photo !== null) {
         this.userHead = this.$moment.HttpAddress_1 + `showFile/${this.$moment.userInfo.user.photo}`
+        this.userScrope = this.$moment.userInfo.user.scope
+        this.userName = this.$moment.userInfo.user.name
       }
-      this.userScrope = this.$moment.userInfo.user.scope
       this.initPageByScope()
       if (this.userScrope !== 'A') {
         if (this.summarizings.length > 5) {
@@ -516,13 +515,14 @@ export default {
       }
       this.resetDateEvery(this.dateTabs[0].id)
 
-      this.userName = this.$moment.userInfo.user.name
-      android.setTimeOut('initGetLineChartData', 400)
+      this.$setTimeOut('initGetLineChartData', 400)
     },
     initPageByScope () {
-      if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
-      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) { // C:机电班组
-      } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) { // D:事故服务顾问
+      if (this.$moment.userInfo.user) {
+        if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jdfwgw) { // B:机电服务顾问
+        } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.jxbz) { // C:机电班组
+        } else if (this.$moment.userInfo.user.scope === this.$moment.dutyOpt.sgfwgw) { // D:事故服务顾问
+        }
       }
       if (this.summarizings.length < 5) {
         this.progressBallSpace = 1.4
@@ -637,7 +637,7 @@ export default {
       this.dateEveryRailTrans = -document.body.clientWidth
       this.$nextTick().then(() => {
         this.$refs['date-every-rail'].style.transform = `translateX(-100%)`
-        android.setTimeOut('loadHeaderAfterDateSection', 1000)
+        this.$setTimeOut('loadHeaderAfterDateSection', 1000)
       })
     },
     getDateSection (min, type, format) {
