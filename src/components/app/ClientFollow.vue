@@ -132,19 +132,21 @@ export default {
   },
   methods: {
     initPageData () {
-      // if (this.$moment.userInfo.user) {
-      this.$comfun.http_post(this, this.$moment.appServer + '/customerManager/searchByBsSubCusto', {
-        'createBy': 259
-      }).then((response) => {
-        this.datas = []
-        for (let c = 0; c < response.body.list.length; c++) {
-          this.datas.push({
-            userName: response.body.list[c].custoName,
-            dos: [ 'delete' ]
-          })
-        }
-      })
-      // }
+      if (this.$moment.userInfo.user) {
+        this.$comfun.http_post(this, this.$moment.appServer + '/customerManager/searchByBsSubCusto', {
+          'createBy': this.$moment.userInfo.user.id
+        }).then((response) => {
+          this.datas = []
+          for (let c = 0; c < response.body.list.length; c++) {
+            this.datas.push({
+              id: response.body.list[c].scId,
+              userName: response.body.list[c].custoName,
+              mobile: response.body.list[c].mobile,
+              dos: [ 'delete' ]
+            })
+          }
+        })
+      }
     },
     searchClick () {
       this.filterClose()
@@ -223,19 +225,32 @@ export default {
       this.dataItemMoveStartX = event.touches[0].pageX
       if (event.target.classList.contains('btn-follow')) {
         this.$call('callPhone', this.datas[dataIndex]['mobile'])
+      } else {
+        clearInterval(this.holdTimer)
+        this.holdTimer = setInterval(() => {
+          this.holdTime++
+          if (this.holdTime > 60) {
+            clearInterval(this.holdTimer)
+            this.holdTime = 0
+            this.$call('skipPage', JSON.stringify({
+              path: 'app-client-follow-detail',
+              title: '潜客详情',
+              titleDos: [
+                {
+                  event: 'client-follow-detail-edit',
+                  txt: '编辑'
+                }
+              ],
+              titleBarColor: '#1F6FC8',
+              statusBarStyle: 'highlight',
+              fullPage: false,
+              pageParams: {
+                dataId: this.datas[dataIndex]['id']
+              }
+            }))
+          }
+        }, 10)
       }
-      clearInterval(this.holdTimer)
-      this.holdTimer = setInterval(() => {
-        this.holdTime++
-        if (this.holdTime > 60) {
-          clearInterval(this.holdTimer)
-          this.holdTime = 0
-          this.$call('skipPage', {
-            path: 'app-client-follow-detail',
-            title: '潜客详情'
-          })
-        }
-      }, 10)
     },
     dataItemTouchMove (dataIndex, doCount) {
       clearInterval(this.holdTimer)
