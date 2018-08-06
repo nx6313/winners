@@ -70,7 +70,7 @@
               <div :class="['tip', item.require === true ? 'tip-require' : 'tip-no-require']"><i v-if="item.require === true" class="form-item-require">*</i>{{item.tip}}<span class="min-tip" v-if="item.minTip">{{item.minTip}}</span></div>
               <div class="radio-wrap">
                 <input type="hidden" v-model="item.model">
-                <span v-for="(radio, radioIndex) in item.radios" :key="radioIndex" :class="['radio-ceil', 'radio-' + radioIndex]" @click="selectRadio($event, formBlockIndex, itemIndex, radioIndex)">{{radio.val}}</span>
+                <span v-for="(radio, radioIndex) in item.radios" :key="radioIndex" :class="['radio-ceil', 'radio-' + radioIndex, item.model === String(radio.key) ? 'radio-ceil-select' : '']" @click="selectRadio($event, formBlockIndex, itemIndex, radioIndex)">{{radio.val}}</span>
               </div>
             </div>
           </template>
@@ -135,7 +135,7 @@ export default {
               type: 'radio',
               tip: '客户性别',
               name: 'custoSex',
-              model: '',
+              model: '1',
               require: true,
               radios: [
                 {
@@ -439,6 +439,8 @@ export default {
           val: response.body[l].customerLevelValue
         })
       }
+      this.formItems[0].items[3].model = this.formItems[0].items[3].items[0].val
+      this.formItems[0].items[3].inputing = true
     })
   },
   methods: {

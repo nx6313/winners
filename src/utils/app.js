@@ -15,6 +15,10 @@ window['androidEvent'] = (event, params) => {
   window.app.$root.eventHub.$emit(event, params)
 }
 
+window['iosEvent'] = (event, params) => {
+  window.app.$root.eventHub.$emit(event, params)
+}
+
 export default {
   install: function (Vue, options) {
     Vue.prototype.$android = android

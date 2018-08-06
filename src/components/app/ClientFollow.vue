@@ -19,7 +19,36 @@
       <span v-for="(filterVal, filterValIndex) in filterVals" :key="filterValIndex" v-if="filterVal">{{filterVal}}<i class="filter-select-delete iconfont icon-delete" @click="deleteSelectFilter($event, filterValIndex)"></i></span>
     </div>
     <div :class="['data-items-wrap', hasFilter ? 'data-items-wrap-has-filter' : '']">
-      <div class="data-item-wrap" v-for="(data, dataIndex) in datas" :key="dataIndex" :ref="'data-item-wrap-' + dataIndex">
+      <div class="data-item-wrap" v-if="searchDatas.length === 0" v-for="(data, dataIndex) in datas" :key="dataIndex" :ref="'data-item-wrap-' + dataIndex">
+        <div class="do-wrap">
+          <span v-for="(doBtn, doIndex) in data.dos" :key="doIndex">
+            <template v-if="doBtn === 'delete'">删除</template>
+          </span>
+        </div>
+        <div class="data-wrap" @touchstart="dataItemTouchStart(dataIndex, data.dos.length)" @touchmove="dataItemTouchMove(dataIndex, data.dos.length)" @touchend="dataItemTouchEnd(dataIndex, data.dos.length)">
+          <div class="data-head-wrap flex-r flex-b">
+            <span class="user-name">{{data.userName}}
+              <span class="btn-follow"><i class="iconfont icon-phone"></i>立即回访</span>
+            </span>
+            <i class="iconfont icon-right"></i>
+          </div>
+          <div class="data-content-wrap flex-r flex-b">
+            <div>
+              <span>意向车型</span>
+              <span>{{data.intentionCarModel ? data.intentionCarModel : '未填写'}}</span>
+            </div>
+            <div>
+              <span>来访时间</span>
+              <span>{{data.comeinDate ? data.intentionCarModel : '未填写'}}</span>
+            </div>
+            <div>
+              <span>跟进次数</span>
+              <span>1次</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="data-item-wrap" v-if="searchDatas.length > 0" v-for="(data, dataIndex) in searchDatas" :key="dataIndex" :ref="'data-item-wrap-' + dataIndex">
         <div class="do-wrap">
           <span v-for="(doBtn, doIndex) in data.dos" :key="doIndex">
             <template v-if="doBtn === 'delete'">删除</template>
@@ -120,6 +149,7 @@ export default {
         }
       ],
       datas: [],
+      searchDatas: [],
       dataItemMoveStartX: -1,
       dataItemMoveDistance: -1
     }
@@ -279,6 +309,18 @@ export default {
       }
       this.dataItemMoveStartX = -1
       this.dataItemMoveDistance = -1
+    }
+  },
+  watch: {
+    searchVal (val, old) {
+      if (val.trim() !== '') {
+        this.$comfun.http_post(this, this.$moment.appServer + 'customerManager/searchByBsSubCusto', {
+          scId: this.$moment.userInfo.user.id,
+          phoneOrName: val.trim()
+        })
+      } else {
+        this.searchDatas = []
+      }
     }
   }
 }
@@ -492,7 +534,7 @@ export default {
       }
       .data-wrap {
         position: relative;
-        height: 100%;
+        height: calc(100% - 0.78rem);
         background-color: #ffffff;
         padding: 0.6rem 0.8rem;
         font-size: 0.8rem;
@@ -512,6 +554,7 @@ export default {
             display: inline-block;
             font-size: 0.8rem;
             color: #0165d8;
+            margin-left: 0.8rem;
             i {
               position: relative;
               display: inline-block;
