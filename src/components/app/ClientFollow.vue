@@ -19,7 +19,7 @@
       <span v-for="(filterVal, filterValIndex) in filterVals" :key="filterValIndex" v-if="filterVal">{{filterVal}}<i class="filter-select-delete iconfont icon-delete" @click="deleteSelectFilter($event, filterValIndex)"></i></span>
     </div>
     <div :class="['data-items-wrap', hasFilter ? 'data-items-wrap-has-filter' : '']">
-      <div class="data-item-wrap" v-if="searchDatas.length === 0" v-for="(data, dataIndex) in datas" :key="dataIndex" :ref="'data-item-wrap-' + dataIndex">
+      <div class="data-item-wrap" v-for="(data, dataIndex) in datas" :key="dataIndex" :ref="'data-item-wrap-' + dataIndex">
         <div class="do-wrap">
           <span v-for="(doBtn, doIndex) in data.dos" :key="doIndex">
             <template v-if="doBtn === 'delete'">删除</template>
@@ -31,33 +31,6 @@
               <span class="btn-follow"><i class="iconfont icon-phone"></i>立即回访</span>
             </span>
             <i class="iconfont icon-right"></i>
-          </div>
-          <div class="data-content-wrap flex-r flex-b">
-            <div>
-              <span>意向车型</span>
-              <span>{{data.intentionCarModel ? data.intentionCarModel : '未填写'}}</span>
-            </div>
-            <div>
-              <span>来访时间</span>
-              <span>{{data.comeinDate ? data.intentionCarModel : '未填写'}}</span>
-            </div>
-            <div>
-              <span>跟进次数</span>
-              <span>1次</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="data-item-wrap" v-if="searchDatas.length > 0" v-for="(data, dataIndex) in searchDatas" :key="dataIndex" :ref="'data-item-wrap-' + dataIndex">
-        <div class="do-wrap">
-          <span v-for="(doBtn, doIndex) in data.dos" :key="doIndex">
-            <template v-if="doBtn === 'delete'">删除</template>
-          </span>
-        </div>
-        <div class="data-wrap" @touchstart="dataItemTouchStart(dataIndex, data.dos.length)" @touchmove="dataItemTouchMove(dataIndex, data.dos.length)" @touchend="dataItemTouchEnd(dataIndex, data.dos.length)">
-          <div class="data-head-wrap flex-r flex-b">
-            <span class="user-name">{{data.userName}}</span>
-            <span class="btn-follow"><i class="iconfont icon-phone"></i>立即回访<i class="iconfont icon-right"></i></span>
           </div>
           <div class="data-content-wrap flex-r flex-b">
             <div>
@@ -95,32 +68,37 @@ export default {
           key: '客户级别',
           filterItems: [
             {
-              key: 'H',
+              key: 1,
               val: 'H 级',
               des: '（三天内成交）'
             },
             {
-              key: 'A',
+              key: 2,
               val: 'A 级',
               des: '（7 天内成交）'
             },
             {
-              key: 'B',
+              key: 3,
               val: 'B 级',
               des: '（30 天内成交）'
             },
             {
-              key: 'C',
+              key: 4,
               val: 'C 级',
               des: '（30 天以上成交）'
             },
             {
-              key: 'O',
+              key: 5,
               val: 'O 级',
               des: '（订车客户）'
             },
             {
-              key: 'F',
+              key: 6,
+              val: 'D 级',
+              des: '（成交客户）'
+            },
+            {
+              key: 7,
               val: 'F 级',
               des: '（战败）'
             }
@@ -149,7 +127,6 @@ export default {
         }
       ],
       datas: [],
-      searchDatas: [],
       dataItemMoveStartX: -1,
       dataItemMoveDistance: -1
     }
@@ -177,6 +154,19 @@ export default {
           }
         })
       }
+      this.$comfun.http_get(this, this.$moment.appServer + '/bsCustoLevelManager/getAllCustomerLevel').then((response) => {
+        this.filters[0].filterItems = []
+        for (let l = 0; l < response.body.length; l++) {
+          this.filters[0].filterItems.push({
+            key: response.body[l].customerLevelId,
+            val: response.body[l].customerLevelValue
+          })
+        }
+      })
+      this.filters[1].filterItems[0].key = this.$comfun.formatDate(this.$comfun.getTargetDate(-6), 'yyyy-MM-dd') + ',' + this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      this.filters[1].filterItems[1].key = this.$comfun.formatDate(this.$comfun.getTargetDate(-12), 'yyyy-MM-dd') + ',' + this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      this.filters[1].filterItems[2].key = this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[0], 'yyyy-MM-dd') + ',' + this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[1], 'yyyy-MM-dd')
+      this.filters[1].filterItems[3].key = this.$comfun.formatDate(this.$comfun.getMonthStartEnd(-2)[0], 'yyyy-MM-dd') + ',' + this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
     },
     searchClick () {
       this.filterClose()
@@ -234,6 +224,7 @@ export default {
       } else {
         this.hasFilter = false
       }
+      this.searchData(this.searchVal.trim())
     },
     deleteSelectFilter (event, filterValIndex) {
       this.$set(this.filterKeys, filterValIndex, undefined)
@@ -309,18 +300,39 @@ export default {
       }
       this.dataItemMoveStartX = -1
       this.dataItemMoveDistance = -1
+    },
+    searchData (searchVal) {
+      var searchParams = {}
+      searchParams['createBy'] = this.$moment.userInfo.user.id
+      if (searchVal !== '') {
+        searchParams['phoneOrName'] = searchVal
+      }
+      if (this.filterKeys[0]) {
+        searchParams['custoLevel'] = this.filterKeys[0]
+      }
+      if (this.filterKeys[1]) {
+        var searchDateSE = this.filterKeys[1].split(',')
+        searchParams['startTime'] = searchDateSE[0]
+        searchParams['endTime'] = searchDateSE[1]
+      }
+      this.$comfun.http_post(this, this.$moment.appServer + 'customerManager/searchByBsSubCusto', searchParams).then((response) => {
+        this.datas = []
+        if (response.body.code === 1 && response.body.totals && response.body.totals > 0) {
+          for (let c = 0; c < response.body.list.length; c++) {
+            this.datas.push({
+              id: response.body.list[c].scId,
+              userName: response.body.list[c].custoName,
+              mobile: response.body.list[c].mobile,
+              dos: [ 'delete' ]
+            })
+          }
+        }
+      })
     }
   },
   watch: {
     searchVal (val, old) {
-      if (val.trim() !== '') {
-        this.$comfun.http_post(this, this.$moment.appServer + 'customerManager/searchByBsSubCusto', {
-          scId: this.$moment.userInfo.user.id,
-          phoneOrName: val.trim()
-        })
-      } else {
-        this.searchDatas = []
-      }
+      this.searchData(val.trim())
     }
   }
 }
@@ -462,10 +474,10 @@ export default {
       opacity: 1;
     }
     .filter-content-open-0 {
-      transform: translateY(101.2%);
+      transform: translateY(100.6%);
     }
     .filter-content-open-1 {
-      transform: translateY(101.6%);
+      transform: translateY(100.6%);
     }
   }
   .header-wrap::after {
@@ -567,6 +579,9 @@ export default {
               margin-right: 0.2rem;
               color: #0165d8;
             }
+          }
+          i {
+            color: rgb(168, 168, 168);
           }
         }
         .data-head-wrap::after {
