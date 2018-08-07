@@ -31,7 +31,10 @@ export default {
         }
       } else if (window.deviceType === 'ios') {
         if (ios) {
-          ios.messageHandlers.setTimeOut.postMessage(eventName, duration)
+          ios.messageHandlers.setTimeOut.postMessage({
+            body: eventName,
+            params: duration
+          })
         }
       }
     }
@@ -43,7 +46,10 @@ export default {
         }
       } else if (window.deviceType === 'ios') {
         if (ios) {
-          ios.messageHandlers.callIos.postMessage(eventName, params)
+          ios.messageHandlers.callIos.postMessage({
+            body: eventName,
+            params: params
+          })
         }
       }
     }

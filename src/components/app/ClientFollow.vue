@@ -27,9 +27,10 @@
         </div>
         <div class="data-wrap" @touchstart="dataItemTouchStart(dataIndex, data.dos.length)" @touchmove="dataItemTouchMove(dataIndex, data.dos.length)" @touchend="dataItemTouchEnd(dataIndex, data.dos.length)">
           <div class="data-head-wrap flex-r flex-b">
-            <span class="user-name">{{data.userName}}
+            <div class="left-title">
+              <span class="user-name">{{data.userName}}</span>
               <span class="btn-follow"><i class="iconfont icon-phone"></i>立即回访</span>
-            </span>
+            </div>
             <i class="iconfont icon-right"></i>
           </div>
           <div class="data-content-wrap flex-r flex-b">
@@ -163,10 +164,10 @@ export default {
           })
         }
       })
-      this.filters[1].filterItems[0].key = this.$comfun.formatDate(this.$comfun.getTargetDate(-6), 'yyyy-MM-dd') + ',' + this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
-      this.filters[1].filterItems[1].key = this.$comfun.formatDate(this.$comfun.getTargetDate(-12), 'yyyy-MM-dd') + ',' + this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
-      this.filters[1].filterItems[2].key = this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[0], 'yyyy-MM-dd') + ',' + this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[1], 'yyyy-MM-dd')
-      this.filters[1].filterItems[3].key = this.$comfun.formatDate(this.$comfun.getMonthStartEnd(-2)[0], 'yyyy-MM-dd') + ',' + this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      this.filters[1].filterItems[0].key = 'filter-1-0,' + this.$comfun.formatDate(this.$comfun.getTargetDate(-6), 'yyyy-MM-dd') + ',' + this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      this.filters[1].filterItems[1].key = 'filter-1-1,' + this.$comfun.formatDate(this.$comfun.getTargetDate(-12), 'yyyy-MM-dd') + ',' + this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      this.filters[1].filterItems[2].key = 'filter-1-2,' + this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[0], 'yyyy-MM-dd') + ',' + this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[1], 'yyyy-MM-dd')
+      this.filters[1].filterItems[3].key = 'filter-1-3,' + this.$comfun.formatDate(this.$comfun.getMonthStartEnd(-2)[0], 'yyyy-MM-dd') + ',' + this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
     },
     searchClick () {
       this.filterClose()
@@ -240,6 +241,7 @@ export default {
       } else {
         this.hasFilter = false
       }
+      this.searchData(this.searchVal.trim())
     },
     dataItemTouchStart (dataIndex, doCount) {
       this.$refs['data-item-wrap-' + dataIndex][0].getElementsByClassName('data-wrap')[0].style['transition-duration'] = '0s'
@@ -312,8 +314,8 @@ export default {
       }
       if (this.filterKeys[1]) {
         var searchDateSE = this.filterKeys[1].split(',')
-        searchParams['startTime'] = searchDateSE[0]
-        searchParams['endTime'] = searchDateSE[1]
+        searchParams['startTime'] = searchDateSE[1]
+        searchParams['endTime'] = searchDateSE[2]
       }
       this.$comfun.http_post(this, this.$moment.appServer + 'customerManager/searchByBsSubCusto', searchParams).then((response) => {
         this.datas = []
@@ -491,7 +493,7 @@ export default {
   }
   .filter-select-wrap {
     position: relative;
-    background-color: #f0f9ff;
+    background-color: #f6fdfd;
     padding: 0 0.8rem;
     margin-top: -0.4rem;
     margin-bottom: -0.3rem;
@@ -547,13 +549,18 @@ export default {
       .data-wrap {
         position: relative;
         height: calc(100% - 0.78rem);
-        background-color: #ffffff;
         padding: 0.6rem 0.8rem;
         font-size: 0.8rem;
         transition: all 0.2s ease 0s;
+        background-color: #f7f7f7;
         .data-head-wrap {
           position: relative;
           padding: 1rem 0 0.9rem;
+          background-color: #ffffff;
+          div.left-title {
+            position: relative;
+            display: inline-block;
+          }
           span.user-name {
             position: relative;
             display: inline-block;
@@ -587,8 +594,8 @@ export default {
         .data-head-wrap::after {
           content: '';
           position: absolute;
-          left: 0.2rem;
-          right: 0.2rem;
+          left: 0.3rem;
+          right: 0.3rem;
           bottom: 0;
           border-bottom: 1px solid #e9e9e9;
         }
@@ -626,8 +633,8 @@ export default {
     .data-item-wrap:nth-of-type(n + 2)::after {
       content: '';
       position: absolute;
-      left: 0.1rem;
-      right: 0.1rem;
+      left: 0;
+      right: 0;
       top: 0;
       border-top: 1px solid #e9e9e9;
     }
