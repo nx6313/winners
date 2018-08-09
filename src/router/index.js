@@ -149,6 +149,14 @@ var router = new Router({
       component: resolve => require(['@/components/UserData'], resolve)
     },
     {
+      path: '/app-no-page',
+      name: 'AppNoPage',
+      component: resolve => require(['@/components/app/NoPage'], resolve),
+      meta: {
+        title: '正在开发中'
+      }
+    },
+    {
       path: '/app-me',
       name: 'AppMe',
       component: resolve => require(['@/components/app/Me'], resolve),
@@ -242,6 +250,14 @@ var router = new Router({
       component: resolve => require(['@/components/app/ClientFollowDetail'], resolve),
       meta: {
         title: '潜客详情'
+      }
+    },
+    {
+      path: '/app-winner-list',
+      name: 'AppWinnerList',
+      component: resolve => require(['@/components/app/WinnerList'], resolve),
+      meta: {
+        title: '龙虎榜'
       }
     }
   ]
