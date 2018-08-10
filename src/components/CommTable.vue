@@ -3,10 +3,11 @@
     <template v-if="rowDatas.length > 0">
       <table border="0" cellpadding="0" cellspacing="0" v-for="(t, tIndex) in tableCount" :key="tIndex">
         <tr>
-          <th v-for="(th, thIndex) in title" :key="thIndex" v-if="thIndex >= (lineNum * tIndex) && thIndex < (lineNum * (tIndex + 1))" :colspan="thIndex % lineNum === 0 && showIndex ? (isArr(rowDatas[0][thIndex]) ? rowDatas[0][thIndex].length + 1 : 2) : (isArr(rowDatas[0][thIndex]) ? rowDatas[0][thIndex].length : 1)">{{th.label}}</th>
+          <th v-if="!secondTitle && showIndex">排名</th>
+          <th v-for="(th, thIndex) in title" :key="thIndex" v-if="thIndex >= (lineNum * tIndex) && thIndex < (lineNum * (tIndex + 1))" :colspan="thIndex % lineNum === 0 && showIndex ? (isArr(rowDatas[0][thIndex]) ? (!secondTitle ? rowDatas[0][thIndex].length : rowDatas[0][thIndex].length + 1) : (!secondTitle ? 1 : 2)) : (isArr(rowDatas[0][thIndex]) ? rowDatas[0][thIndex].length : 1)">{{th.label}}</th>
         </tr>
         <tr v-if="secondTitle">
-          <td v-if="showIndex">序号</td>
+          <td v-if="showIndex">排名</td>
           <template v-for="(second, secondIndex) in secondTitles" v-if="secondIndex >= (lineNum * tIndex) && secondIndex < (lineNum * (tIndex + 1))">
             <template v-if="isArr(second)">
               <td v-for="(s, sIndex) in second" :key="secondIndex + '-' + sIndex">{{s}}</td>
@@ -17,7 +18,15 @@
           </template>
         </tr>
         <tr v-for="(row, rowIndex) in rowDatas" :key="rowIndex">
-          <td v-if="showIndex">{{rowIndex + 1}}</td>
+          <td v-if="showIndex">
+            <template v-if="rankBadge">
+              <template v-if="rowIndex === 0"><i class="rank-gold"></i></template>
+              <template v-if="rowIndex === 1"><i class="rank-silver"></i></template>
+              <template v-if="rowIndex === 2"><i class="rank-cuprum"></i></template>
+              <template v-if="rowIndex > 2">{{rowIndex + 1}}</template>
+            </template>
+            <template v-if="!rankBadge">{{rowIndex + 1}}</template>
+          </td>
           <template v-for="(col, colIndex) in row" v-if="colIndex >= (lineNum * tIndex) && colIndex < (lineNum * (tIndex + 1))">
             <template v-if="isArr(col)">
               <td v-for="(c, cIndex) in col" :key="colIndex + '-' + cIndex">{{c}}</td>
@@ -35,7 +44,7 @@
 <script>
 export default {
   name: 'CommTable',
-  props: ['title', 'second-title', 'data', 'show-index', 'line-num'],
+  props: ['title', 'second-title', 'data', 'show-index', 'line-num', 'rank-badge'],
   data () {
     return {
       rowDatas: [],
@@ -89,6 +98,36 @@ export default {
         padding: 0.8rem 0;
         border-top: 1px solid rgb(70, 189, 248);
         white-space: nowrap;
+        .rank-gold {
+          position: relative;
+          display: inline-block;
+          width: 1.2rem;
+          height: 1rem;
+          background-image: url('./../assets/rank-gold.png');
+          background-size: auto 100%;
+          background-repeat: no-repeat;
+          background-position: center;
+        }
+        .rank-silver {
+          position: relative;
+          display: inline-block;
+          width: 1.2rem;
+          height: 1rem;
+          background-image: url('./../assets/rank-silver.png');
+          background-size: auto 100%;
+          background-repeat: no-repeat;
+          background-position: center;
+        }
+        .rank-cuprum {
+          position: relative;
+          display: inline-block;
+          width: 1.2rem;
+          height: 1rem;
+          background-image: url('./../assets/rank-cuprum.png');
+          background-size: auto 100%;
+          background-repeat: no-repeat;
+          background-position: center;
+        }
       }
       td:nth-of-type(n + 2) {
         border-left: 1px solid rgb(70, 189, 248);

@@ -259,6 +259,22 @@ var router = new Router({
       meta: {
         title: '龙虎榜'
       }
+    },
+    {
+      path: '/app-inteligent-analysis',
+      name: 'AppIntelligentAnalysis',
+      component: resolve => require(['@/components/app/IntelligentAnalysis'], resolve),
+      meta: {
+        title: '智能分析'
+      }
+    },
+    {
+      path: '/app-client-kpi',
+      name: 'AppClientKpi',
+      component: resolve => require(['@/components/app/ClientKpi'], resolve),
+      meta: {
+        title: '客户 KPI'
+      }
     }
   ]
 })

@@ -6,7 +6,7 @@
         <span>{{app.text}}</span>
       </div>
     </div>
-    <comm-table :title="tableTitles" :second-title="tableSecondTitles" :data="tableData" :show-index="true" :line-num="3"></comm-table>
+    <comm-table :title="tableTitles" :second-title="tableSecondTitles" :data="tableData" :show-index="true" :line-num="3" :rank-badge="true"></comm-table>
   </div>
 </template>
 
@@ -128,9 +128,125 @@ export default {
           'esc': [
             '高兆祥', '6374.30'
           ]
+        },
+        {
+          'gxd': [
+            '陈俊锋', '6374.30'
+          ],
+          'zcxs': [
+            '戈凯', '6374.30'
+          ],
+          'qcyp': [
+            '陆雪梦', '6374.30'
+          ],
+          'jr': [
+            '高兆祥', '6374.30'
+          ],
+          'bx': [
+            '高兆祥', '6374.30'
+          ],
+          'esc': [
+            '高兆祥', '6374.30'
+          ]
+        },
+        {
+          'gxd': [
+            '陈俊锋', '6374.30'
+          ],
+          'zcxs': [
+            '戈凯', '6374.30'
+          ],
+          'qcyp': [
+            '陆雪梦', '6374.30'
+          ],
+          'jr': [
+            '高兆祥', '6374.30'
+          ],
+          'bx': [
+            '高兆祥', '6374.30'
+          ],
+          'esc': [
+            '高兆祥', '6374.30'
+          ]
+        },
+        {
+          'gxd': [
+            '陈俊锋', '6374.30'
+          ],
+          'zcxs': [
+            '戈凯', '6374.30'
+          ],
+          'qcyp': [
+            '陆雪梦', '6374.30'
+          ],
+          'jr': [
+            '高兆祥', '6374.30'
+          ],
+          'bx': [
+            '高兆祥', '6374.30'
+          ],
+          'esc': [
+            '高兆祥', '6374.30'
+          ]
+        },
+        {
+          'gxd': [
+            '陈俊锋', '6374.30'
+          ],
+          'zcxs': [
+            '戈凯', '6374.30'
+          ],
+          'qcyp': [
+            '陆雪梦', '6374.30'
+          ],
+          'jr': [
+            '高兆祥', '6374.30'
+          ],
+          'bx': [
+            '高兆祥', '6374.30'
+          ],
+          'esc': [
+            '高兆祥', '6374.30'
+          ]
+        },
+        {
+          'gxd': [
+            '陈俊锋', '6374.30'
+          ],
+          'zcxs': [
+            '戈凯', '6374.30'
+          ],
+          'qcyp': [
+            '陆雪梦', '6374.30'
+          ],
+          'jr': [
+            '高兆祥', '6374.30'
+          ],
+          'bx': [
+            '高兆祥', '6374.30'
+          ],
+          'esc': [
+            '高兆祥', '6374.30'
+          ]
         }
       ]
     }
+  },
+  mounted () {
+    this.$call('addTitleBtn', JSON.stringify([
+      {
+        event: 'title-btn-day',
+        txt: '日'
+      },
+      {
+        event: 'title-btn-month',
+        txt: '月'
+      },
+      {
+        event: 'title-btn-year',
+        txt: '年'
+      }
+    ]))
   }
 }
 </script>
@@ -143,6 +259,7 @@ export default {
     position: relative;
     font-size: 0;
     padding: 0.2rem 0.6rem 0.8rem;
+    text-align: center;
     .top-app-item {
       position: relative;
       display: inline-block;

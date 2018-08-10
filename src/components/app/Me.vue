@@ -17,12 +17,19 @@
       </div>
       <i class="user-footer"></i>
     </div>
+    <div class="user-info-item-wrap do-item-wrap">
+      <div class="user-info-item flex-r flex-b" v-for="(doItem, doItemIndex) in doItems" :key="doItemIndex" @click="toPage(doItem.path, doItem.title)">
+        <span class="title">{{doItem.title}}</span>
+        <span class="arrow"></span>
+      </div>
+    </div>
     <div class="user-info-item-wrap">
-      <div class="user-info-item" v-for="(userInfo, userInfoIndex) in userInfos" :key="userInfoIndex">
+      <div class="user-info-item flex-r flex-b" v-for="(userInfo, userInfoIndex) in userInfos" :key="userInfoIndex">
         <span class="title">{{userInfo.title}}</span>
         <span class="content">{{userInfo.content}}</span>
       </div>
     </div>
+    <div class="finish-cur-account" @click="finishCurAccount">退出当前帐号</div>
   </div>
 </template>
 
@@ -35,6 +42,16 @@ export default {
       defaultUserHead: '',
       userInfo: {},
       userLevel: 3,
+      doItems: [
+        {
+          title: '我的绩效',
+          path: 'app-just-now-performance'
+        },
+        {
+          title: '个人业绩',
+          path: 'app-home'
+        }
+      ],
       userInfos: []
     }
   },
@@ -61,10 +78,6 @@ export default {
       this.$set(this.userInfo, 'userName', this.$moment.userInfo.user.name)
       this.userInfos = [
         {
-          title: '公司',
-          content: this.$moment.userInfo.user.companyName || '未设置'
-        },
-        {
           title: '职务',
           content: this.$moment.userInfo.user.dutyName || '未设置'
         },
@@ -84,6 +97,20 @@ export default {
           this.$call('selectPic', '')
         }
       })
+    },
+    toPage (path, title) {
+      this.$call('skipPage', JSON.stringify({
+        path: path,
+        title: title,
+        titleDos: [],
+        titleBarColor: '#004E97',
+        statusBarStyle: 'highlight',
+        fullPage: false,
+        pageParams: {}
+      }))
+    },
+    finishCurAccount () {
+      this.$call('exitLogin', '')
     }
   }
 }
@@ -243,10 +270,11 @@ export default {
       position: relative;
       display: inline-block;
       width: 3.2rem;
-      color: #6d6d6d;
+      color: #1a1a1a;
     }
     .content {
       position: relative;
+      color: #6d6d6d;
     }
   }
   .user-info-item:nth-of-type(n + 2)::after {
@@ -257,5 +285,35 @@ export default {
     top: 0;
     border-top: 1px solid #f8f8f8;
   }
+}
+.do-item-wrap {
+  margin-bottom: 0.8rem;
+  .user-info-item {
+    padding: 1rem 0.8rem;
+    .title {
+      position: relative;
+      display: inline-block;
+      width: 3.2rem;
+      color: #1a1a1a;
+    }
+    .arrow {
+      position: relative;
+      display: inline-block;
+      width: 2rem;
+      height: 1.2rem;
+      background-image: url('./../../assets/item-arrow.png');
+      background-repeat: no-repeat;
+      background-size: auto 100%;
+      background-position: center;
+    }
+  }
+}
+.finish-cur-account {
+  position: relative;
+  margin-top: 1.2rem;
+  font-size: 0.8rem;
+  background-color: #ffffff;
+  text-align: center;
+  padding: 1rem 0;
 }
 </style>
