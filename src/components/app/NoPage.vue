@@ -3,7 +3,6 @@
     <div class="working-wrap">
       <img class="img" :src="working">
       <span class="tip">程序猿正在努力开发中...</span>
-      <span class="tip">！！！由于工资太低，导致进度缓慢！！！</span>
     </div>
     <div class="img-1"></div>
   </div>

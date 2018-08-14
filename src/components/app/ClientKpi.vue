@@ -1,12 +1,24 @@
 <template>
   <div class="client-kpi">
     <div class="top-apps-wrap">
-      <div class="top-app-item" v-for="(app, appIndex) in topApps" :key="appIndex" :style="{ 'width': `calc((100% - 5 * 2 * 0.2rem) / 5)` }">
+      <div class="top-app-item" v-for="(app, appIndex) in topApps" :key="appIndex" :class="page === appIndex ? ['cur-app', `cur-app-${page}`] : ''" :style="{ 'width': `calc((100% - 5 * 2 * 0.2rem) / 5)` }" @click="toTopApp(app, appIndex)">
         <i :style="{ 'background-image': `url(${app.icon})` }"></i>
         <span>{{app.text}}</span>
       </div>
     </div>
-    <comm-table :title="tableTitles" :data="tableData" :show-index="true" :line-num="6" :rank-badge="true"></comm-table>
+    <template v-if="page === 0">
+      <img class="data-loading" :src="require('@/assets/user-loading.gif')" v-if="dataIsLoading">
+      <comm-table v-if="!dataIsLoading" :title="tableTitlesKpi" :data="tableDataKpi" :show-index="true" :rank-badge="false"></comm-table>
+    </template>
+    <template v-if="page === 1">
+    </template>
+    <template v-if="page === 2">
+    </template>
+    <template v-if="page === 3">
+      <iframe frameborder="0" :style="{ 'width': '100%', 'height': '100%' }" src="http://m.dachangjr.com/h5/chengjiaofenxi/chengjiaofenxi.html"></iframe>
+    </template>
+    <template v-if="page === 4">
+    </template>
   </div>
 </template>
 
@@ -20,6 +32,9 @@ export default {
   },
   data () {
     return {
+      page: 0,
+      dateType: 'day',
+      dataIsLoading: true,
       topApps: [
         {
           icon: require('@/assets/do_qkhx.png'),
@@ -42,106 +57,53 @@ export default {
           text: '战败分析'
         }
       ],
-      tableTitles: [
+      tableTitlesKpi: [
         {
           label: '姓名',
           prop: 'name'
         },
         {
-          label: '成交量',
-          prop: 'cjl'
-        },
-        {
-          label: '成交率',
-          prop: 'cjlv'
-        },
-        {
-          label: '二次到店量',
-          prop: 'ecddl'
-        },
-        {
-          label: '二次到店率',
-          prop: 'ecddlv'
+          label: '接待量',
+          prop: 'receptionNum'
         },
         {
           label: '留档量',
-          prop: 'ldl'
+          prop: 'fileNum'
         },
         {
-          label: '留档率',
-          prop: 'ldlv'
+          label: '留档率（%）',
+          prop: 'filePer'
         },
         {
-          label: '试驾人数',
-          prop: 'sjrs'
+          label: '二次到店量',
+          prop: 'arrival2Num'
         },
         {
-          label: '试驾率',
-          prop: 'sjlv'
+          label: '二次到店率（%）',
+          prop: 'arrival2Per'
         },
         {
-          label: '接待量',
-          prop: 'jdl'
+          label: '试驾量',
+          prop: 'driveNum'
         },
         {
-          label: '战败',
-          prop: 'zb'
+          label: '试驾率（%）',
+          prop: 'drivePer'
+        },
+        {
+          label: '成交量',
+          prop: 'closeNum'
+        },
+        {
+          label: '成交率（%）',
+          prop: 'closePer'
+        },
+        {
+          label: '战败量',
+          prop: 'failureNum'
         }
       ],
-      tableData: [
-        {
-          'name': '高兆祥',
-          'cjl': '9',
-          'cjlv': '60%',
-          'ecddl': '36',
-          'ecddlv': '60%',
-          'ldl': '90',
-          'ldlv': '60%',
-          'sjrs': '2',
-          'sjlv': '8',
-          'jdl': '9',
-          'zb': '6'
-        },
-        {
-          'name': '高兆祥',
-          'cjl': '9',
-          'cjlv': '60%',
-          'ecddl': '36',
-          'ecddlv': '60%',
-          'ldl': '90',
-          'ldlv': '60%',
-          'sjrs': '2',
-          'sjlv': '8',
-          'jdl': '9',
-          'zb': '6'
-        },
-        {
-          'name': '高兆祥',
-          'cjl': '9',
-          'cjlv': '60%',
-          'ecddl': '36',
-          'ecddlv': '60%',
-          'ldl': '90',
-          'ldlv': '60%',
-          'sjrs': '2',
-          'sjlv': '8',
-          'jdl': '9',
-          'zb': '6'
-        },
-        {
-          'name': '高兆祥',
-          'cjl': '9',
-          'cjlv': '60%',
-          'ecddl': '36',
-          'ecddlv': '60%',
-          'ldl': '90',
-          'ldlv': '60%',
-          'sjrs': '2',
-          'sjlv': '8',
-          'jdl': '9',
-          'zb': '6'
-        }
-      ]
+      tableDataKpi: []
     }
   },
   mounted () {
@@ -159,6 +121,81 @@ export default {
         txt: '年'
       }
     ]))
+    this.$root.eventHub.$on('title-btn-day', () => {
+      this.dateType = 'day'
+      this.dataIsLoading = true
+      let startDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      let endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      this.getOrderList(startDate, endDate)
+    })
+    this.$root.eventHub.$on('title-btn-month', () => {
+      this.dateType = 'month'
+      this.dataIsLoading = true
+      let startDate = this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[0], 'yyyy-MM-dd')
+      let endDate = this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[1], 'yyyy-MM-dd')
+      this.getOrderList(startDate, endDate)
+    })
+    this.$root.eventHub.$on('title-btn-year', () => {
+      this.dateType = 'year'
+      this.dataIsLoading = true
+      let startDate = this.$comfun.formatDate(this.$comfun.getYearStartEnd()[0], 'yyyy-MM-dd')
+      let endDate = this.$comfun.formatDate(this.$comfun.getYearStartEnd()[1], 'yyyy-MM-dd')
+      this.getOrderList(startDate, endDate)
+    })
+    this.$root.eventHub.$on('app-has-save-user-info', () => {
+      let startDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      let endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      this.getOrderList(startDate, endDate)
+    })
+    let startDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+    let endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+    this.getOrderList(startDate, endDate)
+  },
+  methods: {
+    toTopApp (app, appIndex) {
+      this.page = appIndex
+      if (appIndex === 0) {
+        this.dataIsLoading = true
+        let startDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+        let endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+        if (this.dateType === 'month') {
+          startDate = this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[0], 'yyyy-MM-dd')
+          endDate = this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[1], 'yyyy-MM-dd')
+        } else if (this.dateType === 'year') {
+          startDate = this.$comfun.formatDate(this.$comfun.getYearStartEnd()[0], 'yyyy-MM-dd')
+          endDate = this.$comfun.formatDate(this.$comfun.getYearStartEnd()[1], 'yyyy-MM-dd')
+        }
+        this.getOrderList(startDate, endDate)
+      }
+    },
+    getOrderList (startDate, endDate) {
+      if (this.page === 0) {
+        this.tableDataKpi = []
+        this.$comfun.http_post(this, `data/kpi/all/${this.$moment.userInfo.user.companyId}/order`, {
+          startDate: startDate,
+          endDate: endDate
+        }).then((response) => {
+          if (response.body.success === '1') {
+            for (let s = 0; s < response.body.result.length; s++) {
+              let resultData = {}
+              for (let t = 0; t < this.tableTitlesKpi.length; t++) {
+                resultData[this.tableTitlesKpi[t].prop] = response.body.result[s][this.tableTitlesKpi[t].prop] ? response.body.result[s][this.tableTitlesKpi[t].prop] : 0
+              }
+              this.tableDataKpi.push(resultData)
+            }
+            this.$nextTick().then(() => {
+              setTimeout(() => {
+                this.dataIsLoading = false
+              }, 100)
+            })
+          } else {
+            this.$dialog_msg({
+              msg: '获取kpi数据失败'
+            })
+          }
+        })
+      }
+    }
   }
 }
 </script>
@@ -195,6 +232,64 @@ export default {
         white-space: nowrap;
       }
     }
+    .cur-app {
+      i::before {
+        content: '';
+        position: absolute;
+        background-color: rgb(214, 91, 10);
+        width: 1rem;
+        height: 1rem;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        bottom: -2.8rem;
+        transform: rotate(45deg);
+      }
+      i::after {
+        content: '';
+        position: absolute;
+        background-color: rgb(255, 255, 255);
+        width: 1.4rem;
+        height: 1.4rem;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        bottom: -3.4rem;
+      }
+    }
+    .cur-app-0 {
+      i::before {
+        background-color: #0099E9;
+      }
+    }
+    .cur-app-1 {
+      i::before {
+        background-color: #F39927;
+      }
+    }
+    .cur-app-2 {
+      i::before {
+        background-color: #1DDAE1;
+      }
+    }
+    .cur-app-3 {
+      i::before {
+        background-color: #1D8FE1;
+      }
+    }
+    .cur-app-4 {
+      i::before {
+        background-color: #F9A63D;
+      }
+    }
+  }
+  .data-loading {
+    position: absolute;
+    width: 3.4rem;
+    top: 48vh;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
   }
 }
 </style>

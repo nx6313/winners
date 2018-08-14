@@ -1,235 +1,129 @@
 <template>
-  <div class="winner-list">
+  <div class="winner-list" :style="canOverFlow ? {} : { 'overflow': 'hidden' }">
     <div class="top-apps-wrap">
-      <div class="top-app-item" v-for="(app, appIndex) in topApps" :key="appIndex" :style="{ 'width': `calc((100% - ${topApps.length} * 2 * 0.2rem) / ${topApps.length})` }">
+      <div class="top-app-item" v-for="(app, appIndex) in topApps" :key="appIndex" :class="page === appIndex ? ['cur-app', `cur-app-${page}`] : ''" :style="{ 'width': `calc((100% - ${topApps.length} * 2 * 0.2rem) / ${topApps.length})` }" @click="toTopApp(app, appIndex)">
         <i :style="{ 'background-image': `url(${app.icon})` }"></i>
         <span>{{app.text}}</span>
       </div>
     </div>
-    <comm-table :title="tableTitles" :second-title="tableSecondTitles" :data="tableData" :show-index="true" :line-num="3" :rank-badge="true"></comm-table>
+    <template v-if="page === 0">
+      <img class="data-loading" :src="require('@/assets/user-loading.gif')" v-if="dataIsLoading">
+      <comm-table v-if="!dataIsLoading" :title="tableTitles" :second-title="tableSecondTitles" :data="tableData" :show-index="true" :line-num="3" :rank-badge="false"></comm-table>
+    </template>
+    <template v-if="page === 1">
+      积分排行
+    </template>
+    <template v-if="page === 2">
+      <app-advance></app-advance>
+    </template>
+    <template v-if="page === 3">
+      <app-badge></app-badge>
+    </template>
+    <template v-if="page === 4">
+      阿米巴竞赛
+    </template>
   </div>
 </template>
 
 <script>
 import Table from '@/components/CommTable'
+import Advance from '@/components/app/Advance'
+import Badge from '@/components/app/Badge'
+import NoPage from '@/components/app/NoPage'
 
 export default {
   name: 'AppWinnerList',
   components: {
-    'comm-table': Table
+    'comm-table': Table,
+    'app-advance': Advance,
+    'app-badge': Badge,
+    'app-no-page': NoPage
   },
   data () {
     return {
+      page: 0,
+      dateType: 'day',
+      canOverFlow: true,
+      dataIsLoading: true,
       topApps: [
         {
           icon: require('@/assets/do_yjpm.png'),
-          text: '业绩排名'
+          text: '业绩排名',
+          titleBg: '',
+          dos: true
         },
         {
           icon: require('@/assets/do_jfph.png'),
-          text: '积分排行'
+          text: '积分排行',
+          titleBg: '',
+          dos: true
         },
         {
           icon: require('@/assets/do_cgjj.png'),
-          text: '闯关晋级'
+          text: '闯关晋级',
+          titleBg: '#00488F',
+          dos: false
         },
         {
           icon: require('@/assets/do_pyxb.png'),
-          text: '评优选拔'
+          text: '评优选拔',
+          titleBg: '#144E97',
+          dos: false
         },
         {
           icon: require('@/assets/do_ambjs.png'),
-          text: '阿米巴竞赛'
+          text: '阿米巴竞赛',
+          titleBg: '',
+          dos: false
         }
       ],
       tableTitles: [
         {
           label: '贡献度',
-          prop: 'gxd'
+          prop: 'contribution'
         },
         {
           label: '整车销售',
-          prop: 'zcxs'
+          prop: 'newcar'
         },
         {
           label: '汽车用品',
-          prop: 'qcyp'
+          prop: 'accessory'
         },
         {
           label: '金融',
-          prop: 'jr'
+          prop: 'finance'
         },
         {
           label: '保险',
-          prop: 'bx'
+          prop: 'insurance'
         },
         {
           label: '二手车',
-          prop: 'esc'
+          prop: 'oldcar'
         }
       ],
       tableSecondTitles: {
-        'gxd': [
+        'contribution': [
           '姓名', '金额（元）'
         ],
-        'zcxs': [
+        'newcar': [
           '姓名', '台数'
         ],
-        'qcyp': [
+        'accessory': [
           '姓名', '销售额'
         ],
-        'jr': [
+        'finance': [
           '姓名', '信贷量'
         ],
-        'bx': [
+        'insurance': [
           '姓名', '投保量（单）'
         ],
-        'esc': [
+        'oldcar': [
           '姓名', '销售（台）'
         ]
       },
-      tableData: [
-        {
-          'gxd': [
-            '高兆祥', '6374.30'
-          ],
-          'zcxs': [
-            '高兆祥', '6374.30'
-          ],
-          'qcyp': [
-            '高兆祥', '6374.30'
-          ],
-          'jr': [
-            '高兆祥', '6374.30'
-          ],
-          'bx': [
-            '高兆祥', '6374.30'
-          ],
-          'esc': [
-            '高兆祥', '6374.30'
-          ]
-        },
-        {
-          'gxd': [
-            '陈俊锋', '6374.30'
-          ],
-          'zcxs': [
-            '戈凯', '6374.30'
-          ],
-          'qcyp': [
-            '陆雪梦', '6374.30'
-          ],
-          'jr': [
-            '高兆祥', '6374.30'
-          ],
-          'bx': [
-            '高兆祥', '6374.30'
-          ],
-          'esc': [
-            '高兆祥', '6374.30'
-          ]
-        },
-        {
-          'gxd': [
-            '陈俊锋', '6374.30'
-          ],
-          'zcxs': [
-            '戈凯', '6374.30'
-          ],
-          'qcyp': [
-            '陆雪梦', '6374.30'
-          ],
-          'jr': [
-            '高兆祥', '6374.30'
-          ],
-          'bx': [
-            '高兆祥', '6374.30'
-          ],
-          'esc': [
-            '高兆祥', '6374.30'
-          ]
-        },
-        {
-          'gxd': [
-            '陈俊锋', '6374.30'
-          ],
-          'zcxs': [
-            '戈凯', '6374.30'
-          ],
-          'qcyp': [
-            '陆雪梦', '6374.30'
-          ],
-          'jr': [
-            '高兆祥', '6374.30'
-          ],
-          'bx': [
-            '高兆祥', '6374.30'
-          ],
-          'esc': [
-            '高兆祥', '6374.30'
-          ]
-        },
-        {
-          'gxd': [
-            '陈俊锋', '6374.30'
-          ],
-          'zcxs': [
-            '戈凯', '6374.30'
-          ],
-          'qcyp': [
-            '陆雪梦', '6374.30'
-          ],
-          'jr': [
-            '高兆祥', '6374.30'
-          ],
-          'bx': [
-            '高兆祥', '6374.30'
-          ],
-          'esc': [
-            '高兆祥', '6374.30'
-          ]
-        },
-        {
-          'gxd': [
-            '陈俊锋', '6374.30'
-          ],
-          'zcxs': [
-            '戈凯', '6374.30'
-          ],
-          'qcyp': [
-            '陆雪梦', '6374.30'
-          ],
-          'jr': [
-            '高兆祥', '6374.30'
-          ],
-          'bx': [
-            '高兆祥', '6374.30'
-          ],
-          'esc': [
-            '高兆祥', '6374.30'
-          ]
-        },
-        {
-          'gxd': [
-            '陈俊锋', '6374.30'
-          ],
-          'zcxs': [
-            '戈凯', '6374.30'
-          ],
-          'qcyp': [
-            '陆雪梦', '6374.30'
-          ],
-          'jr': [
-            '高兆祥', '6374.30'
-          ],
-          'bx': [
-            '高兆祥', '6374.30'
-          ],
-          'esc': [
-            '高兆祥', '6374.30'
-          ]
-        }
-      ]
+      tableData: []
     }
   },
   mounted () {
@@ -247,6 +141,94 @@ export default {
         txt: '年'
       }
     ]))
+    this.$root.eventHub.$on('title-btn-day', () => {
+      this.dateType = 'day'
+      this.dataIsLoading = true
+      let startDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      let endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      this.getOrderList(startDate, endDate)
+    })
+    this.$root.eventHub.$on('title-btn-month', () => {
+      this.dateType = 'month'
+      this.dataIsLoading = true
+      let startDate = this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[0], 'yyyy-MM-dd')
+      let endDate = this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[1], 'yyyy-MM-dd')
+      this.getOrderList(startDate, endDate)
+    })
+    this.$root.eventHub.$on('title-btn-year', () => {
+      this.dateType = 'year'
+      this.dataIsLoading = true
+      let startDate = this.$comfun.formatDate(this.$comfun.getYearStartEnd()[0], 'yyyy-MM-dd')
+      let endDate = this.$comfun.formatDate(this.$comfun.getYearStartEnd()[1], 'yyyy-MM-dd')
+      this.getOrderList(startDate, endDate)
+    })
+    this.$root.eventHub.$on('app-has-save-user-info', () => {
+      let startDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      let endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      this.getOrderList(startDate, endDate)
+    })
+    let startDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+    let endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+    this.getOrderList(startDate, endDate)
+  },
+  methods: {
+    toTopApp (app, appIndex) {
+      this.page = appIndex
+      this.$call('updateTitleBar', JSON.stringify({
+        bg: app.titleBg,
+        dos: app.dos
+      }))
+      if (appIndex === 2 || appIndex === 3) {
+        this.canOverFlow = false
+      } else {
+        this.canOverFlow = true
+      }
+      if (appIndex === 0) {
+        this.dataIsLoading = true
+        let startDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+        let endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+        if (this.dateType === 'month') {
+          startDate = this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[0], 'yyyy-MM-dd')
+          endDate = this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[1], 'yyyy-MM-dd')
+        } else if (this.dateType === 'year') {
+          startDate = this.$comfun.formatDate(this.$comfun.getYearStartEnd()[0], 'yyyy-MM-dd')
+          endDate = this.$comfun.formatDate(this.$comfun.getYearStartEnd()[1], 'yyyy-MM-dd')
+        }
+        this.getOrderList(startDate, endDate)
+      }
+    },
+    getOrderList (startDate, endDate) {
+      this.tableData = []
+      this.$comfun.http_post(this, `data/person/order/${this.$moment.userInfo.user.id}`, {
+        startDate: startDate,
+        endDate: endDate
+      }).then((response) => {
+        if (response.body.success === '1') {
+          for (let t = 0; t < this.tableTitles.length; t++) {
+            for (let s = 0; s < response.body[this.tableTitles[t].prop].length; s++) {
+              let winnerData = {}
+              winnerData[this.tableTitles[t].prop] = [response.body[this.tableTitles[t].prop][s].name, (response.body[this.tableTitles[t].prop][s].num ? response.body[this.tableTitles[t].prop][s].num : 0)]
+              if (t === 0) {
+                this.tableData.push(winnerData)
+              } else {
+                this.$set(this.tableData[s], this.tableTitles[t].prop, [response.body[this.tableTitles[t].prop][s].name, (response.body[this.tableTitles[t].prop][s].num ? response.body[this.tableTitles[t].prop][s].num : 0)])
+              }
+              if (t === this.tableTitles.length - 1 && s === response.body[this.tableTitles[t].prop].length - 1) {
+                this.$nextTick().then(() => {
+                  setTimeout(() => {
+                    this.dataIsLoading = false
+                  }, 100)
+                })
+              }
+            }
+          }
+        } else {
+          this.$dialog_msg({
+            msg: '获取排名数据失败'
+          })
+        }
+      })
+    }
   }
 }
 </script>
@@ -283,6 +265,64 @@ export default {
         white-space: nowrap;
       }
     }
+    .cur-app {
+      i::before {
+        content: '';
+        position: absolute;
+        background-color: rgb(214, 91, 10);
+        width: 1rem;
+        height: 1rem;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        bottom: -2.8rem;
+        transform: rotate(45deg);
+      }
+      i::after {
+        content: '';
+        position: absolute;
+        background-color: rgb(255, 255, 255);
+        width: 1.4rem;
+        height: 1.4rem;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        bottom: -3.4rem;
+      }
+    }
+    .cur-app-0 {
+      i::before {
+        background-color: #0099E9;
+      }
+    }
+    .cur-app-1 {
+      i::before {
+        background-color: #F39927;
+      }
+    }
+    .cur-app-2 {
+      i::before {
+        background-color: #1DDAE1;
+      }
+    }
+    .cur-app-3 {
+      i::before {
+        background-color: #1D8FE1;
+      }
+    }
+    .cur-app-4 {
+      i::before {
+        background-color: #29AB91;
+      }
+    }
+  }
+  .data-loading {
+    position: absolute;
+    width: 3.4rem;
+    top: 48vh;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
   }
 }
 </style>

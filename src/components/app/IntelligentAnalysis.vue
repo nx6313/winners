@@ -1,12 +1,22 @@
 <template>
   <div class="inteligent-analysis">
     <div class="top-apps-wrap">
-      <div class="top-app-item" v-for="(app, appIndex) in topApps" :key="appIndex" :style="{ 'width': `calc((100% - 5 * 2 * 0.2rem) / 5)` }">
+      <div class="top-app-item" v-for="(app, appIndex) in topApps" :key="appIndex" :class="page === appIndex ? ['cur-app', `cur-app-${page}`] : ''" :style="{ 'width': `calc((100% - 5 * 2 * 0.2rem) / 5)` }" @click="toTopApp(app, appIndex)">
         <i :style="{ 'background-image': `url(${app.icon})` }"></i>
         <span>{{app.text}}</span>
       </div>
     </div>
-    <comm-table :title="tableTitles" :data="tableData" :show-index="true" :line-num="8" :rank-badge="true"></comm-table>
+    <template v-if="page === 0">
+      <img class="data-loading" :src="require('@/assets/user-loading.gif')" v-if="dataIsLoading">
+      <comm-table v-if="!dataIsLoading" :title="tableTitles" :data="tableData" :show-index="true" :rank-badge="false"></comm-table>
+    </template>
+    <template v-if="page === 1">
+      <img class="data-loading" :src="require('@/assets/user-loading.gif')" v-if="dataIsLoading">
+      <comm-table v-if="!dataIsLoading" :title="tableTitlesKpi" :data="tableDataKpi" :show-index="true" :rank-badge="false"></comm-table>
+    </template>
+    <template v-if="page === 2">
+      <iframe frameborder="0" :style="{ 'width': '100%', 'height': '100%' }" src="http://m.dachangjr.com/h5/yongjinjiangli/yongjinjiangli.html"></iframe>
+    </template>
   </div>
 </template>
 
@@ -20,6 +30,9 @@ export default {
   },
   data () {
     return {
+      page: 0,
+      dateType: 'day',
+      dataIsLoading: true,
       topApps: [
         {
           icon: require('@/assets/do_ssjx.png'),
@@ -41,67 +54,97 @@ export default {
         },
         {
           label: '提成统计',
-          prop: 'tctj'
+          prop: 'sumPref'
         },
         {
           label: '整车销售',
-          prop: 'zcxs'
+          prop: 'newcarPref'
         },
         {
           label: '汽车用品',
-          prop: 'qcyp'
+          prop: 'accessoryPerf'
         },
         {
           label: '金融',
-          prop: 'jr'
+          prop: 'financePerf'
         },
         {
           label: '二手车',
-          prop: 'esc'
+          prop: 'oldcarPerf'
         },
         {
-          label: '保险',
-          prop: 'bx'
+          label: '新保',
+          prop: 'insuranceNewPerf'
+        },
+        {
+          label: '延保',
+          prop: 'insuranceOldPerf'
+        },
+        {
+          label: '工龄工资',
+          prop: 'glgz'
+        },
+        {
+          label: '其他绩效',
+          prop: 'qtjx'
+        },
+        {
+          label: '其他政策提成',
+          prop: 'qtzctc'
+        },
+        {
+          label: '贡献度',
+          prop: 'gxd'
         }
       ],
-      tableData: [
+      tableData: [],
+      tableTitlesKpi: [
         {
-          'name': '高兆祥',
-          'tctj': '6374.30',
-          'zcxs': '6374.30',
-          'qcyp': '6374.30',
-          'jr': '6374.30',
-          'esc': '6374.30',
-          'bx': '6374.30'
+          label: '姓名',
+          prop: 'name'
         },
         {
-          'name': '高兆祥',
-          'tctj': '6374.30',
-          'zcxs': '6374.30',
-          'qcyp': '6374.30',
-          'jr': '6374.30',
-          'esc': '6374.30',
-          'bx': '6374.30'
+          label: '接待量',
+          prop: 'receptionNum'
         },
         {
-          'name': '高兆祥',
-          'tctj': '6374.30',
-          'zcxs': '6374.30',
-          'qcyp': '6374.30',
-          'jr': '6374.30',
-          'esc': '6374.30',
-          'bx': '6374.30'
+          label: '留档量',
+          prop: 'fileNum'
         },
         {
-          'name': '高兆祥',
-          'tctj': '6374.30',
-          'zcxs': '6374.30',
-          'qcyp': '6374.30',
-          'jr': '6374.30',
-          'esc': '6374.30',
-          'bx': '6374.30'
+          label: '留档率（%）',
+          prop: 'filePer'
+        },
+        {
+          label: '二次到店量',
+          prop: 'arrival2Num'
+        },
+        {
+          label: '二次到店率（%）',
+          prop: 'arrival2Per'
+        },
+        {
+          label: '试驾量',
+          prop: 'driveNum'
+        },
+        {
+          label: '试驾率（%）',
+          prop: 'drivePer'
+        },
+        {
+          label: '成交量',
+          prop: 'closeNum'
+        },
+        {
+          label: '成交率（%）',
+          prop: 'closePer'
+        },
+        {
+          label: '战败量',
+          prop: 'failureNum'
         }
-      ]
+      ],
+      tableDataKpi: []
     }
   },
   mounted () {
@@ -119,6 +162,106 @@ export default {
         txt: '年'
       }
     ]))
+    this.$root.eventHub.$on('title-btn-day', () => {
+      this.dateType = 'day'
+      this.dataIsLoading = true
+      let startDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      let endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      this.getOrderList(startDate, endDate)
+    })
+    this.$root.eventHub.$on('title-btn-month', () => {
+      this.dateType = 'month'
+      this.dataIsLoading = true
+      let startDate = this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[0], 'yyyy-MM-dd')
+      let endDate = this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[1], 'yyyy-MM-dd')
+      this.getOrderList(startDate, endDate)
+    })
+    this.$root.eventHub.$on('title-btn-year', () => {
+      this.dateType = 'year'
+      this.dataIsLoading = true
+      let startDate = this.$comfun.formatDate(this.$comfun.getYearStartEnd()[0], 'yyyy-MM-dd')
+      let endDate = this.$comfun.formatDate(this.$comfun.getYearStartEnd()[1], 'yyyy-MM-dd')
+      this.getOrderList(startDate, endDate)
+    })
+    this.$root.eventHub.$on('app-has-save-user-info', () => {
+      let startDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      let endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+      this.getOrderList(startDate, endDate)
+    })
+    let startDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+    let endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+    this.getOrderList(startDate, endDate)
+  },
+  methods: {
+    toTopApp (app, appIndex) {
+      this.page = appIndex
+      if (appIndex === 0 || appIndex === 1) {
+        this.dataIsLoading = true
+        let startDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+        let endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
+        if (this.dateType === 'month') {
+          startDate = this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[0], 'yyyy-MM-dd')
+          endDate = this.$comfun.formatDate(this.$comfun.getMonthStartEnd()[1], 'yyyy-MM-dd')
+        } else if (this.dateType === 'year') {
+          startDate = this.$comfun.formatDate(this.$comfun.getYearStartEnd()[0], 'yyyy-MM-dd')
+          endDate = this.$comfun.formatDate(this.$comfun.getYearStartEnd()[1], 'yyyy-MM-dd')
+        }
+        this.getOrderList(startDate, endDate)
+      }
+    },
+    getOrderList (startDate, endDate) {
+      if (this.page === 0) {
+        this.tableData = []
+        this.$comfun.http_post(this, `data/person/perf/${this.$moment.userInfo.user.id}`, {
+          startDate: startDate,
+          endDate: endDate
+        }).then((response) => {
+          if (response.body.success === '1') {
+            for (let s = 0; s < response.body.newcar.length; s++) {
+              let winnerData = {}
+              for (let t = 0; t < this.tableTitles.length; t++) {
+                winnerData[this.tableTitles[t].prop] = response.body.newcar[s][this.tableTitles[t].prop] ? response.body.newcar[s][this.tableTitles[t].prop] : 0
+              }
+              this.tableData.push(winnerData)
+            }
+            this.$nextTick().then(() => {
+              setTimeout(() => {
+                this.dataIsLoading = false
+              }, 100)
+            })
+          } else {
+            this.$dialog_msg({
+              msg: '获取即时绩效数据失败'
+            })
+          }
+        })
+      } else if (this.page === 1) {
+        this.tableDataKpi = []
+        this.$comfun.http_post(this, `data/kpi/all/${this.$moment.userInfo.user.companyId}/order`, {
+          startDate: startDate,
+          endDate: endDate
+        }).then((response) => {
+          if (response.body.success === '1') {
+            for (let s = 0; s < response.body.result.length; s++) {
+              let resultData = {}
+              for (let t = 0; t < this.tableTitlesKpi.length; t++) {
+                resultData[this.tableTitlesKpi[t].prop] = response.body.result[s][this.tableTitlesKpi[t].prop] ? response.body.result[s][this.tableTitlesKpi[t].prop] : 0
+              }
+              this.tableDataKpi.push(resultData)
+            }
+            this.$nextTick().then(() => {
+              setTimeout(() => {
+                this.dataIsLoading = false
+              }, 100)
+            })
+          } else {
+            this.$dialog_msg({
+              msg: '获取kpi数据失败'
+            })
+          }
+        })
+      }
+    }
   }
 }
 </script>
@@ -156,6 +299,54 @@ export default {
         white-space: nowrap;
       }
     }
+    .cur-app {
+      i::before {
+        content: '';
+        position: absolute;
+        background-color: rgb(214, 91, 10);
+        width: 1rem;
+        height: 1rem;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        bottom: -2.8rem;
+        transform: rotate(45deg);
+      }
+      i::after {
+        content: '';
+        position: absolute;
+        background-color: rgb(255, 255, 255);
+        width: 1.4rem;
+        height: 1.4rem;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        bottom: -3.4rem;
+      }
+    }
+    .cur-app-0 {
+      i::before {
+        background-color: #0099E9;
+      }
+    }
+    .cur-app-1 {
+      i::before {
+        background-color: #2291E2;
+      }
+    }
+    .cur-app-2 {
+      i::before {
+        background-color: #1CDAE1;
+      }
+    }
+  }
+  .data-loading {
+    position: absolute;
+    width: 3.4rem;
+    top: 48vh;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
   }
 }
 </style>

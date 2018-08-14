@@ -1,42 +1,73 @@
 <template>
-  <div class="comm-table">
+  <div class="comm-table" :style="!lineNum ? { 'overflow-x': 'auto', 'overflow-y': 'hidden' } : {}">
     <template v-if="rowDatas.length > 0">
-      <table border="0" cellpadding="0" cellspacing="0" v-for="(t, tIndex) in tableCount" :key="tIndex">
-        <tr>
-          <th v-if="!secondTitle && showIndex">排名</th>
-          <th v-for="(th, thIndex) in title" :key="thIndex" v-if="thIndex >= (lineNum * tIndex) && thIndex < (lineNum * (tIndex + 1))" :colspan="thIndex % lineNum === 0 && showIndex ? (isArr(rowDatas[0][thIndex]) ? (!secondTitle ? rowDatas[0][thIndex].length : rowDatas[0][thIndex].length + 1) : (!secondTitle ? 1 : 2)) : (isArr(rowDatas[0][thIndex]) ? rowDatas[0][thIndex].length : 1)">{{th.label}}</th>
-        </tr>
-        <tr v-if="secondTitle">
-          <td v-if="showIndex">排名</td>
-          <template v-for="(second, secondIndex) in secondTitles" v-if="secondIndex >= (lineNum * tIndex) && secondIndex < (lineNum * (tIndex + 1))">
-            <template v-if="isArr(second)">
-              <td v-for="(s, sIndex) in second" :key="secondIndex + '-' + sIndex">{{s}}</td>
+      <div class="comm-table-rail-wrap" :style="!lineNum ? { 'width': `calc(${(title.length + (showIndex ? 1 : 0))} * 3rem)` } : {}">
+        <table border="0" cellpadding="0" cellspacing="0" v-for="(t, tIndex) in tableCount" :key="tIndex">
+          <tr>
+            <th v-if="!secondTitle && showIndex">排名</th>
+            <template v-if="lineNum">
+              <th v-for="(th, thIndex) in title" :key="thIndex" v-if="thIndex >= (lineNum * tIndex) && thIndex < (lineNum * (tIndex + 1))" :colspan="thIndex % lineNum === 0 && showIndex ? (isArr(rowDatas[0][thIndex]) ? (!secondTitle ? rowDatas[0][thIndex].length : rowDatas[0][thIndex].length + 1) : (!secondTitle ? 1 : 2)) : (isArr(rowDatas[0][thIndex]) ? rowDatas[0][thIndex].length : 1)">{{th.label}}</th>
             </template>
-            <template v-if="!isArr(second)">
-              <td :key="secondIndex">{{second}}</td>
+            <template v-if="!lineNum">
+              <th v-for="(th, thIndex) in title" :key="thIndex" :colspan="showIndex ? (isArr(rowDatas[0][thIndex]) ? (!secondTitle ? rowDatas[0][thIndex].length : rowDatas[0][thIndex].length + 1) : (!secondTitle ? 1 : 2)) : (isArr(rowDatas[0][thIndex]) ? rowDatas[0][thIndex].length : 1)">{{th.label}}</th>
             </template>
-          </template>
-        </tr>
-        <tr v-for="(row, rowIndex) in rowDatas" :key="rowIndex">
-          <td v-if="showIndex">
-            <template v-if="rankBadge">
-              <template v-if="rowIndex === 0"><i class="rank-gold"></i></template>
-              <template v-if="rowIndex === 1"><i class="rank-silver"></i></template>
-              <template v-if="rowIndex === 2"><i class="rank-cuprum"></i></template>
-              <template v-if="rowIndex > 2">{{rowIndex + 1}}</template>
+          </tr>
+          <tr v-if="secondTitle">
+            <td v-if="showIndex">排名</td>
+            <template v-if="lineNum">
+              <template v-for="(second, secondIndex) in secondTitles" v-if="secondIndex >= (lineNum * tIndex) && secondIndex < (lineNum * (tIndex + 1))">
+                <template v-if="isArr(second)">
+                  <td v-for="(s, sIndex) in second" :key="secondIndex + '-' + sIndex">{{s}}</td>
+                </template>
+                <template v-if="!isArr(second)">
+                  <td :key="secondIndex">{{second}}</td>
+                </template>
+              </template>
             </template>
-            <template v-if="!rankBadge">{{rowIndex + 1}}</template>
-          </td>
-          <template v-for="(col, colIndex) in row" v-if="colIndex >= (lineNum * tIndex) && colIndex < (lineNum * (tIndex + 1))">
-            <template v-if="isArr(col)">
-              <td v-for="(c, cIndex) in col" :key="colIndex + '-' + cIndex">{{c}}</td>
+            <template v-if="!lineNum">
+              <template v-for="(second, secondIndex) in secondTitles">
+                <template v-if="isArr(second)">
+                  <td v-for="(s, sIndex) in second" :key="secondIndex + '-' + sIndex">{{s}}</td>
+                </template>
+                <template v-if="!isArr(second)">
+                  <td :key="secondIndex">{{second}}</td>
+                </template>
+              </template>
             </template>
-            <template v-if="!isArr(col)">
-              <td :key="colIndex">{{col}}</td>
+          </tr>
+          <tr v-for="(row, rowIndex) in rowDatas" :key="rowIndex">
+            <td v-if="showIndex">
+              <template v-if="rankBadge">
+                <template v-if="rowIndex === 0"><i class="rank-gold"></i></template>
+                <template v-if="rowIndex === 1"><i class="rank-silver"></i></template>
+                <template v-if="rowIndex === 2"><i class="rank-cuprum"></i></template>
+                <template v-if="rowIndex > 2">{{rowIndex + 1}}</template>
+              </template>
+              <template v-if="!rankBadge">{{rowIndex + 1}}</template>
+            </td>
+            <template v-if="lineNum">
+              <template v-for="(col, colIndex) in row" v-if="colIndex >= (lineNum * tIndex) && colIndex < (lineNum * (tIndex + 1))">
+                <template v-if="isArr(col)">
+                  <td v-for="(c, cIndex) in col" :key="colIndex + '-' + cIndex">{{c}}</td>
+                </template>
+                <template v-if="!isArr(col)">
+                  <td :key="colIndex">{{col}}</td>
+                </template>
+              </template>
             </template>
-          </template>
-        </tr>
-      </table>
+            <template v-if="!lineNum">
+              <template v-for="(col, colIndex) in row">
+                <template v-if="isArr(col)">
+                  <td v-for="(c, cIndex) in col" :key="colIndex + '-' + cIndex">{{c}}</td>
+                </template>
+                <template v-if="!isArr(col)">
+                  <td :key="colIndex">{{col}}</td>
+                </template>
+              </template>
+            </template>
+          </tr>
+        </table>
+      </div>
     </template>
   </div>
 </template>
@@ -60,7 +91,9 @@ export default {
       }
       this.rowDatas.push(columnDatas)
     }
-    this.tableCount = Math.ceil(this.title.length / this.lineNum)
+    if (this.lineNum) {
+      this.tableCount = Math.ceil(this.title.length / this.lineNum)
+    }
     for (let c = 0; c < this.title.length; c++) {
       this.secondTitles.push(this.secondTitle[this.title[c].prop])
     }
@@ -77,6 +110,9 @@ export default {
 .comm-table {
   position: relative;
   font-size: 0.8rem;
+  .comm-table-rail-wrap {
+    position: relative;
+  }
   table {
     position: relative;
     width: 100%;
@@ -84,7 +120,7 @@ export default {
     border-bottom: 1px solid #1CA9F1;
     tr {
       th {
-        padding: 1rem 0;
+        padding: 0.8rem 0;
         background-color: #1CA9F1;
         color: #ffffff;
         font-weight: normal;
@@ -95,9 +131,10 @@ export default {
       }
       td {
         text-align: center;
-        padding: 0.8rem 0;
+        padding: 0.4rem 0;
         border-top: 1px solid rgb(70, 189, 248);
         white-space: nowrap;
+        background-color: #ffffff;
         .rank-gold {
           position: relative;
           display: inline-block;
@@ -136,6 +173,9 @@ export default {
   }
   table:nth-of-type(n + 2) {
     margin-top: 0.8rem;
+  }
+  table:last-child {
+    margin-bottom: 1.2rem;
   }
 }
 </style>

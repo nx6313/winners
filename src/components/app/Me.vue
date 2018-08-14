@@ -269,7 +269,6 @@ export default {
     .title {
       position: relative;
       display: inline-block;
-      width: 3.2rem;
       color: #1a1a1a;
     }
     .content {
@@ -293,7 +292,6 @@ export default {
     .title {
       position: relative;
       display: inline-block;
-      width: 3.2rem;
       color: #1a1a1a;
     }
     .arrow {
