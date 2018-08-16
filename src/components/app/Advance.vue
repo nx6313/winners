@@ -15,7 +15,7 @@
       </span>
     </div>
     <div class="level-content-wrap">
-      <div class="level-rail-wrap" ref="level-rail-wrap" :style="userLevel ? { 'transform': `translateX(calc((3rem - 100vw - 0.8rem) * ${userLevel.level - 1}))` } : {}" @touchstart="levelTouchStart" @touchmove="levelTouchMove" @touchend="levelTouchEnd">
+      <div class="level-rail-wrap" ref="level-rail-wrap" :style="userLevel ? { 'transform': `translateX(calc((3rem - 100vw - 0.8rem) * ${userLevel.level - 1}))` } : {}" @touchstart.stop="levelTouchStart" @touchmove.stop="levelTouchMove" @touchend.stop="levelTouchEnd">
         <div :class="['level-content-panel', userLevel.level - 1 === levelIndex ? 'cur-panel' : '', userLevel.level - 1 > levelIndex ? 'get-panel' : '']" v-for="(level, levelIndex) in levels" :key="levelIndex" :style="{ 'left': `calc(1.5rem + (100vw - 3rem + 0.8rem) * ${levelIndex})` }">
           <div class="level-scroll-content">
             <div class="header flex-r flex-b">

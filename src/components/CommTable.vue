@@ -1,10 +1,11 @@
 <template>
-  <div class="comm-table" :style="!lineNum ? { 'overflow-x': 'auto', 'overflow-y': 'hidden' } : {}">
-    <template v-if="rowDatas.length > 0">
+  <div v-if="rowDatas && rowDatas.length > 0" class="comm-table" :style="!lineNum ? { 'overflow-x': 'auto', 'overflow-y': 'hidden' } : {}">
+    <template>
       <div class="comm-table-rail-wrap" :style="!lineNum ? { 'width': `calc(${(title.length + (showIndex ? 1 : 0))} * 3rem)` } : {}">
         <table border="0" cellpadding="0" cellspacing="0" v-for="(t, tIndex) in tableCount" :key="tIndex">
           <tr>
             <th v-if="!secondTitle && showIndex">排名</th>
+            <th v-if="secondTitle && showIndex" rowspan="2">排名</th>
             <template v-if="lineNum">
               <th v-for="(th, thIndex) in title" :key="thIndex" v-if="thIndex >= (lineNum * tIndex) && thIndex < (lineNum * (tIndex + 1))" :colspan="thIndex % lineNum === 0 && showIndex ? (isArr(rowDatas[0][thIndex]) ? (!secondTitle ? rowDatas[0][thIndex].length : rowDatas[0][thIndex].length + 1) : (!secondTitle ? 1 : 2)) : (isArr(rowDatas[0][thIndex]) ? rowDatas[0][thIndex].length : 1)">{{th.label}}</th>
             </template>
@@ -13,7 +14,6 @@
             </template>
           </tr>
           <tr v-if="secondTitle">
-            <td v-if="showIndex">排名</td>
             <template v-if="lineNum">
               <template v-for="(second, secondIndex) in secondTitles" v-if="secondIndex >= (lineNum * tIndex) && secondIndex < (lineNum * (tIndex + 1))">
                 <template v-if="isArr(second)">
@@ -74,7 +74,7 @@
 
 <script>
 export default {
-  name: 'CommTable',
+  name: 'comm-table',
   props: ['title', 'second-title', 'data', 'show-index', 'line-num', 'rank-badge'],
   data () {
     return {
@@ -84,18 +84,22 @@ export default {
     }
   },
   mounted () {
-    for (let r = 0; r < this.data.length; r++) {
-      let columnDatas = []
-      for (let c = 0; c < this.title.length; c++) {
-        columnDatas.push(this.data[r][this.title[c].prop])
+    if (this.data && this.title) {
+      for (let r = 0; r < this.data.length; r++) {
+        let columnDatas = []
+        for (let c = 0; c < this.title.length; c++) {
+          columnDatas.push(this.data[r][this.title[c].prop])
+        }
+        this.rowDatas.push(columnDatas)
       }
-      this.rowDatas.push(columnDatas)
-    }
-    if (this.lineNum) {
-      this.tableCount = Math.ceil(this.title.length / this.lineNum)
-    }
-    for (let c = 0; c < this.title.length; c++) {
-      this.secondTitles.push(this.secondTitle[this.title[c].prop])
+      if (this.lineNum) {
+        this.tableCount = Math.ceil(this.title.length / this.lineNum)
+      }
+      if (this.secondTitle) {
+        for (let c = 0; c < this.title.length; c++) {
+          this.secondTitles.push(this.secondTitle[this.title[c].prop])
+        }
+      }
     }
   },
   methods: {
