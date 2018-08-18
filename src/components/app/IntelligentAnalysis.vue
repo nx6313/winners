@@ -43,7 +43,7 @@ export default {
       showMin: false,
       minStartY: -1,
       minDistanceY: -1,
-      minTopDistance: 4.2 * 16,
+      minTopDistance: 4 * 16,
       topApps: [
         {
           icon: require('@/assets/do_ssjx.png'),
