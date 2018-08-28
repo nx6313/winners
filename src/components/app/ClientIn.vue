@@ -372,7 +372,9 @@ export default {
               name: 'nextvisitDate',
               event: 'orderBackTime',
               model: '',
-              inputing: false
+              inputing: false,
+              dateMin: [(new Date()).getFullYear(), (new Date()).getMonth(), (new Date()).getDate(), 0, 0, 0],
+              dateMax: [this.$comfun.getMonthStartEnd(1)[1].getFullYear(), this.$comfun.getMonthStartEnd(1)[1].getMonth(), this.$comfun.getMonthStartEnd(1)[1].getDate(), 23, 59, 59]
             },
             {
               type: 'picker',
@@ -404,6 +406,22 @@ export default {
     }
   },
   mounted () {
+    this.$comfun.http_get(this, this.$moment.appServer + 'custoFrontRecordManager/findById?id=' + this.$comfun.getRequest('dataId')).then((response) => {
+      if (response.body) {
+        if (response.body.custoNo) {
+          this.formItems[0].items[4].model = response.body.custoNo
+          this.formItems[0].items[4].inputing = true
+        }
+        if (response.body.ArrivalTime) {
+          this.formItems[0].items[5][0].model = response.body.ArrivalTime
+          this.formItems[0].items[5][0].inputing = true
+        }
+        if (response.body.LeaveTime) {
+          this.formItems[0].items[5][1].model = response.body.LeaveTime
+          this.formItems[0].items[5][1].inputing = true
+        }
+      }
+    })
     this.$root.eventHub.$on('clientType', (data) => {
       this.formItems[0].items[3].modelKey = this.formItems[0].items[3].items[data['index1']].key
       this.formItems[0].items[3].model = this.formItems[0].items[3].items[data['index1']].val
@@ -476,7 +494,9 @@ export default {
         this.$call('pickerView', JSON.stringify({
           event: clickItemData.event,
           type: 'time',
-          title: clickItemData.tip
+          title: clickItemData.tip,
+          dateMin: clickItemData.dateMin ? clickItemData.dateMin : [(new Date()).getFullYear(), (new Date()).getMonth(), (new Date()).getDate(), 0, 0, 0],
+          dateMax: clickItemData.dateMax ? clickItemData.dateMax : [(new Date()).getFullYear(), (new Date()).getMonth(), (new Date()).getDate(), 23, 59, 59]
         }))
       }
       if (type === 'picker') {
@@ -692,12 +712,14 @@ export default {
         tip: '数据提交中，请稍后'
       })
       formData.createBy = this.$moment.userInfo.user.id
+      formData.frId = this.$comfun.getRequest('dataId')
       this.$comfun.http_post(this, this.$moment.appServer + '/customerManager/add', formData).then((response) => {
         this.$dialog_close_loading()
         if (response.body.code === '1') {
           this.$dialog_msg({
             msg: '提交成功'
           })
+          this.$call('refPage', '')
           this.$call('back', '')
         } else {
           this.$dialog_msg({

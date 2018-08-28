@@ -186,6 +186,9 @@ export default {
       let endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
       this.getOrderList(startDate, endDate)
     })
+    this.$root.eventHub.$on('getTableDataAfter', () => {
+      this.dataIsLoading = false
+    })
     let startDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
     let endDate = this.$comfun.formatDate(new Date(), 'yyyy-MM-dd')
     this.getOrderList(startDate, endDate)
@@ -278,9 +281,7 @@ export default {
               }
               if (t === this.tableTitles.length - 1 && s === response.body[this.tableTitles[t].prop].length - 1) {
                 this.$nextTick().then(() => {
-                  setTimeout(() => {
-                    this.dataIsLoading = false
-                  }, 100)
+                  this.$setTimeOut('getTableDataAfter', 400)
                 })
               }
             }

@@ -60,9 +60,9 @@ export default {
       this.initUserInfo()
     })
     this.$root.eventHub.$on('userHeadUploadSuccess', (headData) => {
-      this.$set(this.userInfo, 'userHead', this.$moment.HttpAddress_1 + `showFile/${headData.fid}`)
+      this.$set(this.userInfo, 'userHead', headData)
       this.$moment.localforage.getItem('userLoginInfo').then((userInfo) => {
-        userInfo.user.photo = headData.fid
+        userInfo.user.photo = headData
         this.$moment.localforage.setItem('userLoginInfo', userInfo)
       })
     })

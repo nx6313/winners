@@ -552,7 +552,7 @@ export default {
         padding: 0.6rem 0.8rem;
         font-size: 0.8rem;
         transition: all 0.2s ease 0s;
-        background-color: #f7f7f7;
+        background-color: #ffffff;
         .data-head-wrap {
           position: relative;
           padding: 1rem 0 0.9rem;

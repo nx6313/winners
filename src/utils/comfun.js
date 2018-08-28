@@ -1,7 +1,7 @@
 export default {
   install: function (Vue, options) {
     var ComFun = {
-      http_get: function (context, url) {
+      http_get: function (context, url, params) {
         context.$http.options.headers = {
           'Content-Type': 'application/json;charset=utf-8'
         }
@@ -10,6 +10,14 @@ export default {
             var callUrl = context.$moment.server() + url
             if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
               callUrl = url
+            }
+            if (params) {
+              callUrl += '?'
+              for (let k in params) {
+                callUrl += k + '=' + params[k]
+                callUrl += '&'
+              }
+              callUrl = callUrl.substr(0, callUrl.length - 1)
             }
             context.$http.get(callUrl).then(response => {
               if (this.isAndroidIos().isMobile) {

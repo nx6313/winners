@@ -56,6 +56,24 @@ canvas {
   align-items: center;
 }
 
+.data-loading {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 10vh;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(30, 30, 30, .2);
+}
+
+.data-empty {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 10vh;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(30, 30, 30, .2);
+}
+
 @font-face {
   font-family: FZLTHJW;
   src: url('./../../static/FZLTHJW.ttf');

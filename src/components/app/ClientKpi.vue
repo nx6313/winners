@@ -49,7 +49,7 @@ export default {
       topApps: [
         {
           icon: require('@/assets/do_qkhx.png'),
-          text: '潜客画像',
+          text: '潜客KPI',
           minStyle: 'txt'
         },
         {

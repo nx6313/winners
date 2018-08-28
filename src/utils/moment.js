@@ -2,8 +2,8 @@ var HttpIp = ''
 var HttpPort = ''
 // var HttpAddress = 'http://172.18.168.222:8080/'
 var HttpAddress = 'http://wx.dcsc520.cn/lhp/'
-// var AppHttpAddress = 'http://172.18.168.202:8080/'
-var AppHttpAddress = 'http://47.104.187.132:8080/appapi/'
+// var AppHttpAddress = 'http://172.18.168.44:8080/'
+var AppHttpAddress = 'http://wx.dcsc520.cn/appapi-0.0.1-SNAPSHOT/'
 var HttpAddressRoot = 'http://wx.dcsc520.cn/'
 var localforage = require('localforage')
 

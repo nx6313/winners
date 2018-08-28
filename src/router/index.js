@@ -197,6 +197,14 @@ var router = new Router({
       }
     },
     {
+      path: '/app-client-in-task',
+      name: 'AppClientInTask',
+      component: resolve => require(['@/components/app/ClientInTask'], resolve),
+      meta: {
+        title: '待录潜客'
+      }
+    },
+    {
       path: '/app-client-in',
       name: 'AppClientIn',
       component: resolve => require(['@/components/app/ClientIn'], resolve),
@@ -274,6 +282,22 @@ var router = new Router({
       component: resolve => require(['@/components/app/ClientKpi'], resolve),
       meta: {
         title: '客户 KPI'
+      }
+    },
+    {
+      path: '/app-client-manager',
+      name: 'AppClientManager',
+      component: resolve => require(['@/components/app/ClientManager'], resolve),
+      meta: {
+        title: '潜客管理'
+      }
+    },
+    {
+      path: '/app-client-manager-detail',
+      name: 'AppClientManagerDetail',
+      component: resolve => require(['@/components/app/ClientManagerDetail'], resolve),
+      meta: {
+        title: '潜客管理条目详情'
       }
     }
   ]

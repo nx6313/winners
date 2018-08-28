@@ -177,13 +177,17 @@ export default {
         }
         .name {
           position: relative;
-          display: inline-block;
+          display: block;
+          width: 100%;
+          text-align: center;
           font-size: 0.8rem;
           color: rgb(54, 54, 54);
         }
         .time {
           position: relative;
-          display: inline-block;
+          display: block;
+          width: 100%;
+          text-align: center;
           font-size: 0.6rem;
           margin-top: 0.4rem;
           color: rgb(145, 145, 145);

@@ -20,6 +20,7 @@
               <span>{{tabItem.title}}</span>
               <span>{{tabItem.val}}</span>
             </div>
+            <i :class="['edit-btn', (tabIndex === 0 && isEditindPage1) || (tabIndex === 1 && isEditindPage2) ? 'edit-btn-save' : '']" @click="doEdit(tabIndex)">编辑</i>
           </template>
           <template v-if="tab.type === 'time-follow'">
             <div class="page-time-follow-item-wrap">
@@ -46,7 +47,7 @@
                   </div>
                 </div>
               </div>
-              <i class="save-btn">保存</i>
+              <i class="save-btn" @click="saveClientFollow">保存</i>
             </div>
           </template>
         </div>
@@ -66,8 +67,11 @@ export default {
       clientLevel: '~',
       followContent: '',
       followOrderTime: '',
+      followOrderTimeVal: '',
       followPics: [],
       followPicMax: 3,
+      isEditindPage1: false,
+      isEditindPage2: false,
       tabs: [
         {
           type: 'item',
@@ -140,51 +144,44 @@ export default {
         {
           type: 'time-follow',
           title: '跟进记录',
-          items: [
-            {
-              time: '2018/07/24',
-              title: '再看看，还没想好',
-              pics: ['http://a5.topitme.com/o025/1002536708f56d0bfd.jpg', 'http://www.wallcoo.com/cartoon/David_Lanham_Illustration/wallpapers/1280x800/spacedoggy.jpg', 'http://www.cssxt.com/uploadfile/2017/1208/20171208110834538.jpg'],
-              orderTime: '2018/07/25'
-            },
-            {
-              time: '2018/07/24',
-              title: '',
-              pics: [],
-              orderTime: '2018/07/25'
-            }
-          ]
+          items: []
         }
       ]
     }
   },
   mounted () {
     this.$root.eventHub.$on('follow-order-time', (data) => {
-      this.followOrderTime = this.$comfun.formatDate(new Date(Number(data)), 'yyyy-MM-dd hh:mm:ss')
+      this.followOrderTimeVal = this.$comfun.formatDate(new Date(Number(data)), 'yyyy-MM-dd hh:mm:ss')
+      this.followOrderTime = this.$comfun.formatDate(new Date(Number(data)), 'yy/MM/dd hh:mm:ss')
+    })
+    this.$root.eventHub.$on('follow-order-pic', (data) => {
+      for (let p in data) {
+        this.followPics.push(data[p])
+      }
     })
     this.$comfun.http_get(this, this.$moment.appServer + 'customerManager/findOne/' + this.$comfun.getRequest('dataId')).then((response) => {
       if (response.body) {
         this.clientName = response.body.custoName
         this.clientLevel = response.body.custoLevel
 
-        this.tabs[0].items[0].val = response.body.mobile
+        this.tabs[0].items[0].val = response.body.mobile || '未填写'
         this.tabs[0].items[1].val = response.body.custoSex === 1 ? '男' : '女'
-        this.tabs[0].items[2].val = response.body.mobile
-        this.tabs[0].items[3].val = response.body.mobile
-        this.tabs[0].items[4].val = response.body.mobile
-        this.tabs[0].items[5].val = response.body.mobile
+        this.tabs[0].items[2].val = response.body.contactMode || '未填写'
+        this.tabs[0].items[3].val = response.body.visitorNumber || '未填写'
+        this.tabs[0].items[4].val = response.body.comeinDate || '未填写'
+        this.tabs[0].items[5].val = response.body.leaveDate || '未填写'
 
-        this.tabs[1].items[0].val = response.body.mobile
-        this.tabs[1].items[1].val = response.body.mobile
-        this.tabs[1].items[2].val = response.body.mobile
-        this.tabs[1].items[3].val = response.body.mobile
-        this.tabs[1].items[4].val = response.body.mobile
-        this.tabs[1].items[5].val = response.body.mobile
-        this.tabs[1].items[6].val = response.body.mobile
-        this.tabs[1].items[7].val = response.body.mobile
+        this.tabs[1].items[0].val = response.body.intentionCarModel || '未填写'
+        this.tabs[1].items[1].val = response.body.compeCarModel || '未填写'
+        this.tabs[1].items[2].val = response.body.driveFlag ? '是' : '否'
+        this.tabs[1].items[3].val = response.body.informationFrom || '未填写'
+        this.tabs[1].items[4].val = response.body.mobile || '未填写'
+        this.tabs[1].items[5].val = response.body.budget || '未填写'
+        this.tabs[1].items[6].val = response.body.colour || '未填写'
+        this.tabs[1].items[7].val = response.body.custoDescribe || '未填写'
       }
     })
-    this.$comfun.http_get(this, this.$moment.appServer + 'customerManager/findByScId/' + this.$comfun.getRequest('dataId')).then((response) => {})
+    this.getFollowData()
   },
   methods: {
     scrollPage () {
@@ -195,9 +192,33 @@ export default {
         this.isFixed = false
       }
     },
+    doEdit (editPageIndex) {
+      if (editPageIndex === 0) {
+        this.isEditindPage1 = !this.isEditindPage1
+      } else if (editPageIndex === 1) {
+        this.isEditindPage2 = !this.isEditindPage2
+      }
+    },
+    getFollowData () {
+      this.$comfun.http_get(this, this.$moment.appServer + 'bsCustoAndReturnvisitManager/find/' + this.$comfun.getRequest('dataId')).then((response) => {
+        if (response.body && response.body.returnvisitList) {
+          this.tabs[2].items = []
+          if (response.body.returnvisitList.length > 0) {
+            for (let f in response.body.returnvisitList) {
+              this.tabs[2].items.push({
+                time: response.body.returnvisitList[f].returnvisitDate,
+                title: response.body.returnvisitList[f].returnvisitContent,
+                pics: ['http://a5.topitme.com/o025/1002536708f56d0bfd.jpg', 'http://www.wallcoo.com/cartoon/David_Lanham_Illustration/wallpapers/1280x800/spacedoggy.jpg', 'http://www.cssxt.com/uploadfile/2017/1208/20171208110834538.jpg'],
+                orderTime: response.body.returnvisitList[f].nextvisitDate
+              })
+            }
+          }
+        }
+      })
+    },
     call () {
       if (this.tabs[0].items[2].val) {
-        this.$call('callPhone', this.tabs[0].items[2].val)
+        this.$call('callPhone', this.tabs[0].items[0].val)
       } else {
         this.$dialog_msg({
           msg: '客户手机号码存在问题，无法拨打'
@@ -219,7 +240,9 @@ export default {
       this.$call('pickerView', JSON.stringify({
         event: 'follow-order-time',
         type: 'time',
-        title: '预约跟进时间'
+        title: '预约跟进时间',
+        dateMin: [(new Date()).getFullYear(), (new Date()).getMonth(), (new Date()).getDate(), 0, 0, 0],
+        dateMax: [this.$comfun.getMonthStartEnd(1)[1].getFullYear(), this.$comfun.getMonthStartEnd(1)[1].getMonth(), this.$comfun.getMonthStartEnd(1)[1].getDate(), 23, 59, 59]
       }))
     },
     deleteSelectPicture (picIndex) {
@@ -233,7 +256,40 @@ export default {
         has: this.followPics.length,
         max: this.followPicMax
       }))
-      // this.followPics.push('http://www.wallcoo.com/flower/Amazing_Color_Flowers_2560x1600_III/wallpapers/2560x1600/Flowers_Wallpapers_91.jpg')
+    },
+    saveClientFollow () {
+      if (!this.followContent) {
+        this.$dialog_msg({
+          msg: '请输入跟进内容'
+        })
+        return false
+      }
+      if (!this.followOrderTimeVal) {
+        this.$dialog_msg({
+          msg: '请选择预约跟进时间'
+        })
+        return false
+      }
+      this.$comfun.http_post(this, this.$moment.appServer + 'returnvisitManager/add', {
+        scId: this.$comfun.getRequest('dataId'),
+        returnvisitContent: this.followContent,
+        returnvisitDate: this.$comfun.formatDate(new Date(), 'yyyy-MM-dd hh:mm:ss'),
+        nextvisitDate: this.followOrderTimeVal
+      }).then((response) => {
+        if (response.body.code === '1') {
+          this.$dialog_msg({
+            msg: '新增跟进信息成功'
+          })
+          this.getFollowData()
+          this.followContent = ''
+          this.followOrderTime = ''
+          this.followOrderTimeVal = ''
+        } else {
+          this.$dialog_msg({
+            msg: '新增跟进信息失败'
+          })
+        }
+      })
     }
   }
 }
@@ -288,6 +344,7 @@ export default {
     width: 100%;
     font-size: 0;
     background-color: #f5f5f5;
+    z-index: 1;
     span {
       position: relative;
       display: inline-block;
@@ -330,12 +387,13 @@ export default {
       width: 100%;
       top: 0;
       left: 0;
-      background-color: #ffffff;
-      padding: 0.6rem 0 0;
+      background-color: #f5f5f5;
+      padding: 0;
       .page-item {
         position: relative;
         padding: 0.8rem 1rem;
         font-size: 0.8rem;
+        background-color: #ffffff;
         span:nth-of-type(1) {
           color: #8E8E8E;
         }
@@ -414,8 +472,9 @@ export default {
               i {
                 position: relative;
                 display: inline-block;
-                width: 5rem;
-                height: 5rem;
+                width: calc((100% - 3rem) / 3);
+                height: 0;
+                padding-bottom: calc((100% - 3rem) / 3);
                 background-size: cover;
                 background-repeat: no-repeat;
                 background-position: center;
@@ -474,8 +533,9 @@ export default {
               .picture-add-btn {
                 position: relative;
                 display: inline-block;
-                width: 5rem;
-                height: 5rem;
+                width: calc((100% - 4rem) / 3);
+                height: 0;
+                padding-bottom: calc((100% - 4rem) / 3);
                 background-image: url('./../../assets/add-pic.png');
                 background-repeat: no-repeat;
                 background-size: cover;
@@ -487,8 +547,9 @@ export default {
               .picture-selected {
                 position: relative;
                 display: inline-block;
-                width: 5rem;
-                height: 5rem;
+                width: calc((100% - 4rem) / 3);
+                height: 0;
+                padding-bottom: calc((100% - 4rem) / 3);
                 background-repeat: no-repeat;
                 background-size: cover;
                 background-position: center;
@@ -550,6 +611,28 @@ export default {
         .save-btn:active {
           background-color: rgb(15, 144, 219);
         }
+      }
+      .edit-btn {
+        position: relative;
+        display: block;
+        background-color: rgb(163, 163, 163);
+        font-style: normal;
+        color: #ffffff;
+        font-size: 0.9rem;
+        text-align: center;
+        padding: 0.6rem 0;
+        margin: 1.4rem 1rem 0;
+        border-radius: 3px;
+        user-select: none;
+      }
+      .edit-btn:active {
+        background-color: rgb(167, 167, 167);
+      }
+      .edit-btn-save {
+        background-color: #0C9AEA;
+      }
+      .edit-btn-save:active {
+        background-color: rgb(15, 144, 219);
       }
     }
   }
