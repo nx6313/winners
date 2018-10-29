@@ -40,7 +40,7 @@
             </div>
             <div>
               <span>来访时间</span>
-              <span>{{data.comeinDate ? data.intentionCarModel : '未填写'}}</span>
+              <span>{{data.comeinDate ? $comfun.formatDate(new Date(data.comeinDate.replace(/-/g, '/')), 'yy/MM/dd hh:mm:ss') : '未填写'}}</span>
             </div>
             <div>
               <span>跟进次数</span>
@@ -150,6 +150,7 @@ export default {
               id: response.body.list[c].scId,
               userName: response.body.list[c].custoName,
               mobile: response.body.list[c].mobile,
+              comeinDate: response.body.list[c].comeinDate,
               dos: [ 'delete' ]
             })
           }

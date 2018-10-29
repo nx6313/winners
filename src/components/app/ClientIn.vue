@@ -214,7 +214,8 @@ export default {
                 name: 'comeinDate',
                 event: 'inTime',
                 model: '',
-                inputing: false
+                inputing: false,
+                canUse: false
               },
               {
                 type: 'time',
@@ -224,7 +225,8 @@ export default {
                 name: 'leaveDate',
                 event: 'outTime',
                 model: '',
-                inputing: false
+                inputing: false,
+                canUse: false
               }
             ],
             {
@@ -467,6 +469,9 @@ export default {
       if (lineItemIndex !== undefined) {
         clickItemData = this.formItems[formBlockIndex].items[formItemIndex][lineItemIndex]
       }
+      if (!clickItemData.canUse) {
+        return false
+      }
       if (type === 'input') {
         if (clickItemData.inputing === false) {
           clickItemData.inputing = true
@@ -521,6 +526,9 @@ export default {
         var clickItemData = this.formItems[formBlockIndex].items[formItemIndex]
         if (lineItemIndex !== undefined) {
           clickItemData = this.formItems[formBlockIndex].items[formItemIndex][lineItemIndex]
+        }
+        if (!clickItemData.canUse) {
+          return false
         }
         clickItemData.inputing = false
         event.target.value = ''

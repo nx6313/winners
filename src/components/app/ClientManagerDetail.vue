@@ -1,14 +1,17 @@
 <template>
   <div class="client-manager-detail">
     <div class="client-item-wrap" v-for="(data, dataIndex) in dataList" :key="dataIndex">
-      <div class="head-wrap flex-r flex-b">
-        <div class="left">
-          <span>A</span>
-          <span>都吉欣</span>
-          <span>来访时间：<span>18/02/22</span></span>
-        </div>
-        <div class="right">
-          <i class="iconfont icon-phone"></i>
+      <div class="do-wrap">234</div>
+      <div class="move-point">
+        <div class="head-wrap flex-r flex-b">
+          <div class="left">
+            <span>A</span>
+            <span>都吉欣</span>
+            <span>来访时间：<i>18/02/22</i></span>
+          </div>
+          <div class="right">
+            <i class="iconfont icon-phone"></i>
+          </div>
         </div>
       </div>
     </div>
@@ -41,10 +44,55 @@ export default {
   .client-item-wrap {
     position: relative;
     background-color: #ffffff;
-    padding: 0.8rem 1rem;
+    .do-wrap {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      background-color: #FF3B30;
+      width: 4rem;
+    }
+    .move-point {
+      position: relative;
+      background-color: #ffffff;
+      padding: 0.8rem 1rem;
+    }
     .head-wrap {
       position: relative;
-      .left {}
+      .left {
+        position: relative;
+        span {
+          position: relative;
+          display: inline-block;
+          vertical-align: bottom;
+        }
+        i {
+          position: relative;
+          display: inline-block;
+          font-style: normal;
+          vertical-align: bottom;
+          color: #484848;
+        }
+        span:nth-of-type(1) {
+          width: 1.1rem;
+          height: 1.1rem;
+          line-height: 1.1rem;
+          border-radius: 50%;
+          text-align: center;
+          background-color: #A8DAF4;
+          font-size: 0.5rem;
+          color: rgb(31, 137, 194);
+          margin-right: 0.3rem;
+        }
+        span:nth-of-type(2) {
+          font-size: 1rem;
+        }
+        span:nth-of-type(3) {
+          font-size: 0.6rem;
+          color: #727272;
+          margin-left: 0.4rem;
+        }
+      }
       .right {
         position: relative;
         i {
